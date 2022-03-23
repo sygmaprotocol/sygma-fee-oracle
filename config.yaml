@@ -1,0 +1,47 @@
+# env
+env: dev # dev, production
+
+# Log level
+log_level: 5  # 5 is debug level, use 4(info) in prod
+
+# Gin http server config
+http_server:
+  mode: debug # or release, debug
+  port: :8091
+
+# time in second before server shutdown
+# this will allow server to finish running jobs before shutdown
+finish_up_time: 3
+
+# internal scheduled cronjob
+cron_job:
+  update_conversion_rate_job:
+    name: conversion rate
+    enable: true
+    check_frequency: "* * * * *"
+    process_number: 1
+  update_gas_price_job:
+    name: gas price
+    enable: true
+    check_frequency: "* * * * *"
+    process_number: 1
+
+# store path
+store:
+  path: ./lvldbdata
+
+oracle:
+  etherscan:
+    enable: true
+    api_key: 473P55YZMBNSRR63YF78D2PMMIUYUQJMGY
+  coinmarketcap:
+    enable: true
+    api_key: 1408daf0-0777-4916-9fe4-20da5ee77560
+
+gas_price_domains:
+  [ ethereum ]
+
+# conversion_rate_pairs contains price pair for conversion rate
+# must be paired and follow the format of [ base, foreign, base, foreign, ... ]
+conversion_rate_pairs:
+  [ eth, usd, eth, doge ]
