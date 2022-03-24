@@ -7,6 +7,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/ethereum/go-ethereum/crypto"
+
 	"github.com/ChainSafe/chainbridge-fee-oracle/base"
 	"github.com/ChainSafe/chainbridge-fee-oracle/cronjob"
 	"github.com/ChainSafe/chainbridge-fee-oracle/oracle"
@@ -34,16 +36,27 @@ func TestRunGasPriceJobTestSuite(t *testing.T) {
 	suite.Run(t, new(GasPriceJobTestSuite))
 }
 
-func (s *GasPriceJobTestSuite) SetupSuite() {}
+func (s *GasPriceJobTestSuite) SetupSuite() {
+	priv, err := crypto.GenerateKey()
+	if err != nil {
+		panic(err)
+	}
+	crypto.FromECDSA(priv)
+	err = os.WriteFile("./keyfile.priv", crypto.FromECDSA(priv), 0666)
+	if err != nil {
+		panic(err)
+	}
+}
 
 func (s *GasPriceJobTestSuite) TearDownSuite() {
 	_ = os.RemoveAll("./lvldbdata")
+	_ = os.RemoveAll("./keyfile.priv")
 }
 
 func (s *GasPriceJobTestSuite) SetupTest() {
 	gomockController := gomock.NewController(s.T())
 	s.oracle = mockOracle.NewMockGasPriceOracle(gomockController)
-	s.appBase = base.NewFeeOracleAppBase("../config/config.template.yaml")
+	s.appBase = base.NewFeeOracleAppBase("../config/config.template.yaml", "./keyfile.priv", "secp256k1")
 	s.gasPriceOperator = oracle.NewGasPriceOracleOperator(s.appBase.GetLogger(), s.oracle)
 	s.db = mockStore.NewMockStore(gomockController)
 	s.gasPriceStore = store.NewGasPriceStore(s.db)

@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/ChainSafe/chainbridge-fee-oracle/types"
 	"github.com/syndtr/goleveldb/leveldb"
+	"strings"
 )
 
 type GasPriceStore struct {
@@ -45,6 +46,28 @@ func (g *GasPriceStore) GetGasPrice(oracleName, domainID string) (*types.GasPric
 	return gasPrice, nil
 }
 
+func (g *GasPriceStore) GetGasPriceByDomain(domainId string) ([]*types.GasPricesResp, error) {
+	gasPriceData, err := g.db.GetBySuffix([]byte(fmt.Sprintf(":%s", strings.ToLower(domainId))))
+	if err != nil {
+		if errors.Is(err, leveldb.ErrNotFound) {
+			return nil, ErrNotFound
+		}
+		return nil, err
+	}
+
+	re := make([]*types.GasPricesResp, 0)
+	for _, data := range gasPriceData {
+		var gasPrice *types.GasPricesResp
+		err = json.Unmarshal(data, &gasPrice)
+		if err != nil {
+			return nil, err
+		}
+		re = append(re, gasPrice)
+	}
+
+	return re, nil
+}
+
 func (g *GasPriceStore) storeKeyFormat(oracleName, domainID string) []byte {
-	return []byte(fmt.Sprintf("%s:%s", oracleName, domainID))
+	return []byte(fmt.Sprintf("%s:%s", strings.ToLower(oracleName), strings.ToLower(domainID)))
 }

@@ -6,6 +6,11 @@ import (
 	"sync"
 	"time"
 
+	"github.com/ChainSafe/chainbridge-fee-oracle/config"
+	"github.com/ChainSafe/chainbridge-fee-oracle/consensus"
+	"github.com/ChainSafe/chainbridge-fee-oracle/consensus/strategy"
+	"github.com/ChainSafe/chainbridge-fee-oracle/identity"
+
 	"github.com/ChainSafe/chainbridge-fee-oracle/api"
 	"github.com/ChainSafe/chainbridge-fee-oracle/base"
 	"github.com/ChainSafe/chainbridge-fee-oracle/cronjob"
@@ -35,6 +40,12 @@ type FeeOracleApp struct {
 	conversionRateStore *store.ConversionRateStore
 	gasPriceStore       *store.GasPriceStore
 
+	// identity is the oracle identity, used when signing the oracle data
+	identity *identity.OracleIdentityOperator
+
+	// consensus is used for local and group oracle data checking and verification
+	consensus *consensus.Consensus
+
 	appTerminationChecker sync.WaitGroup
 }
 
@@ -56,6 +67,8 @@ func NewFeeOracleApp(appBase *base.FeeOracleAppBase) *FeeOracleApp {
 	conversionRateStore := store.NewConversionRateStore(appBase.GetStore())
 	gasPriceStore := store.NewGasPriceStore(appBase.GetStore())
 
+	oracleIdentity := identity.NewOracleIdentityOperator(appBase.GetOracleIdentity())
+
 	app := &FeeOracleApp{
 		base:                  appBase,
 		log:                   appBase.GetLogger().WithField("app", "app"),
@@ -64,7 +77,10 @@ func NewFeeOracleApp(appBase *base.FeeOracleAppBase) *FeeOracleApp {
 		gasPriceOracles:       gasPriceOracles,
 		conversionRateStore:   conversionRateStore,
 		gasPriceStore:         gasPriceStore,
-		cronJobServer:         cronjob.NewCronJobs(appBase, conversionRateOracles, gasPriceOracles, conversionRateStore, gasPriceStore, appBase.GetLogger()),
+		identity:              oracleIdentity,
+		consensus:             consensus.NewConsensus(initStrategy(appBase.GetConfig()), appBase.GetLogger()),
+		cronJobServer: cronjob.NewCronJobs(appBase, conversionRateOracles, gasPriceOracles, conversionRateStore,
+			gasPriceStore, appBase.GetLogger()),
 		appTerminationChecker: sync.WaitGroup{},
 	}
 
@@ -147,4 +163,16 @@ func (a *FeeOracleApp) stopStore() {
 	if err != nil {
 		a.log.Error(err)
 	}
+}
+
+func initStrategy(conf *config.Config) strategy.Strategy {
+	var localDataStrategy strategy.Strategy
+	switch conf.StrategyConfig().Local {
+	case "average":
+		localDataStrategy = &strategy.Average{}
+	default:
+		panic("unsupported strategy")
+	}
+
+	return localDataStrategy
 }

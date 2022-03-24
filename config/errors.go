@@ -12,7 +12,7 @@ const (
 )
 
 var (
-	ErrLoadConfig          = FeeOracleError{loadConfigErrCode, "failed to load config", ""}
+	ErrLoadConfig          = FeeOracleError{loadConfigErrCode, "failed to load app config", ""}
 	ErrParseRequest        = FeeOracleError{parseRequestErrCode, "failed to parse request data", ""}
 	ErrInvalidRequestInput = FeeOracleError{invalidRequestInputErrCode, "invalid request input", ""}
 )

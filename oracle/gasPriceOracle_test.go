@@ -2,6 +2,7 @@ package oracle_test
 
 import (
 	"errors"
+	"github.com/ethereum/go-ethereum/crypto"
 	"os"
 	"testing"
 	"time"
@@ -26,16 +27,27 @@ func TestRunGasPriceOracleTestSuite(t *testing.T) {
 	suite.Run(t, new(GasPriceOracleTestSuite))
 }
 
-func (s *GasPriceOracleTestSuite) SetupSuite() {}
+func (s *GasPriceOracleTestSuite) SetupSuite() {
+	priv, err := crypto.GenerateKey()
+	if err != nil {
+		panic(err)
+	}
+	crypto.FromECDSA(priv)
+	err = os.WriteFile("./keyfile.priv", crypto.FromECDSA(priv), 0666)
+	if err != nil {
+		panic(err)
+	}
+}
 
 func (s *GasPriceOracleTestSuite) TearDownSuite() {
 	_ = os.RemoveAll("./lvldbdata")
+	_ = os.RemoveAll("./keyfile.priv")
 }
 
 func (s *GasPriceOracleTestSuite) SetupTest() {
 	gomockController := gomock.NewController(s.T())
 	s.oracle = mockOracle.NewMockGasPriceOracle(gomockController)
-	s.appBase = base.NewFeeOracleAppBase("../config/config.template.yaml")
+	s.appBase = base.NewFeeOracleAppBase("../config/config.template.yaml", "./keyfile.priv", "secp256k1")
 	s.gasPriceOperator = oracle.NewGasPriceOracleOperator(s.appBase.GetLogger(), s.oracle)
 	s.testdata = &types.GasPricesResp{
 		SafeGasPrice:    "1",

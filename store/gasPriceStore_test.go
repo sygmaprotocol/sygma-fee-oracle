@@ -93,3 +93,49 @@ func (s *GasPriceStoreTestSuite) TestGetGasPrice_NotFound() {
 
 	s.EqualError(err, store.ErrNotFound.Error())
 }
+
+func (s *GasPriceStoreTestSuite) TestGetGasPriceByDomain_NotFound() {
+	s.db.EXPECT().GetBySuffix([]byte(fmt.Sprintf(":%s", s.testdata.DomainId))).Return(nil, store.ErrNotFound)
+
+	_, err := s.gasPriceStore.GetGasPriceByDomain(s.testdata.DomainId)
+
+	s.EqualError(err, store.ErrNotFound.Error())
+}
+
+func (s *GasPriceStoreTestSuite) TestGetGasPriceByDomain_Success() {
+	re := make([][]byte, 0)
+
+	d1 := &types.GasPricesResp{
+		SafeGasPrice:    "1",
+		ProposeGasPrice: "2",
+		FastGasPrice:    "3",
+		OracleName:      "",
+		DomainId:        "ethereum",
+		Time:            time.Time{},
+	}
+	jd1, err := json.Marshal(d1)
+	s.Nil(err)
+	re = append(re, jd1)
+
+	d2 := &types.GasPricesResp{
+		SafeGasPrice:    "2",
+		ProposeGasPrice: "3",
+		FastGasPrice:    "4",
+		OracleName:      "",
+		DomainId:        "ethereum",
+		Time:            time.Time{},
+	}
+
+	jd2, err := json.Marshal(d2)
+	s.Nil(err)
+	re = append(re, jd2)
+
+	s.db.EXPECT().GetBySuffix([]byte(fmt.Sprintf(":%s", s.testdata.DomainId))).Return(re, nil)
+
+	fetchedData, err := s.gasPriceStore.GetGasPriceByDomain(s.testdata.DomainId)
+	s.Nil(err)
+
+	s.Equal(2, len(fetchedData))
+	s.EqualValues(d1, fetchedData[0])
+	s.EqualValues(d2, fetchedData[1])
+}

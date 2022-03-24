@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/ChainSafe/chainbridge-fee-oracle/types"
 	"github.com/syndtr/goleveldb/leveldb"
+	"strings"
 )
 
 type ConversionRateStore struct {
@@ -44,6 +45,28 @@ func (c *ConversionRateStore) GetConversionRate(oracleName, baseCurrency, foreig
 	return conversionRateData, nil
 }
 
+func (c *ConversionRateStore) GetConversionRateByCurrencyPair(base, foreign string) ([]*types.ConversionRateResp, error) {
+	conversionRateData, err := c.db.GetBySuffix([]byte(fmt.Sprintf(":%s:%s", strings.ToLower(base), strings.ToLower(foreign))))
+	if err != nil {
+		if errors.Is(err, leveldb.ErrNotFound) {
+			return nil, ErrNotFound
+		}
+		return nil, err
+	}
+
+	re := make([]*types.ConversionRateResp, 0)
+	for _, data := range conversionRateData {
+		var cr *types.ConversionRateResp
+		err = json.Unmarshal(data, &cr)
+		if err != nil {
+			return nil, err
+		}
+		re = append(re, cr)
+	}
+
+	return re, nil
+}
+
 func (c *ConversionRateStore) storeKeyFormat(oracleName, baseCurrency, foreignCurrency string) []byte {
-	return []byte(fmt.Sprintf("%s:%s:%s", oracleName, baseCurrency, foreignCurrency))
+	return []byte(fmt.Sprintf("%s:%s:%s", strings.ToLower(oracleName), strings.ToLower(baseCurrency), strings.ToLower(foreignCurrency)))
 }

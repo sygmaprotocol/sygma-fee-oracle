@@ -62,6 +62,21 @@ func (mr *MockStoreMockRecorder) Get(arg0 interface{}) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Get", reflect.TypeOf((*MockStore)(nil).Get), arg0)
 }
 
+// GetBySuffix mocks base method.
+func (m *MockStore) GetBySuffix(arg0 []byte) ([][]byte, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetBySuffix", arg0)
+	ret0, _ := ret[0].([][]byte)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetBySuffix indicates an expected call of GetBySuffix.
+func (mr *MockStoreMockRecorder) GetBySuffix(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetBySuffix", reflect.TypeOf((*MockStore)(nil).GetBySuffix), arg0)
+}
+
 // Set mocks base method.
 func (m *MockStore) Set(arg0, arg1 []byte) error {
 	m.ctrl.T.Helper()

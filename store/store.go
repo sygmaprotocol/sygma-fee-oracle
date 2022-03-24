@@ -9,5 +9,6 @@ var (
 type Store interface {
 	Set([]byte, []byte) error
 	Get([]byte) ([]byte, error)
+	GetBySuffix([]byte) ([][]byte, error)
 	Close() error
 }

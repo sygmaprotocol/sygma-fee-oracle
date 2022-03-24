@@ -91,3 +91,47 @@ func (s *ConversionRateStoreTestSuite) TestGetConversionRate_NotFound() {
 
 	s.EqualError(err, store.ErrNotFound.Error())
 }
+
+func (s *ConversionRateStoreTestSuite) TestGetConversionRateByCurrencyPair_NotFound() {
+	s.db.EXPECT().GetBySuffix([]byte(fmt.Sprintf(":%s:%s", s.testdata.Base, s.testdata.Foreign))).Return(nil, store.ErrNotFound)
+
+	_, err := s.conversionRateStore.GetConversionRateByCurrencyPair(s.testdata.Base, s.testdata.Foreign)
+
+	s.EqualError(err, store.ErrNotFound.Error())
+}
+
+func (s *ConversionRateStoreTestSuite) TestGetConversionRateByCurrencyPair_Success() {
+	re := make([][]byte, 0)
+
+	d1 := &types.ConversionRateResp{
+		Base:       "eth",
+		Foreign:    "usd",
+		Rate:       2345.987,
+		OracleName: "",
+		Time:       time.Time{},
+	}
+	jd1, err := json.Marshal(d1)
+	s.Nil(err)
+	re = append(re, jd1)
+
+	d2 := &types.ConversionRateResp{
+		Base:       "eth",
+		Foreign:    "usd",
+		Rate:       2350.234,
+		OracleName: "",
+		Time:       time.Time{},
+	}
+
+	jd2, err := json.Marshal(d2)
+	s.Nil(err)
+	re = append(re, jd2)
+
+	s.db.EXPECT().GetBySuffix([]byte(fmt.Sprintf(":%s:%s", s.testdata.Base, s.testdata.Foreign))).Return(re, nil)
+
+	fetchedData, err := s.conversionRateStore.GetConversionRateByCurrencyPair(s.testdata.Base, s.testdata.Foreign)
+	s.Nil(err)
+
+	s.Equal(2, len(fetchedData))
+	s.EqualValues(d1, fetchedData[0])
+	s.EqualValues(d2, fetchedData[1])
+}

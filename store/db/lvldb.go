@@ -1,6 +1,7 @@
 package db
 
 import (
+	"bytes"
 	"github.com/ChainSafe/chainbridge-fee-oracle/store"
 	"github.com/pkg/errors"
 	"github.com/syndtr/goleveldb/leveldb"
@@ -26,6 +27,27 @@ func (db *LvlDB) Get(key []byte) ([]byte, error) {
 
 func (db *LvlDB) Set(key []byte, value []byte) error {
 	return db.db.Put(key, value, nil)
+}
+
+// GetBySuffix get all items from db with given suffix
+// e.g:
+//	1. key pattern with `*:eth:usdt` for conversion rate, suffix is `:eth:usdt`
+//  2. key pattern with `*:ethereum` for gas price, suffix is `:ethereum`
+func (db *LvlDB) GetBySuffix(suffix []byte) ([][]byte, error) {
+	re := make([][]byte, 0)
+	iter := db.db.NewIterator(nil, nil)
+	for iter.Next() {
+		if bytes.HasSuffix(iter.Key(), suffix) {
+			re = append(re, iter.Value())
+		}
+	}
+	iter.Release()
+	err := iter.Error()
+	if err != nil {
+		return nil, err
+	}
+
+	return re, nil
 }
 
 func (db *LvlDB) Close() error {

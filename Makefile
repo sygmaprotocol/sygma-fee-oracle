@@ -1,5 +1,7 @@
 export GO111MODULE=on
 
+makeFileDir := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
+
 .DEFAULT_GOAL := install
 
 install:
@@ -17,7 +19,7 @@ check:
 	gosec ./...
 
 start: install
-	$(GOPATH)/bin/chainbridge-fee-oracle server -c ./config.yaml
+	$(GOPATH)/bin/chainbridge-fee-oracle server -c $(makeFileDir)config.yaml -k $(makeFileDir)keyfile.priv -t secp256k1
 
 genmocks:
 	mockgen -destination=./store/mock/store.go -source=./store/store.go

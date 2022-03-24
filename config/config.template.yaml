@@ -45,3 +45,7 @@ gas_price_domains:
 # must be paired and follow the format of [ base, foreign, base, foreign, ... ]
 conversion_rate_pairs:
   [ eth, usd ]
+
+# strategy defines the strategy on verify and aggregate data from store when fetched
+strategy:
+  local: average

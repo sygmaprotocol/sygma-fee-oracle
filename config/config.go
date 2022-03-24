@@ -2,6 +2,10 @@ package config
 
 import (
 	"errors"
+	"github.com/ChainSafe/chainbridge-fee-oracle/identity"
+	"github.com/ChainSafe/chainbridge-fee-oracle/identity/secp256k1"
+	"io/ioutil"
+
 	"path"
 	"path/filepath"
 	"strings"
@@ -33,6 +37,12 @@ type configData struct {
 	GasPriceDomains []string `mapstructure:"gas_price_domains"`
 
 	ConversionRatePairs []string `mapstructure:"conversion_rate_pairs"`
+
+	Strategy strategy `mapstructure:"strategy"`
+}
+
+type strategy struct {
+	Local string `mapstructure:"local"`
 }
 
 type oracle struct {
@@ -117,6 +127,10 @@ func (c *Config) ConversionRatePairsChecker() error {
 	return nil
 }
 
+func (c *Config) StrategyConfig() strategy {
+	return c.config.Strategy
+}
+
 func (c *Config) ConversionRatePairsConfig() [][]string {
 	pricePairs := make([][]string, 0)
 
@@ -155,6 +169,20 @@ func LoadConfig(configPath string) (*Config, *logrus.Logger) {
 	log.SetLevel(conf.logLevel())
 
 	return conf, log
+}
+
+func LoadOracleIdentityKey(keyPath, keyType string) (identity.Keypair, error) {
+	privBytes, err := ioutil.ReadFile(keyPath) // #nosec
+	if err != nil {
+		return nil, err
+	}
+
+	switch strings.ToLower(keyType) {
+	case identity.Secp256k1Type:
+		return secp256k1.NewKeypairFromPrivateKey(privBytes)
+	default:
+		return nil, errors.New("unsupported key type")
+	}
 }
 
 func newConfig(configPath string) (*Config, error) {

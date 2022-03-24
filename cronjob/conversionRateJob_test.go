@@ -3,6 +3,7 @@ package cronjob_test
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/ethereum/go-ethereum/crypto"
 	"os"
 	"testing"
 	"time"
@@ -34,16 +35,27 @@ func TestRunConversionRateJobTestSuite(t *testing.T) {
 	suite.Run(t, new(ConversionRateJobTestSuite))
 }
 
-func (s *ConversionRateJobTestSuite) SetupSuite() {}
+func (s *ConversionRateJobTestSuite) SetupSuite() {
+	priv, err := crypto.GenerateKey()
+	if err != nil {
+		panic(err)
+	}
+	crypto.FromECDSA(priv)
+	err = os.WriteFile("./keyfile.priv", crypto.FromECDSA(priv), 0666)
+	if err != nil {
+		panic(err)
+	}
+}
 
 func (s *ConversionRateJobTestSuite) TearDownSuite() {
 	_ = os.RemoveAll("./lvldbdata")
+	_ = os.RemoveAll("./keyfile.priv")
 }
 
 func (s *ConversionRateJobTestSuite) SetupTest() {
 	gomockController := gomock.NewController(s.T())
 	s.oracle = mockOracle.NewMockConversionRateOracle(gomockController)
-	s.appBase = base.NewFeeOracleAppBase("../config/config.template.yaml")
+	s.appBase = base.NewFeeOracleAppBase("../config/config.template.yaml", "./keyfile.priv", "secp256k1")
 	s.conversionRateOperator = oracle.NewConversionRateOracleOperator(s.appBase.GetLogger(), s.oracle)
 	s.db = mockStore.NewMockStore(gomockController)
 	s.conversionRateStore = store.NewConversionRateStore(s.db)

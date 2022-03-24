@@ -1,16 +1,18 @@
 package oracle_test
 
 import (
+	"os"
+	"testing"
+	"time"
+
 	"github.com/ChainSafe/chainbridge-fee-oracle/base"
 	"github.com/ChainSafe/chainbridge-fee-oracle/oracle"
 	mockOracle "github.com/ChainSafe/chainbridge-fee-oracle/oracle/mock"
 	"github.com/ChainSafe/chainbridge-fee-oracle/types"
+	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/golang/mock/gomock"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/suite"
-	"os"
-	"testing"
-	"time"
 )
 
 type ConversionRateOracleTestSuite struct {
@@ -25,16 +27,27 @@ func TestRunConversionRateOracleTestSuite(t *testing.T) {
 	suite.Run(t, new(ConversionRateOracleTestSuite))
 }
 
-func (s *ConversionRateOracleTestSuite) SetupSuite() {}
+func (s *ConversionRateOracleTestSuite) SetupSuite() {
+	priv, err := crypto.GenerateKey()
+	if err != nil {
+		panic(err)
+	}
+	crypto.FromECDSA(priv)
+	err = os.WriteFile("./keyfile.priv", crypto.FromECDSA(priv), 0666)
+	if err != nil {
+		panic(err)
+	}
+}
 
 func (s *ConversionRateOracleTestSuite) TearDownSuite() {
 	_ = os.RemoveAll("./lvldbdata")
+	_ = os.RemoveAll("./keyfile.priv")
 }
 
 func (s *ConversionRateOracleTestSuite) SetupTest() {
 	gomockController := gomock.NewController(s.T())
 	s.oracle = mockOracle.NewMockConversionRateOracle(gomockController)
-	s.appBase = base.NewFeeOracleAppBase("../config/config.template.yaml")
+	s.appBase = base.NewFeeOracleAppBase("../config/config.template.yaml", "./keyfile.priv", "secp256k1")
 	s.conversionRateOperator = oracle.NewConversionRateOracleOperator(s.appBase.GetLogger(), s.oracle)
 	s.testdata = &types.ConversionRateResp{
 		Base:       "eth",
