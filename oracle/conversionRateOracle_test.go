@@ -54,7 +54,7 @@ func (s *ConversionRateOracleTestSuite) SetupTest() {
 		Foreign:    "usdt",
 		Rate:       3000,
 		OracleName: "cooinmarketcap",
-		Time:       time.Time{},
+		Time:       time.Time{}.String(),
 	}
 }
 

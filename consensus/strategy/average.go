@@ -3,6 +3,7 @@ package strategy
 import (
 	"errors"
 	"fmt"
+	"math"
 	"strconv"
 
 	"github.com/ChainSafe/chainbridge-fee-oracle/store"
@@ -47,9 +48,9 @@ func (a *Average) RunOnGasPrice(store *store.GasPriceStore, domainId string) (*t
 	}
 
 	return &types.GasPricesResp{
-		SafeGasPrice:    fmt.Sprintf("%f", fast/dataSize),
-		ProposeGasPrice: fmt.Sprintf("%f", propose/dataSize),
-		FastGasPrice:    fmt.Sprintf("%f", safe/dataSize),
+		SafeGasPrice:    fmt.Sprintf("%d", int(math.Round(fast/dataSize))),
+		ProposeGasPrice: fmt.Sprintf("%d", int(propose/dataSize)),
+		FastGasPrice:    fmt.Sprintf("%d", int(safe/dataSize)),
 		DomainId:        domainId,
 		Time:            re[0].Time, // use the first data time for now
 	}, nil

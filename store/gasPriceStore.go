@@ -1,13 +1,18 @@
 package store
 
 import (
+	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/ChainSafe/chainbridge-fee-oracle/types"
-	"github.com/syndtr/goleveldb/leveldb"
 	"strings"
+
+	"github.com/ChainSafe/chainbridge-fee-oracle/types"
+	"github.com/mitchellh/mapstructure"
+	"github.com/syndtr/goleveldb/leveldb"
 )
+
+const gasPriceStoreKeyPrefix = "gasprice:"
 
 type GasPriceStore struct {
 	db Store
@@ -46,8 +51,12 @@ func (g *GasPriceStore) GetGasPrice(oracleName, domainID string) (*types.GasPric
 	return gasPrice, nil
 }
 
-func (g *GasPriceStore) GetGasPriceByDomain(domainId string) ([]*types.GasPricesResp, error) {
-	gasPriceData, err := g.db.GetBySuffix([]byte(fmt.Sprintf(":%s", strings.ToLower(domainId))))
+func (g *GasPriceStore) GetGasPriceByDomain(domainId string) ([]types.GasPricesResp, error) {
+	key := bytes.Buffer{}
+	key.WriteString(gasPriceStoreKeyPrefix)
+	var dataReceiver *types.GasPricesResp
+
+	gasPriceData, err := g.db.GetByPrefix(key.Bytes(), dataReceiver)
 	if err != nil {
 		if errors.Is(err, leveldb.ErrNotFound) {
 			return nil, ErrNotFound
@@ -55,19 +64,24 @@ func (g *GasPriceStore) GetGasPriceByDomain(domainId string) ([]*types.GasPrices
 		return nil, err
 	}
 
-	re := make([]*types.GasPricesResp, 0)
+	re := make([]types.GasPricesResp, 0)
 	for _, data := range gasPriceData {
-		var gasPrice *types.GasPricesResp
-		err = json.Unmarshal(data, &gasPrice)
+		var gp types.GasPricesResp
+		err = mapstructure.Decode(data, &gp)
 		if err != nil {
 			return nil, err
 		}
-		re = append(re, gasPrice)
+		if gp.DomainId == domainId {
+			re = append(re, gp)
+		}
 	}
 
 	return re, nil
 }
 
 func (g *GasPriceStore) storeKeyFormat(oracleName, domainID string) []byte {
-	return []byte(fmt.Sprintf("%s:%s", strings.ToLower(oracleName), strings.ToLower(domainID)))
+	key := bytes.Buffer{}
+	key.WriteString(fmt.Sprintf("%s%s:%s", gasPriceStoreKeyPrefix, strings.ToLower(oracleName), strings.ToLower(domainID)))
+
+	return key.Bytes()
 }

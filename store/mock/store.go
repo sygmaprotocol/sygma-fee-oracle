@@ -62,19 +62,19 @@ func (mr *MockStoreMockRecorder) Get(arg0 interface{}) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Get", reflect.TypeOf((*MockStore)(nil).Get), arg0)
 }
 
-// GetBySuffix mocks base method.
-func (m *MockStore) GetBySuffix(arg0 []byte) ([][]byte, error) {
+// GetByPrefix mocks base method.
+func (m *MockStore) GetByPrefix(arg0 []byte, arg1 interface{}) ([]interface{}, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetBySuffix", arg0)
-	ret0, _ := ret[0].([][]byte)
+	ret := m.ctrl.Call(m, "GetByPrefix", arg0, arg1)
+	ret0, _ := ret[0].([]interface{})
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// GetBySuffix indicates an expected call of GetBySuffix.
-func (mr *MockStoreMockRecorder) GetBySuffix(arg0 interface{}) *gomock.Call {
+// GetByPrefix indicates an expected call of GetByPrefix.
+func (mr *MockStoreMockRecorder) GetByPrefix(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetBySuffix", reflect.TypeOf((*MockStore)(nil).GetBySuffix), arg0)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetByPrefix", reflect.TypeOf((*MockStore)(nil).GetByPrefix), arg0, arg1)
 }
 
 // Set mocks base method.

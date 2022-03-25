@@ -64,7 +64,7 @@ func (s *ConversionRateJobTestSuite) SetupTest() {
 		Foreign:    "usd",
 		Rate:       3000,
 		OracleName: "cooinmarketcap",
-		Time:       time.Time{},
+		Time:       time.Time{}.String(),
 	}
 
 	conversionRateOracle := oracle.NewConversionRateOracleOperator(s.appBase.GetLogger(), s.oracle)
@@ -98,12 +98,12 @@ func (s *ConversionRateJobTestSuite) TestJobOperation_Run_Failure() {
 	s.oracle.EXPECT().IsEnabled().Return(true)
 	s.oracle.EXPECT().InquiryConversionRate(s.testdata.Base, s.testdata.Foreign).Return(nil, errors.New("error")).Times(1)
 	s.oracle.EXPECT().Name().Return("test oracle").Times(1)
-	s.db.EXPECT().Set([]byte(fmt.Sprintf("%s:%s:%s", s.testdata.OracleName, s.testdata.Base, s.testdata.Foreign)), []byte("")).Return(nil).Times(0)
+	s.db.EXPECT().Set([]byte(fmt.Sprintf("conversionrate:%s:%s:%s", s.testdata.OracleName, s.testdata.Base, s.testdata.Foreign)), []byte("")).Return(nil).Times(0)
 
 	cronjob.ConversionRateJobOperation(s.job)()
 }
 
-func (s *ConversionRateJobTestSuite) TestJobOperation_Run_Success_StoreGasPrice_Failure() {
+func (s *ConversionRateJobTestSuite) TestJobOperation_Run_Success_StoreConversionRate_Failure() {
 	s.oracle.EXPECT().IsEnabled().Return(true)
 	s.oracle.EXPECT().InquiryConversionRate(s.testdata.Base, s.testdata.Foreign).Return(s.testdata, nil).Times(1)
 	s.oracle.EXPECT().Name().Return("test oracle").Times(0)
@@ -111,11 +111,11 @@ func (s *ConversionRateJobTestSuite) TestJobOperation_Run_Success_StoreGasPrice_
 	dataBytes, err := json.Marshal(s.testdata)
 	s.Nil(err)
 
-	s.db.EXPECT().Set([]byte(fmt.Sprintf("%s:%s:%s", s.testdata.OracleName, s.testdata.Base, s.testdata.Foreign)), dataBytes).Return(errors.New("error")).Times(1)
+	s.db.EXPECT().Set([]byte(fmt.Sprintf("conversionrate:%s:%s:%s", s.testdata.OracleName, s.testdata.Base, s.testdata.Foreign)), dataBytes).Return(errors.New("error")).Times(1)
 	cronjob.ConversionRateJobOperation(s.job)()
 }
 
-func (s *ConversionRateJobTestSuite) TestJobOperation_Run_Success_StoreGasPrice_Success() {
+func (s *ConversionRateJobTestSuite) TestJobOperation_Run_Success_StoreConversionRate_Success() {
 	s.oracle.EXPECT().IsEnabled().Return(true)
 	s.oracle.EXPECT().InquiryConversionRate(s.testdata.Base, s.testdata.Foreign).Return(s.testdata, nil).Times(1)
 	s.oracle.EXPECT().Name().Return("test oracle").Times(0)
@@ -123,6 +123,6 @@ func (s *ConversionRateJobTestSuite) TestJobOperation_Run_Success_StoreGasPrice_
 	dataBytes, err := json.Marshal(s.testdata)
 	s.Nil(err)
 
-	s.db.EXPECT().Set([]byte(fmt.Sprintf("%s:%s:%s", s.testdata.OracleName, s.testdata.Base, s.testdata.Foreign)), dataBytes).Return(nil).Times(1)
+	s.db.EXPECT().Set([]byte(fmt.Sprintf("conversionrate:%s:%s:%s", s.testdata.OracleName, s.testdata.Base, s.testdata.Foreign)), dataBytes).Return(nil).Times(1)
 	cronjob.ConversionRateJobOperation(s.job)()
 }

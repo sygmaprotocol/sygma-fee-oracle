@@ -1,13 +1,18 @@
 package store
 
 import (
+	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/mitchellh/mapstructure"
+	"strings"
+
 	"github.com/ChainSafe/chainbridge-fee-oracle/types"
 	"github.com/syndtr/goleveldb/leveldb"
-	"strings"
 )
+
+const conversionRateStoreKeyPrefix = "conversionrate:"
 
 type ConversionRateStore struct {
 	db Store
@@ -45,8 +50,12 @@ func (c *ConversionRateStore) GetConversionRate(oracleName, baseCurrency, foreig
 	return conversionRateData, nil
 }
 
-func (c *ConversionRateStore) GetConversionRateByCurrencyPair(base, foreign string) ([]*types.ConversionRateResp, error) {
-	conversionRateData, err := c.db.GetBySuffix([]byte(fmt.Sprintf(":%s:%s", strings.ToLower(base), strings.ToLower(foreign))))
+func (c *ConversionRateStore) GetConversionRateByCurrencyPair(base, foreign string) ([]types.ConversionRateResp, error) {
+	key := bytes.Buffer{}
+	key.WriteString(conversionRateStoreKeyPrefix)
+	var dataReceiver *types.ConversionRateResp
+
+	conversionRateData, err := c.db.GetByPrefix(key.Bytes(), dataReceiver)
 	if err != nil {
 		if errors.Is(err, leveldb.ErrNotFound) {
 			return nil, ErrNotFound
@@ -54,19 +63,27 @@ func (c *ConversionRateStore) GetConversionRateByCurrencyPair(base, foreign stri
 		return nil, err
 	}
 
-	re := make([]*types.ConversionRateResp, 0)
+	fmt.Println(conversionRateData)
+
+	re := make([]types.ConversionRateResp, 0)
 	for _, data := range conversionRateData {
-		var cr *types.ConversionRateResp
-		err = json.Unmarshal(data, &cr)
+		var cr types.ConversionRateResp
+		err = mapstructure.Decode(data, &cr)
 		if err != nil {
 			return nil, err
 		}
-		re = append(re, cr)
+		if cr.Base == base && cr.Foreign == foreign {
+			re = append(re, cr)
+		}
 	}
 
 	return re, nil
 }
 
 func (c *ConversionRateStore) storeKeyFormat(oracleName, baseCurrency, foreignCurrency string) []byte {
-	return []byte(fmt.Sprintf("%s:%s:%s", strings.ToLower(oracleName), strings.ToLower(baseCurrency), strings.ToLower(foreignCurrency)))
+	key := bytes.Buffer{}
+	key.WriteString(fmt.Sprintf("%s%s:%s:%s", conversionRateStoreKeyPrefix, strings.ToLower(oracleName),
+		strings.ToLower(baseCurrency), strings.ToLower(foreignCurrency)))
+
+	return key.Bytes()
 }

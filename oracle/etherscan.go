@@ -4,15 +4,16 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/ChainSafe/chainbridge-fee-oracle/config"
-	"net/http"
-	"strings"
-	"time"
-
 	"github.com/ChainSafe/chainbridge-fee-oracle/oracle/client"
 	"github.com/ChainSafe/chainbridge-fee-oracle/types"
+	"github.com/ChainSafe/chainbridge-fee-oracle/util"
 	"github.com/mitchellh/mapstructure"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
+	"math/big"
+	"net/http"
+	"strings"
+	"time"
 )
 
 var _ GasPriceOracle = (*Etherscan)(nil)
@@ -90,13 +91,26 @@ func (e *Etherscan) InquiryGasPrice(chainDomain string) (*types.GasPricesResp, e
 		return nil, errors.Wrap(err, "failed to decode gas price response")
 	}
 
+	safeGasPriceValue, err := util.Str2BigInt(egp.SafeGasPrice)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to convert gas price response value")
+	}
+	proposeGasPriceValue, err := util.Str2BigInt(egp.ProposeGasPrice)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to convert gas price response value")
+	}
+	fastGasPriceValue, err := util.Str2BigInt(egp.FastGasPrice)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to convert gas price response value")
+	}
+
 	return &types.GasPricesResp{
-		SafeGasPrice:    egp.SafeGasPrice,
-		ProposeGasPrice: egp.ProposeGasPrice,
-		FastGasPrice:    egp.FastGasPrice,
+		SafeGasPrice:    new(big.Int).Mul(safeGasPriceValue, big.NewInt(types.GWei)).String(),
+		ProposeGasPrice: new(big.Int).Mul(proposeGasPriceValue, big.NewInt(types.GWei)).String(),
+		FastGasPrice:    new(big.Int).Mul(fastGasPriceValue, big.NewInt(types.GWei)).String(),
 		OracleName:      e.name,
 		DomainId:        chainDomain,
-		Time:            time.Now(),
+		Time:            time.Now().String(),
 	}, nil
 }
 

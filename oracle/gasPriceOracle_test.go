@@ -55,7 +55,7 @@ func (s *GasPriceOracleTestSuite) SetupTest() {
 		FastGasPrice:    "3",
 		OracleName:      "etherscan",
 		DomainId:        "ethereum",
-		Time:            time.Now(),
+		Time:            time.Now().String(),
 	}
 }
 

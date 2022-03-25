@@ -66,7 +66,7 @@ func (s *GasPriceJobTestSuite) SetupTest() {
 		FastGasPrice:    "3",
 		OracleName:      "test oracle",
 		DomainId:        "ethereum",
-		Time:            time.Now(),
+		Time:            time.Now().String(),
 	}
 
 	gasPriceOracle := oracle.NewGasPriceOracleOperator(s.appBase.GetLogger(), s.oracle)
@@ -100,7 +100,7 @@ func (s *GasPriceJobTestSuite) TestJobOperation_Run_Failure() {
 	s.oracle.EXPECT().IsEnabled().Return(true)
 	s.oracle.EXPECT().InquiryGasPrice(s.testdata.DomainId).Return(nil, errors.New("error")).Times(1)
 	s.oracle.EXPECT().Name().Return("test oracle").Times(1)
-	s.db.EXPECT().Set([]byte(fmt.Sprintf("%s:%s", s.testdata.OracleName, s.testdata.DomainId)), []byte("")).Return(nil).Times(0)
+	s.db.EXPECT().Set([]byte(fmt.Sprintf("gasprice:%s:%s", s.testdata.OracleName, s.testdata.DomainId)), []byte("")).Return(nil).Times(0)
 
 	cronjob.GasPriceJobOperation(s.job)()
 }
@@ -113,7 +113,7 @@ func (s *GasPriceJobTestSuite) TestJobOperation_Run_Success_StoreGasPrice_Failur
 	dataBytes, err := json.Marshal(s.testdata)
 	s.Nil(err)
 
-	s.db.EXPECT().Set([]byte(fmt.Sprintf("%s:%s", s.testdata.OracleName, s.testdata.DomainId)), dataBytes).Return(errors.New("error")).Times(1)
+	s.db.EXPECT().Set([]byte(fmt.Sprintf("gasprice:%s:%s", s.testdata.OracleName, s.testdata.DomainId)), dataBytes).Return(errors.New("error")).Times(1)
 	cronjob.GasPriceJobOperation(s.job)()
 }
 
@@ -125,6 +125,6 @@ func (s *GasPriceJobTestSuite) TestJobOperation_Run_Success_StoreGasPrice_Succes
 	dataBytes, err := json.Marshal(s.testdata)
 	s.Nil(err)
 
-	s.db.EXPECT().Set([]byte(fmt.Sprintf("%s:%s", s.testdata.OracleName, s.testdata.DomainId)), dataBytes).Return(nil).Times(1)
+	s.db.EXPECT().Set([]byte(fmt.Sprintf("gasprice:%s:%s", s.testdata.OracleName, s.testdata.DomainId)), dataBytes).Return(nil).Times(1)
 	cronjob.GasPriceJobOperation(s.job)()
 }

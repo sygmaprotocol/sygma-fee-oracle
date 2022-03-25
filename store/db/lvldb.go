@@ -1,10 +1,11 @@
 package db
 
 import (
-	"bytes"
+	"encoding/json"
 	"github.com/ChainSafe/chainbridge-fee-oracle/store"
 	"github.com/pkg/errors"
 	"github.com/syndtr/goleveldb/leveldb"
+	"github.com/syndtr/goleveldb/leveldb/util"
 )
 
 var _ store.Store = (*LvlDB)(nil)
@@ -29,17 +30,20 @@ func (db *LvlDB) Set(key []byte, value []byte) error {
 	return db.db.Put(key, value, nil)
 }
 
-// GetBySuffix get all items from db with given suffix
-// e.g:
-//	1. key pattern with `*:eth:usdt` for conversion rate, suffix is `:eth:usdt`
-//  2. key pattern with `*:ethereum` for gas price, suffix is `:ethereum`
-func (db *LvlDB) GetBySuffix(suffix []byte) ([][]byte, error) {
-	re := make([][]byte, 0)
-	iter := db.db.NewIterator(nil, nil)
+// GetByPrefix get all items from db with given prefix
+// dataReceiver is the var of the data type after Unmarshal
+func (db *LvlDB) GetByPrefix(prefix []byte, dataReceiver interface{}) ([]interface{}, error) {
+	re := make([]interface{}, 0)
+	iter := db.db.NewIterator(util.BytesPrefix(prefix), nil)
 	for iter.Next() {
-		if bytes.HasSuffix(iter.Key(), suffix) {
-			re = append(re, iter.Value())
+		val := iter.Value()
+
+		err := json.Unmarshal(val, &dataReceiver)
+		if err != nil {
+			return nil, err
 		}
+
+		re = append(re, dataReceiver)
 	}
 	iter.Release()
 	err := iter.Error()

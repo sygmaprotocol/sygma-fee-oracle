@@ -37,7 +37,7 @@ func (s *ConversionRateStoreTestSuite) SetupTest() {
 		Foreign:    "usdt",
 		Rate:       3000,
 		OracleName: "cooinmarketcap",
-		Time:       time.Time{},
+		Time:       time.Time{}.String(),
 	}
 }
 
@@ -47,7 +47,7 @@ func (s *ConversionRateStoreTestSuite) TestStoreConversionRate_Failure() {
 	dataBytes, err := json.Marshal(s.testdata)
 	s.Nil(err)
 
-	s.db.EXPECT().Set([]byte(fmt.Sprintf("%s:%s:%s", s.testdata.OracleName, s.testdata.Base, s.testdata.Foreign)), dataBytes).Return(errors.New("error"))
+	s.db.EXPECT().Set([]byte(fmt.Sprintf("conversionrate:%s:%s:%s", s.testdata.OracleName, s.testdata.Base, s.testdata.Foreign)), dataBytes).Return(errors.New("error"))
 
 	err = s.conversionRateStore.StoreConversionRate(s.testdata)
 
@@ -58,7 +58,7 @@ func (s *ConversionRateStoreTestSuite) TestStoreConversionRate_Success() {
 	dataBytes, err := json.Marshal(s.testdata)
 	s.Nil(err)
 
-	s.db.EXPECT().Set([]byte(fmt.Sprintf("%s:%s:%s", s.testdata.OracleName, s.testdata.Base, s.testdata.Foreign)), dataBytes).Return(nil)
+	s.db.EXPECT().Set([]byte(fmt.Sprintf("conversionrate:%s:%s:%s", s.testdata.OracleName, s.testdata.Base, s.testdata.Foreign)), dataBytes).Return(nil)
 
 	err = s.conversionRateStore.StoreConversionRate(s.testdata)
 
@@ -66,7 +66,7 @@ func (s *ConversionRateStoreTestSuite) TestStoreConversionRate_Success() {
 }
 
 func (s *ConversionRateStoreTestSuite) TestGetConversionRate_Failure() {
-	s.db.EXPECT().Get([]byte(fmt.Sprintf("%s:%s:%s", s.testdata.OracleName, s.testdata.Base, s.testdata.Foreign))).Return(nil, errors.New("error"))
+	s.db.EXPECT().Get([]byte(fmt.Sprintf("conversionrate:%s:%s:%s", s.testdata.OracleName, s.testdata.Base, s.testdata.Foreign))).Return(nil, errors.New("error"))
 
 	_, err := s.conversionRateStore.GetConversionRate(s.testdata.OracleName, s.testdata.Base, s.testdata.Foreign)
 
@@ -77,7 +77,7 @@ func (s *ConversionRateStoreTestSuite) TestGetConversionRate_Success() {
 	dataBytes, err := json.Marshal(s.testdata)
 	s.Nil(err)
 
-	s.db.EXPECT().Get([]byte(fmt.Sprintf("%s:%s:%s", s.testdata.OracleName, s.testdata.Base, s.testdata.Foreign))).Return(dataBytes, nil)
+	s.db.EXPECT().Get([]byte(fmt.Sprintf("conversionrate:%s:%s:%s", s.testdata.OracleName, s.testdata.Base, s.testdata.Foreign))).Return(dataBytes, nil)
 
 	_, err = s.conversionRateStore.GetConversionRate(s.testdata.OracleName, s.testdata.Base, s.testdata.Foreign)
 
@@ -85,7 +85,7 @@ func (s *ConversionRateStoreTestSuite) TestGetConversionRate_Success() {
 }
 
 func (s *ConversionRateStoreTestSuite) TestGetConversionRate_NotFound() {
-	s.db.EXPECT().Get([]byte(fmt.Sprintf("%s:%s:%s", s.testdata.OracleName, s.testdata.Base, s.testdata.Foreign))).Return(nil, store.ErrNotFound)
+	s.db.EXPECT().Get([]byte(fmt.Sprintf("conversionrate:%s:%s:%s", s.testdata.OracleName, s.testdata.Base, s.testdata.Foreign))).Return(nil, store.ErrNotFound)
 
 	_, err := s.conversionRateStore.GetConversionRate(s.testdata.OracleName, s.testdata.Base, s.testdata.Foreign)
 
@@ -93,7 +93,8 @@ func (s *ConversionRateStoreTestSuite) TestGetConversionRate_NotFound() {
 }
 
 func (s *ConversionRateStoreTestSuite) TestGetConversionRateByCurrencyPair_NotFound() {
-	s.db.EXPECT().GetBySuffix([]byte(fmt.Sprintf(":%s:%s", s.testdata.Base, s.testdata.Foreign))).Return(nil, store.ErrNotFound)
+	var dataReceiver *types.ConversionRateResp
+	s.db.EXPECT().GetByPrefix([]byte(fmt.Sprintf("conversionrate:")), dataReceiver).Return(nil, store.ErrNotFound)
 
 	_, err := s.conversionRateStore.GetConversionRateByCurrencyPair(s.testdata.Base, s.testdata.Foreign)
 
@@ -101,37 +102,45 @@ func (s *ConversionRateStoreTestSuite) TestGetConversionRateByCurrencyPair_NotFo
 }
 
 func (s *ConversionRateStoreTestSuite) TestGetConversionRateByCurrencyPair_Success() {
-	re := make([][]byte, 0)
+	re := make([]interface{}, 0)
+	var dataReceiverInterface interface{}
 
 	d1 := &types.ConversionRateResp{
 		Base:       "eth",
-		Foreign:    "usd",
+		Foreign:    "usdt",
 		Rate:       2345.987,
 		OracleName: "",
-		Time:       time.Time{},
+		Time:       time.Time{}.String(),
 	}
 	jd1, err := json.Marshal(d1)
 	s.Nil(err)
-	re = append(re, jd1)
+
+	err = json.Unmarshal(jd1, &dataReceiverInterface)
+	s.Nil(err)
+
+	re = append(re, dataReceiverInterface)
 
 	d2 := &types.ConversionRateResp{
 		Base:       "eth",
-		Foreign:    "usd",
+		Foreign:    "usdt",
 		Rate:       2350.234,
 		OracleName: "",
-		Time:       time.Time{},
+		Time:       time.Time{}.String(),
 	}
 
 	jd2, err := json.Marshal(d2)
 	s.Nil(err)
-	re = append(re, jd2)
+	err = json.Unmarshal(jd2, &dataReceiverInterface)
+	s.Nil(err)
+	re = append(re, dataReceiverInterface)
 
-	s.db.EXPECT().GetBySuffix([]byte(fmt.Sprintf(":%s:%s", s.testdata.Base, s.testdata.Foreign))).Return(re, nil)
+	var dataReceiver *types.ConversionRateResp
+	s.db.EXPECT().GetByPrefix([]byte(fmt.Sprintf("conversionrate:")), dataReceiver).Return(re, nil)
 
 	fetchedData, err := s.conversionRateStore.GetConversionRateByCurrencyPair(s.testdata.Base, s.testdata.Foreign)
 	s.Nil(err)
 
 	s.Equal(2, len(fetchedData))
-	s.EqualValues(d1, fetchedData[0])
-	s.EqualValues(d2, fetchedData[1])
+	s.EqualValues(*d1, fetchedData[0])
+	s.EqualValues(*d2, fetchedData[1])
 }

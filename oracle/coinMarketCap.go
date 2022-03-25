@@ -112,7 +112,7 @@ func (c *CoinMarketCap) InquiryConversionRate(baseCurrency, foreignCurrency stri
 		Foreign:    foreignCurrency,
 		Rate:       cmccr.Price,
 		OracleName: c.name,
-		Time:       time.Now(),
+		Time:       time.Now().String(),
 	}, nil
 }
 
