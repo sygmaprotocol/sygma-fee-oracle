@@ -26,8 +26,11 @@ jobs:
       - name: Unit tests
         run: make test
 
-      - name: Gosec check
-        run: make check
+      - name: Gosec Security Scanner
+        run: |
+          export PATH=$PATH:$(go env GOPATH)/bin
+          go get github.com/securego/gosec/cmd/gosec
+          make check
       
       - name: Lint check
         run: make lint
