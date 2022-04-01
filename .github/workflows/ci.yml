@@ -1,0 +1,23 @@
+name: CI
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Build
+        run: make install
+        
+      - name: Test
+        run: make test
+
+      - name: Gosec check
+        run: make check
+      
+      - name: Lint check
+        run: make lint
