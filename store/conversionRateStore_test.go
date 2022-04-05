@@ -17,7 +17,7 @@ type ConversionRateStoreTestSuite struct {
 	suite.Suite
 	conversionRateStore *store.ConversionRateStore
 	db                  *mockStore.MockStore
-	testdata            *types.ConversionRateResp
+	testdata            *types.ConversionRate
 }
 
 func TestRunConversionRateStoreTestSuite(t *testing.T) {
@@ -32,12 +32,12 @@ func (s *ConversionRateStoreTestSuite) SetupTest() {
 	gomockController := gomock.NewController(s.T())
 	s.db = mockStore.NewMockStore(gomockController)
 	s.conversionRateStore = store.NewConversionRateStore(s.db)
-	s.testdata = &types.ConversionRateResp{
+	s.testdata = &types.ConversionRate{
 		Base:       "eth",
 		Foreign:    "usdt",
 		Rate:       3000,
 		OracleName: "cooinmarketcap",
-		Time:       time.Time{}.String(),
+		Time:       time.Time{}.UnixMilli(),
 	}
 }
 
@@ -93,10 +93,10 @@ func (s *ConversionRateStoreTestSuite) TestGetConversionRate_NotFound() {
 }
 
 func (s *ConversionRateStoreTestSuite) TestGetConversionRateByCurrencyPair_NotFound() {
-	var dataReceiver *types.ConversionRateResp
-	s.db.EXPECT().GetByPrefix([]byte(fmt.Sprintf("conversionrate:")), dataReceiver).Return(nil, store.ErrNotFound)
+	var dataReceiver *types.ConversionRate
+	s.db.EXPECT().GetByPrefix([]byte("conversionrate:"), dataReceiver).Return(nil, store.ErrNotFound)
 
-	_, err := s.conversionRateStore.GetConversionRateByCurrencyPair(s.testdata.Base, s.testdata.Foreign)
+	_, err := s.conversionRateStore.GetConversionRatesByCurrencyPair(s.testdata.Base, s.testdata.Foreign)
 
 	s.EqualError(err, store.ErrNotFound.Error())
 }
@@ -105,12 +105,12 @@ func (s *ConversionRateStoreTestSuite) TestGetConversionRateByCurrencyPair_Succe
 	re := make([]interface{}, 0)
 	var dataReceiverInterface interface{}
 
-	d1 := &types.ConversionRateResp{
+	d1 := &types.ConversionRate{
 		Base:       "eth",
 		Foreign:    "usdt",
 		Rate:       2345.987,
 		OracleName: "",
-		Time:       time.Time{}.String(),
+		Time:       time.Time{}.UnixMilli(),
 	}
 	jd1, err := json.Marshal(d1)
 	s.Nil(err)
@@ -120,12 +120,12 @@ func (s *ConversionRateStoreTestSuite) TestGetConversionRateByCurrencyPair_Succe
 
 	re = append(re, dataReceiverInterface)
 
-	d2 := &types.ConversionRateResp{
+	d2 := &types.ConversionRate{
 		Base:       "eth",
 		Foreign:    "usdt",
 		Rate:       2350.234,
 		OracleName: "",
-		Time:       time.Time{}.String(),
+		Time:       time.Time{}.UnixMilli(),
 	}
 
 	jd2, err := json.Marshal(d2)
@@ -134,10 +134,10 @@ func (s *ConversionRateStoreTestSuite) TestGetConversionRateByCurrencyPair_Succe
 	s.Nil(err)
 	re = append(re, dataReceiverInterface)
 
-	var dataReceiver *types.ConversionRateResp
-	s.db.EXPECT().GetByPrefix([]byte(fmt.Sprintf("conversionrate:")), dataReceiver).Return(re, nil)
+	var dataReceiver *types.ConversionRate
+	s.db.EXPECT().GetByPrefix([]byte("conversionrate:"), dataReceiver).Return(re, nil)
 
-	fetchedData, err := s.conversionRateStore.GetConversionRateByCurrencyPair(s.testdata.Base, s.testdata.Foreign)
+	fetchedData, err := s.conversionRateStore.GetConversionRatesByCurrencyPair(s.testdata.Base, s.testdata.Foreign)
 	s.Nil(err)
 
 	s.Equal(2, len(fetchedData))

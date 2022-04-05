@@ -2,10 +2,11 @@ package oracle_test
 
 import (
 	"errors"
-	"github.com/ethereum/go-ethereum/crypto"
 	"os"
 	"testing"
 	"time"
+
+	"github.com/ethereum/go-ethereum/crypto"
 
 	"github.com/ChainSafe/chainbridge-fee-oracle/base"
 	"github.com/ChainSafe/chainbridge-fee-oracle/oracle"
@@ -20,7 +21,7 @@ type GasPriceOracleTestSuite struct {
 	appBase          *base.FeeOracleAppBase
 	gasPriceOperator *oracle.GasPriceOracleOperator
 	oracle           *mockOracle.MockGasPriceOracle
-	testdata         *types.GasPricesResp
+	testdata         *types.GasPrices
 }
 
 func TestRunGasPriceOracleTestSuite(t *testing.T) {
@@ -49,13 +50,13 @@ func (s *GasPriceOracleTestSuite) SetupTest() {
 	s.oracle = mockOracle.NewMockGasPriceOracle(gomockController)
 	s.appBase = base.NewFeeOracleAppBase("../config/config.template.yaml", "./keyfile.priv", "secp256k1")
 	s.gasPriceOperator = oracle.NewGasPriceOracleOperator(s.appBase.GetLogger(), s.oracle)
-	s.testdata = &types.GasPricesResp{
+	s.testdata = &types.GasPrices{
 		SafeGasPrice:    "1",
 		ProposeGasPrice: "2",
 		FastGasPrice:    "3",
 		OracleName:      "etherscan",
-		DomainId:        "ethereum",
-		Time:            time.Now().String(),
+		DomainName:      "ethereum",
+		Time:            time.Now().UnixMilli(),
 	}
 }
 
@@ -64,17 +65,17 @@ func (s *GasPriceOracleTestSuite) TearDownTest() {
 }
 
 func (s *GasPriceOracleTestSuite) TestInquiryGasPrice_Failure() {
-	s.oracle.EXPECT().InquiryGasPrice(s.testdata.DomainId).Return(nil, errors.New("error"))
+	s.oracle.EXPECT().InquiryGasPrice(s.testdata.DomainName).Return(nil, errors.New("error"))
 
-	_, err := s.gasPriceOperator.Run(s.testdata.DomainId)
+	_, err := s.gasPriceOperator.Run(s.testdata.DomainName)
 
 	s.NotNil(err)
 }
 
 func (s *GasPriceOracleTestSuite) TestInquiryGasPrice_Success() {
-	s.oracle.EXPECT().InquiryGasPrice(s.testdata.DomainId).Return(s.testdata, nil)
+	s.oracle.EXPECT().InquiryGasPrice(s.testdata.DomainName).Return(s.testdata, nil)
 
-	_, err := s.gasPriceOperator.Run(s.testdata.DomainId)
+	_, err := s.gasPriceOperator.Run(s.testdata.DomainName)
 
 	s.Nil(err)
 }

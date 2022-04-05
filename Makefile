@@ -27,6 +27,6 @@ genmocks:
 
 test:
 	go clean -testcache
-	go test --race github.com/ChainSafe/chainbridge-fee-oracle/cronjob \
-				   github.com/ChainSafe/chainbridge-fee-oracle/oracle \
-				   github.com/ChainSafe/chainbridge-fee-oracle/store
+	go test --race ./...
+
+

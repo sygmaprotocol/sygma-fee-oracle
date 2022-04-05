@@ -24,7 +24,7 @@ func NewConversionRateStore(db Store) *ConversionRateStore {
 	}
 }
 
-func (c *ConversionRateStore) StoreConversionRate(conversionRate *types.ConversionRateResp) error {
+func (c *ConversionRateStore) StoreConversionRate(conversionRate *types.ConversionRate) error {
 	data, err := json.Marshal(conversionRate)
 	if err != nil {
 		return err
@@ -32,7 +32,7 @@ func (c *ConversionRateStore) StoreConversionRate(conversionRate *types.Conversi
 	return c.db.Set(c.storeKeyFormat(conversionRate.OracleName, conversionRate.Base, conversionRate.Foreign), data)
 }
 
-func (c *ConversionRateStore) GetConversionRate(oracleName, baseCurrency, foreignCurrency string) (*types.ConversionRateResp, error) {
+func (c *ConversionRateStore) GetConversionRate(oracleName, baseCurrency, foreignCurrency string) (*types.ConversionRate, error) {
 	data, err := c.db.Get(c.storeKeyFormat(oracleName, baseCurrency, foreignCurrency))
 	if err != nil {
 		if errors.Is(err, leveldb.ErrNotFound) {
@@ -41,7 +41,7 @@ func (c *ConversionRateStore) GetConversionRate(oracleName, baseCurrency, foreig
 		return nil, err
 	}
 
-	var conversionRateData *types.ConversionRateResp
+	var conversionRateData *types.ConversionRate
 	err = json.Unmarshal(data, &conversionRateData)
 	if err != nil {
 		return nil, err
@@ -50,24 +50,19 @@ func (c *ConversionRateStore) GetConversionRate(oracleName, baseCurrency, foreig
 	return conversionRateData, nil
 }
 
-func (c *ConversionRateStore) GetConversionRateByCurrencyPair(base, foreign string) ([]types.ConversionRateResp, error) {
+func (c *ConversionRateStore) GetConversionRatesByCurrencyPair(base, foreign string) ([]types.ConversionRate, error) {
 	key := bytes.Buffer{}
 	key.WriteString(conversionRateStoreKeyPrefix)
-	var dataReceiver *types.ConversionRateResp
+	var dataReceiver *types.ConversionRate
 
 	conversionRateData, err := c.db.GetByPrefix(key.Bytes(), dataReceiver)
 	if err != nil {
-		if errors.Is(err, leveldb.ErrNotFound) {
-			return nil, ErrNotFound
-		}
 		return nil, err
 	}
 
-	fmt.Println(conversionRateData)
-
-	re := make([]types.ConversionRateResp, 0)
+	re := make([]types.ConversionRate, 0)
 	for _, data := range conversionRateData {
-		var cr types.ConversionRateResp
+		var cr types.ConversionRate
 		err = mapstructure.Decode(data, &cr)
 		if err != nil {
 			return nil, err

@@ -24,17 +24,17 @@ func NewGasPriceStore(db Store) *GasPriceStore {
 	}
 }
 
-func (g *GasPriceStore) StoreGasPrice(gasPrice *types.GasPricesResp) error {
+func (g *GasPriceStore) StoreGasPrice(gasPrice *types.GasPrices) error {
 	data, err := json.Marshal(gasPrice)
 	if err != nil {
 		return err
 	}
 
-	return g.db.Set(g.storeKeyFormat(gasPrice.OracleName, gasPrice.DomainId), data)
+	return g.db.Set(g.storeKeyFormat(gasPrice.OracleName, gasPrice.DomainName), data)
 }
 
-func (g *GasPriceStore) GetGasPrice(oracleName, domainID string) (*types.GasPricesResp, error) {
-	gasPriceData, err := g.db.Get(g.storeKeyFormat(oracleName, domainID))
+func (g *GasPriceStore) GetGasPrice(oracleName, domainName string) (*types.GasPrices, error) {
+	gasPriceData, err := g.db.Get(g.storeKeyFormat(oracleName, domainName))
 	if err != nil {
 		if errors.Is(err, leveldb.ErrNotFound) {
 			return nil, ErrNotFound
@@ -42,7 +42,7 @@ func (g *GasPriceStore) GetGasPrice(oracleName, domainID string) (*types.GasPric
 		return nil, err
 	}
 
-	var gasPrice *types.GasPricesResp
+	var gasPrice *types.GasPrices
 	err = json.Unmarshal(gasPriceData, &gasPrice)
 	if err != nil {
 		return nil, err
@@ -51,27 +51,24 @@ func (g *GasPriceStore) GetGasPrice(oracleName, domainID string) (*types.GasPric
 	return gasPrice, nil
 }
 
-func (g *GasPriceStore) GetGasPriceByDomain(domainId string) ([]types.GasPricesResp, error) {
+func (g *GasPriceStore) GetGasPricesByDomain(domainName string) ([]types.GasPrices, error) {
 	key := bytes.Buffer{}
 	key.WriteString(gasPriceStoreKeyPrefix)
-	var dataReceiver *types.GasPricesResp
+	var dataReceiver *types.GasPrices
 
 	gasPriceData, err := g.db.GetByPrefix(key.Bytes(), dataReceiver)
 	if err != nil {
-		if errors.Is(err, leveldb.ErrNotFound) {
-			return nil, ErrNotFound
-		}
 		return nil, err
 	}
 
-	re := make([]types.GasPricesResp, 0)
+	re := make([]types.GasPrices, 0)
 	for _, data := range gasPriceData {
-		var gp types.GasPricesResp
+		var gp types.GasPrices
 		err = mapstructure.Decode(data, &gp)
 		if err != nil {
 			return nil, err
 		}
-		if gp.DomainId == domainId {
+		if gp.DomainName == domainName {
 			re = append(re, gp)
 		}
 	}

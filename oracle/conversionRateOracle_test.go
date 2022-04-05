@@ -20,7 +20,7 @@ type ConversionRateOracleTestSuite struct {
 	appBase                *base.FeeOracleAppBase
 	conversionRateOperator *oracle.ConversionRateOracleOperator
 	oracle                 *mockOracle.MockConversionRateOracle
-	testdata               *types.ConversionRateResp
+	testdata               *types.ConversionRate
 }
 
 func TestRunConversionRateOracleTestSuite(t *testing.T) {
@@ -49,12 +49,12 @@ func (s *ConversionRateOracleTestSuite) SetupTest() {
 	s.oracle = mockOracle.NewMockConversionRateOracle(gomockController)
 	s.appBase = base.NewFeeOracleAppBase("../config/config.template.yaml", "./keyfile.priv", "secp256k1")
 	s.conversionRateOperator = oracle.NewConversionRateOracleOperator(s.appBase.GetLogger(), s.oracle)
-	s.testdata = &types.ConversionRateResp{
+	s.testdata = &types.ConversionRate{
 		Base:       "eth",
 		Foreign:    "usdt",
 		Rate:       3000,
 		OracleName: "cooinmarketcap",
-		Time:       time.Time{}.String(),
+		Time:       time.Time{}.UnixMilli(),
 	}
 }
 

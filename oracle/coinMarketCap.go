@@ -64,7 +64,7 @@ func NewCoinMarketCap(conf *config.Config, log *logrus.Entry) *CoinMarketCap {
 	}
 }
 
-func (c *CoinMarketCap) InquiryConversionRate(baseCurrency, foreignCurrency string) (conversionRateResp *types.ConversionRateResp, returnErr error) {
+func (c *CoinMarketCap) InquiryConversionRate(baseCurrency, foreignCurrency string) (conversionRateResp *types.ConversionRate, returnErr error) {
 	defer func() {
 		if err := recover(); err != nil {
 			returnErr = recoverErrorStringifier(err)
@@ -107,12 +107,12 @@ func (c *CoinMarketCap) InquiryConversionRate(baseCurrency, foreignCurrency stri
 		return nil, errors.Wrap(err, "failed to decode conversion rate response")
 	}
 
-	return &types.ConversionRateResp{
+	return &types.ConversionRate{
 		Base:       baseCurrency,
 		Foreign:    foreignCurrency,
 		Rate:       cmccr.Price,
 		OracleName: c.name,
-		Time:       time.Now().String(),
+		Time:       time.Now().UnixMilli(),
 	}, nil
 }
 

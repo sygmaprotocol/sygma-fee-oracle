@@ -27,14 +27,10 @@ func (c *Consensus) GetStrategy() string {
 	return c.strategy.Name()
 }
 
-func (c *Consensus) FilterLocalGasPriceData(store *store.GasPriceStore, domainId string) (*types.GasPricesResp, error) {
-	return c.strategy.RunOnGasPrice(store, domainId)
+func (c *Consensus) FilterLocalGasPriceData(store *store.GasPriceStore, DomainName string) (*types.GasPrices, error) {
+	return c.strategy.GasPrice(store, DomainName)
 }
 
-func (c *Consensus) FilterLocalConversionRateData(store *store.ConversionRateStore, base, foreign string) (*types.ConversionRateResp, error) {
-	return c.strategy.RunOnConversionRate(store, base, foreign)
-}
-
-func (c *Consensus) VoteGroupData() {
-	// TODO: this would be used when fee oracle expended in decentralization
+func (c *Consensus) FilterLocalConversionRateData(store *store.ConversionRateStore, base, foreign string) (*types.ConversionRate, error) {
+	return c.strategy.ConversionRate(store, base, foreign)
 }

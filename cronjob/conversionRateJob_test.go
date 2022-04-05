@@ -28,7 +28,7 @@ type ConversionRateJobTestSuite struct {
 	conversionRateStore    *store.ConversionRateStore
 	db                     *mockStore.MockStore
 	job                    *cronjob.Job
-	testdata               *types.ConversionRateResp
+	testdata               *types.ConversionRate
 }
 
 func TestRunConversionRateJobTestSuite(t *testing.T) {
@@ -59,12 +59,12 @@ func (s *ConversionRateJobTestSuite) SetupTest() {
 	s.conversionRateOperator = oracle.NewConversionRateOracleOperator(s.appBase.GetLogger(), s.oracle)
 	s.db = mockStore.NewMockStore(gomockController)
 	s.conversionRateStore = store.NewConversionRateStore(s.db)
-	s.testdata = &types.ConversionRateResp{
+	s.testdata = &types.ConversionRate{
 		Base:       "eth",
 		Foreign:    "usd",
 		Rate:       3000,
 		OracleName: "cooinmarketcap",
-		Time:       time.Time{}.String(),
+		Time:       time.Time{}.UnixMilli(),
 	}
 
 	conversionRateOracle := oracle.NewConversionRateOracleOperator(s.appBase.GetLogger(), s.oracle)

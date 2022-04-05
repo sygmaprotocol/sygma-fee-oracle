@@ -35,10 +35,10 @@ func (m *MockGasPriceOracle) EXPECT() *MockGasPriceOracleMockRecorder {
 }
 
 // InquiryGasPrice mocks base method.
-func (m *MockGasPriceOracle) InquiryGasPrice(arg0 string) (*types.GasPricesResp, error) {
+func (m *MockGasPriceOracle) InquiryGasPrice(arg0 string) (*types.GasPrices, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "InquiryGasPrice", arg0)
-	ret0, _ := ret[0].(*types.GasPricesResp)
+	ret0, _ := ret[0].(*types.GasPrices)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -101,10 +101,10 @@ func (m *MockConversionRateOracle) EXPECT() *MockConversionRateOracleMockRecorde
 }
 
 // InquiryConversionRate mocks base method.
-func (m *MockConversionRateOracle) InquiryConversionRate(arg0, arg1 string) (*types.ConversionRateResp, error) {
+func (m *MockConversionRateOracle) InquiryConversionRate(arg0, arg1 string) (*types.ConversionRate, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "InquiryConversionRate", arg0, arg1)
-	ret0, _ := ret[0].(*types.ConversionRateResp)
+	ret0, _ := ret[0].(*types.ConversionRate)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }

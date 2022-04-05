@@ -29,7 +29,7 @@ type GasPriceJobTestSuite struct {
 	gasPriceStore    *store.GasPriceStore
 	db               *mockStore.MockStore
 	job              *cronjob.Job
-	testdata         *types.GasPricesResp
+	testdata         *types.GasPrices
 }
 
 func TestRunGasPriceJobTestSuite(t *testing.T) {
@@ -60,13 +60,13 @@ func (s *GasPriceJobTestSuite) SetupTest() {
 	s.gasPriceOperator = oracle.NewGasPriceOracleOperator(s.appBase.GetLogger(), s.oracle)
 	s.db = mockStore.NewMockStore(gomockController)
 	s.gasPriceStore = store.NewGasPriceStore(s.db)
-	s.testdata = &types.GasPricesResp{
+	s.testdata = &types.GasPrices{
 		SafeGasPrice:    "1",
 		ProposeGasPrice: "2",
 		FastGasPrice:    "3",
 		OracleName:      "test oracle",
-		DomainId:        "ethereum",
-		Time:            time.Now().String(),
+		DomainName:      "ethereum",
+		Time:            time.Now().UnixMilli(),
 	}
 
 	gasPriceOracle := oracle.NewGasPriceOracleOperator(s.appBase.GetLogger(), s.oracle)
@@ -90,7 +90,7 @@ func (s *GasPriceJobTestSuite) TearDownTest() {
 
 func (s *GasPriceJobTestSuite) TestJobOperation_Oracle_Disabled() {
 	s.oracle.EXPECT().IsEnabled().Return(false)
-	s.oracle.EXPECT().InquiryGasPrice(s.testdata.DomainId).Return(nil, errors.New("error")).Times(0)
+	s.oracle.EXPECT().InquiryGasPrice(s.testdata.DomainName).Return(nil, errors.New("error")).Times(0)
 	s.oracle.EXPECT().Name().Times(0)
 
 	cronjob.GasPriceJobOperation(s.job)()
@@ -98,33 +98,33 @@ func (s *GasPriceJobTestSuite) TestJobOperation_Oracle_Disabled() {
 
 func (s *GasPriceJobTestSuite) TestJobOperation_Run_Failure() {
 	s.oracle.EXPECT().IsEnabled().Return(true)
-	s.oracle.EXPECT().InquiryGasPrice(s.testdata.DomainId).Return(nil, errors.New("error")).Times(1)
+	s.oracle.EXPECT().InquiryGasPrice(s.testdata.DomainName).Return(nil, errors.New("error")).Times(1)
 	s.oracle.EXPECT().Name().Return("test oracle").Times(1)
-	s.db.EXPECT().Set([]byte(fmt.Sprintf("gasprice:%s:%s", s.testdata.OracleName, s.testdata.DomainId)), []byte("")).Return(nil).Times(0)
+	s.db.EXPECT().Set([]byte(fmt.Sprintf("gasprice:%s:%s", s.testdata.OracleName, s.testdata.DomainName)), []byte("")).Return(nil).Times(0)
 
 	cronjob.GasPriceJobOperation(s.job)()
 }
 
 func (s *GasPriceJobTestSuite) TestJobOperation_Run_Success_StoreGasPrice_Failure() {
 	s.oracle.EXPECT().IsEnabled().Return(true)
-	s.oracle.EXPECT().InquiryGasPrice(s.testdata.DomainId).Return(s.testdata, nil).Times(1)
+	s.oracle.EXPECT().InquiryGasPrice(s.testdata.DomainName).Return(s.testdata, nil).Times(1)
 	s.oracle.EXPECT().Name().Return("test oracle").Times(0)
 
 	dataBytes, err := json.Marshal(s.testdata)
 	s.Nil(err)
 
-	s.db.EXPECT().Set([]byte(fmt.Sprintf("gasprice:%s:%s", s.testdata.OracleName, s.testdata.DomainId)), dataBytes).Return(errors.New("error")).Times(1)
+	s.db.EXPECT().Set([]byte(fmt.Sprintf("gasprice:%s:%s", s.testdata.OracleName, s.testdata.DomainName)), dataBytes).Return(errors.New("error")).Times(1)
 	cronjob.GasPriceJobOperation(s.job)()
 }
 
 func (s *GasPriceJobTestSuite) TestJobOperation_Run_Success_StoreGasPrice_Success() {
 	s.oracle.EXPECT().IsEnabled().Return(true)
-	s.oracle.EXPECT().InquiryGasPrice(s.testdata.DomainId).Return(s.testdata, nil).Times(1)
+	s.oracle.EXPECT().InquiryGasPrice(s.testdata.DomainName).Return(s.testdata, nil).Times(1)
 	s.oracle.EXPECT().Name().Return("test oracle").Times(0)
 
 	dataBytes, err := json.Marshal(s.testdata)
 	s.Nil(err)
 
-	s.db.EXPECT().Set([]byte(fmt.Sprintf("gasprice:%s:%s", s.testdata.OracleName, s.testdata.DomainId)), dataBytes).Return(nil).Times(1)
+	s.db.EXPECT().Set([]byte(fmt.Sprintf("gasprice:%s:%s", s.testdata.OracleName, s.testdata.DomainName)), dataBytes).Return(nil).Times(1)
 	cronjob.GasPriceJobOperation(s.job)()
 }

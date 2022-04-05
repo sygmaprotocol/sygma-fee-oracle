@@ -7,7 +7,7 @@ import (
 
 type GasPriceOracle interface {
 	Oracle
-	InquiryGasPrice(chainDomain string) (*types.GasPricesResp, error)
+	InquiryGasPrice(chainDomain string) (*types.GasPrices, error)
 }
 
 type GasPriceOracleOperator struct {
@@ -23,7 +23,7 @@ func NewGasPriceOracleOperator(log *logrus.Entry, oracle GasPriceOracle) *GasPri
 	}
 }
 
-func (g *GasPriceOracleOperator) Run(chainDomain string) (*types.GasPricesResp, error) {
+func (g *GasPriceOracleOperator) Run(chainDomain string) (*types.GasPrices, error) {
 	return g.oracle.InquiryGasPrice(chainDomain)
 }
 

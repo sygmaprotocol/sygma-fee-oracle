@@ -8,7 +8,6 @@ import (
 
 	"github.com/ChainSafe/chainbridge-fee-oracle/config"
 	"github.com/ChainSafe/chainbridge-fee-oracle/consensus"
-	"github.com/ChainSafe/chainbridge-fee-oracle/consensus/strategy"
 	"github.com/ChainSafe/chainbridge-fee-oracle/identity"
 
 	"github.com/ChainSafe/chainbridge-fee-oracle/api"
@@ -78,7 +77,7 @@ func NewFeeOracleApp(appBase *base.FeeOracleAppBase) *FeeOracleApp {
 		conversionRateStore:   conversionRateStore,
 		gasPriceStore:         gasPriceStore,
 		identity:              oracleIdentity,
-		consensus:             consensus.NewConsensus(initStrategy(appBase.GetConfig()), appBase.GetLogger()),
+		consensus:             consensus.NewConsensus(config.GetStrategy(appBase.GetConfig().StrategyConfig()), appBase.GetLogger()),
 		cronJobServer: cronjob.NewCronJobs(appBase, conversionRateOracles, gasPriceOracles, conversionRateStore,
 			gasPriceStore, appBase.GetLogger()),
 		appTerminationChecker: sync.WaitGroup{},
@@ -104,7 +103,7 @@ func (a *FeeOracleApp) Start() {
 // HTTP server
 func (a *FeeOracleApp) startHttpServer() {
 	go func() {
-		api.RouterSetup(a.ginInstance, a.base)
+		api.RouterSetup(a.ginInstance, a.identity, a.consensus, a.gasPriceStore, a.conversionRateStore, a.base.GetConfig(), a.log)
 
 		err := a.ginInstance.Run(a.base.GetConfig().HttpServerConfig().Port)
 		if err != nil {
@@ -163,16 +162,4 @@ func (a *FeeOracleApp) stopStore() {
 	if err != nil {
 		a.log.Error(err)
 	}
-}
-
-func initStrategy(conf *config.Config) strategy.Strategy {
-	var localDataStrategy strategy.Strategy
-	switch conf.StrategyConfig().Local {
-	case "average":
-		localDataStrategy = &strategy.Average{}
-	default:
-		panic("unsupported strategy")
-	}
-
-	return localDataStrategy
 }

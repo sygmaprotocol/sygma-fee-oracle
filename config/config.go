@@ -38,10 +38,14 @@ type configData struct {
 
 	ConversionRatePairs []string `mapstructure:"conversion_rate_pairs"`
 
-	Strategy strategy `mapstructure:"strategy"`
+	Strategy strategyConfig `mapstructure:"strategy"`
+
+	Domains map[int]domain
+
+	Resources map[int]resource
 }
 
-type strategy struct {
+type strategyConfig struct {
 	Local string `mapstructure:"local"`
 }
 
@@ -120,6 +124,22 @@ func (c *Config) GasPriceDomainsConfig() []string {
 	return c.config.GasPriceDomains
 }
 
+func (c *Config) GetRegisteredDomains(domainId int) *domain {
+	d, ok := c.config.Domains[domainId]
+	if !ok {
+		return nil
+	}
+	return &d
+}
+
+func (c *Config) GetRegisteredResources(resourceId int) *resource {
+	r, ok := c.config.Resources[resourceId]
+	if !ok {
+		return nil
+	}
+	return &r
+}
+
 func (c *Config) ConversionRatePairsChecker() error {
 	if len(c.config.ConversionRatePairs)%2 != 0 {
 		return errors.New("conversion_rate_pairs is invalid, must be pairs")
@@ -127,7 +147,7 @@ func (c *Config) ConversionRatePairsChecker() error {
 	return nil
 }
 
-func (c *Config) StrategyConfig() strategy {
+func (c *Config) StrategyConfig() strategyConfig {
 	return c.config.Strategy
 }
 
@@ -168,11 +188,15 @@ func LoadConfig(configPath string) (*Config, *logrus.Logger) {
 	log := logrus.New()
 	log.SetLevel(conf.logLevel())
 
+	// load domains and resources
+	conf.config.Domains = loadDomains()
+	conf.config.Resources = loadResources(conf.config.Domains)
+
 	return conf, log
 }
 
 func LoadOracleIdentityKey(keyPath, keyType string) (identity.Keypair, error) {
-	privBytes, err := ioutil.ReadFile(keyPath) // #nosec
+	privBytes, err := ioutil.ReadFile(filepath.Clean(keyPath))
 	if err != nil {
 		return nil, err
 	}

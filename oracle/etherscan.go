@@ -3,6 +3,11 @@ package oracle
 import (
 	"encoding/json"
 	"fmt"
+	"math/big"
+	"net/http"
+	"strings"
+	"time"
+
 	"github.com/ChainSafe/chainbridge-fee-oracle/config"
 	"github.com/ChainSafe/chainbridge-fee-oracle/oracle/client"
 	"github.com/ChainSafe/chainbridge-fee-oracle/types"
@@ -10,10 +15,6 @@ import (
 	"github.com/mitchellh/mapstructure"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
-	"math/big"
-	"net/http"
-	"strings"
-	"time"
 )
 
 var _ GasPriceOracle = (*Etherscan)(nil)
@@ -62,8 +63,8 @@ func NewEtherscan(conf *config.Config, log *logrus.Entry) *Etherscan {
 	}
 }
 
-func (e *Etherscan) InquiryGasPrice(chainDomain string) (*types.GasPricesResp, error) {
-	if strings.ToLower(chainDomain) != "ethereum" {
+func (e *Etherscan) InquiryGasPrice(domainName string) (*types.GasPrices, error) {
+	if strings.ToLower(domainName) != "ethereum" {
 		return nil, errors.New("unsupported source to fetch gas price")
 	}
 
@@ -104,13 +105,13 @@ func (e *Etherscan) InquiryGasPrice(chainDomain string) (*types.GasPricesResp, e
 		return nil, errors.Wrap(err, "failed to convert gas price response value")
 	}
 
-	return &types.GasPricesResp{
+	return &types.GasPrices{
 		SafeGasPrice:    new(big.Int).Mul(safeGasPriceValue, big.NewInt(types.GWei)).String(),
 		ProposeGasPrice: new(big.Int).Mul(proposeGasPriceValue, big.NewInt(types.GWei)).String(),
 		FastGasPrice:    new(big.Int).Mul(fastGasPriceValue, big.NewInt(types.GWei)).String(),
 		OracleName:      e.name,
-		DomainId:        chainDomain,
-		Time:            time.Now().String(),
+		DomainName:      domainName,
+		Time:            time.Now().UnixMilli(),
 	}, nil
 }
 

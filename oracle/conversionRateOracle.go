@@ -7,7 +7,7 @@ import (
 
 type ConversionRateOracle interface {
 	Oracle
-	InquiryConversionRate(baseCurrency, foreignCurrency string) (*types.ConversionRateResp, error)
+	InquiryConversionRate(baseCurrency, foreignCurrency string) (*types.ConversionRate, error)
 }
 
 type ConversionRateOracleOperator struct {
@@ -23,7 +23,7 @@ func NewConversionRateOracleOperator(log *logrus.Entry, oracle ConversionRateOra
 	}
 }
 
-func (c *ConversionRateOracleOperator) Run(baseCurrency, foreignCurrency string) (*types.ConversionRateResp, error) {
+func (c *ConversionRateOracleOperator) Run(baseCurrency, foreignCurrency string) (*types.ConversionRate, error) {
 	return c.oracle.InquiryConversionRate(baseCurrency, foreignCurrency)
 }
 

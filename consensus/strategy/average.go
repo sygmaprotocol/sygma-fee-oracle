@@ -18,8 +18,8 @@ func (a *Average) Name() string {
 	return "average"
 }
 
-func (a *Average) RunOnGasPrice(store *store.GasPriceStore, domainId string) (*types.GasPricesResp, error) {
-	re, err := store.GetGasPriceByDomain(domainId)
+func (a *Average) GasPrice(store *store.GasPriceStore, domainName string) (*types.GasPrices, error) {
+	re, err := store.GetGasPricesByDomain(domainName)
 	if err != nil {
 		return nil, err
 	}
@@ -47,18 +47,18 @@ func (a *Average) RunOnGasPrice(store *store.GasPriceStore, domainId string) (*t
 		safe += s
 	}
 
-	return &types.GasPricesResp{
-		SafeGasPrice:    fmt.Sprintf("%d", int(math.Round(fast/dataSize))),
+	return &types.GasPrices{
+		SafeGasPrice:    fmt.Sprintf("%d", int(math.Round(safe/dataSize))),
 		ProposeGasPrice: fmt.Sprintf("%d", int(propose/dataSize)),
-		FastGasPrice:    fmt.Sprintf("%d", int(safe/dataSize)),
-		DomainId:        domainId,
+		FastGasPrice:    fmt.Sprintf("%d", int(fast/dataSize)),
+		DomainName:      domainName,
 		Time:            re[0].Time, // use the first data time for now
 	}, nil
 
 }
 
-func (a *Average) RunOnConversionRate(store *store.ConversionRateStore, base, foreign string) (*types.ConversionRateResp, error) {
-	re, err := store.GetConversionRateByCurrencyPair(base, foreign)
+func (a *Average) ConversionRate(store *store.ConversionRateStore, base, foreign string) (*types.ConversionRate, error) {
+	re, err := store.GetConversionRatesByCurrencyPair(base, foreign)
 	if err != nil {
 		return nil, err
 	}
@@ -72,7 +72,7 @@ func (a *Average) RunOnConversionRate(store *store.ConversionRateStore, base, fo
 		rate += resp.Rate
 	}
 
-	return &types.ConversionRateResp{
+	return &types.ConversionRate{
 		Base:    base,
 		Foreign: foreign,
 		Rate:    rate / dataSize,
