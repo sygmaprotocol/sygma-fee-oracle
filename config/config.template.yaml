@@ -34,9 +34,18 @@ oracle:
   etherscan:
     enable: true
     api_key:
+    apis:
+      gas_price:
+  polygonscan:
+    enable: true
+    api_key:
+    apis:
+      gas_price:
   coinmarketcap:
     enable: true
     api_key:
+    apis:
+      query_rate:
 
 gas_price_domains:
   [ ethereum ]

@@ -3,10 +3,11 @@ package cronjob_test
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/ethereum/go-ethereum/crypto"
 	"os"
 	"testing"
 	"time"
+
+	"github.com/ethereum/go-ethereum/crypto"
 
 	"github.com/ChainSafe/chainbridge-fee-oracle/base"
 	"github.com/ChainSafe/chainbridge-fee-oracle/cronjob"
@@ -124,5 +125,17 @@ func (s *ConversionRateJobTestSuite) TestJobOperation_Run_Success_StoreConversio
 	s.Nil(err)
 
 	s.db.EXPECT().Set([]byte(fmt.Sprintf("conversionrate:%s:%s:%s", s.testdata.OracleName, s.testdata.Base, s.testdata.Foreign)), dataBytes).Return(nil).Times(1)
+
+	reverseData := &types.ConversionRate{
+		Base:       "usd",
+		Foreign:    "eth",
+		Rate:       0.0003333333333333333,
+		OracleName: s.testdata.OracleName,
+		Time:       s.testdata.Time,
+	}
+	reverseDataBytes, err := json.Marshal(reverseData)
+	s.Nil(err)
+
+	s.db.EXPECT().Set([]byte(fmt.Sprintf("conversionrate:%s:%s:%s", s.testdata.OracleName, s.testdata.Foreign, s.testdata.Base)), reverseDataBytes).Return(nil).Times(1)
 	cronjob.ConversionRateJobOperation(s.job)()
 }

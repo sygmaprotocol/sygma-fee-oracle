@@ -1,6 +1,7 @@
 package cronjob
 
 import (
+	"github.com/ChainSafe/chainbridge-fee-oracle/types"
 	"github.com/pkg/errors"
 )
 
@@ -25,6 +26,20 @@ func ConversionRateJobOperation(c *Job) func() {
 				c.log.Debugf("conversion rate data: %+v\n", rateData)
 
 				err = c.cronBase.conversionRateStore.StoreConversionRate(rateData)
+				if err != nil {
+					c.log.Error(errors.Wrap(err, "failed to store data into store"))
+					continue
+				}
+
+				reverseRateData := &types.ConversionRate{
+					Base:       pricePair[1],
+					Foreign:    pricePair[0],
+					Rate:       1 / rateData.Rate,
+					OracleName: rateData.OracleName,
+					Time:       rateData.Time,
+				}
+
+				err = c.cronBase.conversionRateStore.StoreConversionRate(reverseRateData)
 				if err != nil {
 					c.log.Error(errors.Wrap(err, "failed to store data into store"))
 					continue

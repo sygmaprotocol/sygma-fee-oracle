@@ -60,3 +60,49 @@ func TestStr2BigInt(t *testing.T) {
 		assert.EqualValues(t, testcase.output, re, testcase.name)
 	}
 }
+
+func TestLarge2SmallUnitConverter(t *testing.T) {
+	type large2SmallUnitConverterTest struct {
+		name   string
+		input1 string
+		input2 uint
+		output *big.Int
+	}
+
+	testcases := make([]large2SmallUnitConverterTest, 0)
+	testcases = append(testcases, large2SmallUnitConverterTest{
+		name:   "valid string as input 1",
+		input1: "100",
+		input2: 2,
+		output: big.NewInt(10000),
+	})
+	testcases = append(testcases, large2SmallUnitConverterTest{
+		name:   "valid string as input 2",
+		input1: "1",
+		input2: 18,
+		output: big.NewInt(1000000000000000000),
+	})
+	testcases = append(testcases, large2SmallUnitConverterTest{
+		name:   "valid string as input 3",
+		input1: "1",
+		input2: 9,
+		output: big.NewInt(1000000000),
+	})
+	testcases = append(testcases, large2SmallUnitConverterTest{
+		name:   "invalid string as input",
+		input1: "1a2b3c",
+		input2: 9,
+		output: (*big.Int)(nil),
+	})
+	testcases = append(testcases, large2SmallUnitConverterTest{
+		name:   "valid string as input 4",
+		input1: "100",
+		input2: 0,
+		output: big.NewInt(100),
+	})
+
+	for _, testcase := range testcases {
+		re := util.Large2SmallUnitConverter(testcase.input1, testcase.input2)
+		assert.EqualValues(t, testcase.output, re, testcase.name)
+	}
+}

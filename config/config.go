@@ -2,9 +2,10 @@ package config
 
 import (
 	"errors"
+	"io/ioutil"
+
 	"github.com/ChainSafe/chainbridge-fee-oracle/identity"
 	"github.com/ChainSafe/chainbridge-fee-oracle/identity/secp256k1"
-	"io/ioutil"
 
 	"path"
 	"path/filepath"
@@ -51,6 +52,7 @@ type strategyConfig struct {
 
 type oracle struct {
 	Etherscan     etherscan     `mapstructure:"etherscan"`
+	Polygonscan   polygonscan   `mapstructure:"polygonscan"`
 	CoinMarketCap coinMarketCap `mapstructure:"coinmarketcap"`
 }
 
@@ -75,14 +77,27 @@ type httpServerConfig struct {
 	Port string `mapstructure:"port"`
 }
 
+type polygonscan struct {
+	Enable bool    `mapstructure:"enable"`
+	ApiKey string  `mapstructure:"api_key"`
+	Apis   apiUrls `mapstructure:"apis"`
+}
+
 type etherscan struct {
-	Enable bool   `mapstructure:"enable"`
-	ApiKey string `mapstructure:"api_key"`
+	Enable bool    `mapstructure:"enable"`
+	ApiKey string  `mapstructure:"api_key"`
+	Apis   apiUrls `mapstructure:"apis"`
 }
 
 type coinMarketCap struct {
-	Enable bool   `mapstructure:"enable"`
-	ApiKey string `mapstructure:"api_key"`
+	Enable bool    `mapstructure:"enable"`
+	ApiKey string  `mapstructure:"api_key"`
+	Apis   apiUrls `mapstructure:"apis"`
+}
+
+type apiUrls struct {
+	GasPriceApiUrl string `mapstructure:"gas_price"`
+	QueryRate      string `mapstructure:"query_rate"`
 }
 
 func (c *Config) logLevel() logrus.Level {

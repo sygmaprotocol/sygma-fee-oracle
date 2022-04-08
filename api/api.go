@@ -8,6 +8,8 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/ChainSafe/chainbridge-fee-oracle/types"
+
 	"github.com/ChainSafe/chainbridge-fee-oracle/config"
 
 	"github.com/ChainSafe/chainbridge-fee-oracle/consensus"
@@ -37,8 +39,7 @@ func AddRouterPathsV1(v1RouterGroups map[string]*gin.RouterGroup, apiHandler *Ha
 }
 
 // endpoint: /{version}/rate/from/{fromDomainID}/to/{toDomainID}/resource/{resourceID}
-// /rate/from/2/to/1/resource/3 : from polygon to ethereum transfer matic => ber = ether / matic, ter = ether / matic, gas price is from ethereum
-// /rate/from/2/to/1/resource/4 : from polygon to ethereum transfer usdt  => ber = ether / matic, ter = ether / usdt, gas price is from ethereum
+// example: /rate/from/1/to/2/resource/1 : from ethereum to polygon transfer eth   => ber = matic / eth, ter = matic / eth, gas price is from polygon
 func (h *Handler) getRate(c *gin.Context) {
 	fromDomainID, err := strconv.Atoi(c.Param("fromDomainID"))
 	if err != nil {
@@ -94,7 +95,7 @@ func (h *Handler) getRate(c *gin.Context) {
 	// if resourceID is the base currency of the fromDomain
 	aggregatedTokenRateData := aggregatedBaseRateData
 	if resource.Symbol != foreignSymbol {
-		fromDomainResource := h.conf.GetRegisteredResources(fromDomainID)
+		fromDomainResource := h.conf.GetRegisteredResources(resource.ID)
 		if fromDomainResource == nil {
 			ginErrorReturn(c, http.StatusBadRequest, newReturnErrorResp(&config.ErrInvalidRequestInput,
 				errors.New("no resource registered with given the fromDomainID")))
@@ -103,25 +104,27 @@ func (h *Handler) getRate(c *gin.Context) {
 
 		h.log.Debugf("token rate calculation: base: %s, foreign: %s\n", baseSymbol, fromDomainResource.Symbol)
 
-		aggregatedTokenRateData, err = h.consensus.FilterLocalConversionRateData(h.conversionRateStore, baseSymbol, fromDomainResource.Symbol)
-		if err != nil {
-			ginErrorReturn(c, http.StatusInternalServerError, newReturnErrorResp(&config.ErrConsensusFail, err))
-			return
+		aggregatedTokenRateData = &types.ConversionRate{}
+		if fromDomainResource.Symbol == baseSymbol {
+			aggregatedTokenRateData.Rate = 1.0
+		} else {
+			aggregatedTokenRateData, err = h.consensus.FilterLocalConversionRateData(h.conversionRateStore, baseSymbol, fromDomainResource.Symbol)
+			if err != nil {
+				ginErrorReturn(c, http.StatusInternalServerError, newReturnErrorResp(&config.ErrConsensusFail, err))
+				return
+			}
 		}
 	}
 
 	result := &FetchRateResp{
-		BaseRate:  fmt.Sprintf("%f", aggregatedBaseRateData.Rate),
-		TokenRate: fmt.Sprintf("%f", aggregatedTokenRateData.Rate),
-		DestinationChainGasPrice: GasPriceResp{
-			SafeGasPrice:    aggregatedGasPriceData.SafeGasPrice,
-			ProposeGasPrice: aggregatedGasPriceData.ProposeGasPrice,
-			FastGasPrice:    aggregatedGasPriceData.FastGasPrice,
-		},
-		FromDomainID: fromDomainID,
-		ToDomainID:   toDomainID,
-		ResourceID:   resourceID,
-		Timestamp:    time.Now().UnixMilli(),
+		BaseRate:                 fmt.Sprintf("%f", aggregatedBaseRateData.Rate),
+		TokenRate:                fmt.Sprintf("%f", aggregatedTokenRateData.Rate),
+		DestinationChainGasPrice: aggregatedGasPriceData.SafeGasPrice,
+		FromDomainID:             fromDomainID,
+		ToDomainID:               toDomainID,
+		ResourceID:               resourceID,
+		DataTimestamp:            aggregatedBaseRateData.Time, // use the actual rate responding time when fetching data from oracle
+		SignatureTimestamp:       time.Now().UnixMilli(),
 	}
 
 	signature, err := h.identity.Sign([]byte(fmt.Sprintf("%v", result)))

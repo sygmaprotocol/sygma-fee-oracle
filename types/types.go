@@ -1,7 +1,8 @@
 package types
 
 const (
-	GWei = 1e9
+	GWei        = 1e9
+	GWeiDecimal = 9
 )
 
 // GasPrices is the type defined for general gas price

@@ -19,10 +19,6 @@ import (
 
 var _ ConversionRateOracle = (*CoinMarketCap)(nil)
 
-const (
-	rateAPIUrl = "https://pro-api.coinmarketcap.com/v2/cryptocurrency/quotes/latest?"
-)
-
 type CoinMarketCap struct {
 	log *logrus.Entry
 
@@ -59,7 +55,7 @@ func NewCoinMarketCap(conf *config.Config, log *logrus.Entry) *CoinMarketCap {
 		apiKey: conf.OracleConfig().CoinMarketCap.ApiKey,
 		enable: conf.OracleConfig().CoinMarketCap.Enable,
 		apis: CoinMarketCapApis{
-			ConversionRateRequest: rateAPIUrl,
+			ConversionRateRequest: conf.OracleConfig().CoinMarketCap.Apis.QueryRate,
 		},
 	}
 }

@@ -39,18 +39,13 @@ func ginSuccessReturn(c *gin.Context, httpCode int, resp ReturnSuccessResponse) 
 }
 
 type FetchRateResp struct {
-	BaseRate                 string       `json:"baseEffectiveRate"`
-	TokenRate                string       `json:"tokenEffectiveRate"`
-	DestinationChainGasPrice GasPriceResp `json:"dstGasPrice"`
-	Signature                string       `json:"signature"`
-	FromDomainID             int          `json:"fromDomainID"`
-	ToDomainID               int          `json:"toDomainID"`
-	ResourceID               int          `json:"resourceID"`
-	Timestamp                int64        `json:"timestamp"`
-}
-
-type GasPriceResp struct {
-	SafeGasPrice    string `json:"safeGasPrice" `
-	ProposeGasPrice string `json:"proposeGasPrice"`
-	FastGasPrice    string `json:"fastGasPrice" `
+	BaseRate                 string `json:"baseEffectiveRate"`
+	TokenRate                string `json:"tokenEffectiveRate"`
+	DestinationChainGasPrice string `json:"dstGasPrice"`
+	Signature                string `json:"signature"`
+	FromDomainID             int    `json:"fromDomainID"`
+	ToDomainID               int    `json:"toDomainID"`
+	ResourceID               int    `json:"resourceID"`
+	DataTimestamp            int64  `json:"dataTimestamp"`
+	SignatureTimestamp       int64  `json:"signatureTimestamp"`
 }

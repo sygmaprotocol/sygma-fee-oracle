@@ -19,10 +19,6 @@ import (
 
 var _ GasPriceOracle = (*Etherscan)(nil)
 
-const (
-	gasPriceAPIUrl = "https://api.etherscan.io/api?module=gastracker&action=gasoracle&apikey="
-)
-
 type Etherscan struct {
 	log *logrus.Entry
 
@@ -58,14 +54,14 @@ func NewEtherscan(conf *config.Config, log *logrus.Entry) *Etherscan {
 		apiKey: conf.OracleConfig().Etherscan.ApiKey,
 		enable: conf.OracleConfig().Etherscan.Enable,
 		apis: EtherscanApis{
-			GasPriceRequest: fmt.Sprintf("%s%s", gasPriceAPIUrl, conf.OracleConfig().Etherscan.ApiKey),
+			GasPriceRequest: fmt.Sprintf("%s%s", conf.OracleConfig().Etherscan.Apis.GasPriceApiUrl, conf.OracleConfig().Etherscan.ApiKey),
 		},
 	}
 }
 
 func (e *Etherscan) InquiryGasPrice(domainName string) (*types.GasPrices, error) {
 	if strings.ToLower(domainName) != "ethereum" {
-		return nil, errors.New("unsupported source to fetch gas price")
+		return nil, ErrNotSupported
 	}
 
 	statusCode, body, err := client.NewHttpRequestMessage(http.MethodGet, e.apis.GasPriceRequest,

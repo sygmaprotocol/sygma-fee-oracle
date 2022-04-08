@@ -34,17 +34,26 @@ oracle:
   etherscan:
     enable: true
     api_key: 473P55YZMBNSRR63YF78D2PMMIUYUQJMGY
+    apis:
+      gas_price: https://api.etherscan.io/api?module=gastracker&action=gasoracle&apikey=
+  polygonscan:
+    enable: true
+    api_key: BZM7P395BQS1YFKQMA2AK2ACQKWGEW4JB3
+    apis:
+      gas_price: https://api.polygonscan.com/api?module=gastracker&action=gasoracle&apikey=
   coinmarketcap:
     enable: true
     api_key: 1408daf0-0777-4916-9fe4-20da5ee77560
+    apis:
+      query_rate: https://pro-api.coinmarketcap.com/v2/cryptocurrency/quotes/latest?
 
 gas_price_domains:
-  [ ethereum ]
+  [ ethereum, polygon ]
 
 # conversion_rate_pairs contains price pair for conversion rate
 # must be paired and follow the format of [ base, foreign, base, foreign, ... ]
 conversion_rate_pairs:
-  [ eth, doge, eth, usdt, eth, matic ]
+  [ eth, doge, eth, usdt, eth, matic, matic, usdt, matic, doge ]
 
 # strategy defines the strategy on verify and aggregate data from store when fetched
 strategy:

@@ -1,6 +1,9 @@
 package cronjob
 
-import "github.com/pkg/errors"
+import (
+	"github.com/ChainSafe/chainbridge-fee-oracle/oracle"
+	"github.com/pkg/errors"
+)
 
 func GasPriceJobOperation(c *Job) func() {
 	return func() {
@@ -14,7 +17,9 @@ func GasPriceJobOperation(c *Job) func() {
 			for _, domain := range c.cronBase.base.GetConfig().GasPriceDomainsConfig() {
 				gasPriceData, err := oracleOperator.Run(domain)
 				if err != nil {
-					c.log.Error(errors.Wrapf(err, "failed to fetch data from oracle: %s", oracleOperator.GetOracleName()))
+					if err != oracle.ErrNotSupported {
+						c.log.Error(errors.Wrapf(err, "failed to fetch data from oracle: %s", oracleOperator.GetOracleName()))
+					}
 					continue
 				}
 
