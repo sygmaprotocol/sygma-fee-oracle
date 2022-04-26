@@ -25,7 +25,12 @@ vendor
 # store data
 lvldbdata
 
-./config.yaml
-
+# prikey file
 *.priv
+
+# swagger doc
+fee-oracle-1.0.0-swagger.yaml
+
+# playground.go
+playground.go
 
