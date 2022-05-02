@@ -48,7 +48,11 @@ type FetchRateResp struct {
 	Signature                string `json:"signature"`
 	FromDomainID             int    `json:"fromDomainID"`
 	ToDomainID               int    `json:"toDomainID"`
-	ResourceID               int    `json:"resourceID"`
-	DataTimestamp            int64  `json:"dataTimestamp"`
-	SignatureTimestamp       int64  `json:"signatureTimestamp"`
+	ResourceID               string `json:"resourceID"`
+	// DataTimestamp represents the timestamp that the data is fetched from external services
+	DataTimestamp int64 `json:"dataTimestamp"`
+	// SignatureTimestamp represents the timestamp that the endpoint responses with the signature
+	SignatureTimestamp int64 `json:"signatureTimestamp"`
+	// ExpirationTimestamp represents the timestamp that the response data expires on the fee handler contract
+	ExpirationTimestamp int64 `json:"expirationTimestamp"`
 }

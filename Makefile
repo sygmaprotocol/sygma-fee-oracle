@@ -13,13 +13,13 @@ get-lint:
 	fi;
 
 lint: get-lint
-	./bin/golangci-lint run ./... --timeout 5m0s
+	./bin/golangci-lint run ./... --skip-dirs e2e --timeout 5m0s
 
 check:
-	gosec ./...
+	gosec -exclude-dir=e2e ./...
 
 start: install
-	$(GOPATH)/bin/chainbridge-fee-oracle server -c $(makeFileDir)config.yaml -k $(makeFileDir)keyfile.priv -t secp256k1
+	$(GOPATH)/bin/chainbridge-fee-oracle server -c $(makeFileDir)config.yaml -d $(makeFileDir)domain.json -r $(makeFileDir)resource.json -k $(makeFileDir)keyfile.priv -t secp256k1
 
 genmocks:
 	mockgen -destination=./store/mock/store.go -source=./store/store.go
@@ -27,18 +27,27 @@ genmocks:
 
 test:
 	go clean -testcache
-	go test --race ./...
+	./scripts/test.sh
+
+start-ganache:
+	./scripts/start_ganache.sh false
+
+e2e-test: install
+	./scripts/prepare_test_data.sh
+	./scripts/start.sh
+	./scripts/start_ganache.sh true
+	./scripts/e2e_testing.sh viatrix/fee-handler
 
 ## license: Adds license header to missing files.
 license:
 	@echo "  >  \033[32mAdding license headers...\033[0m "
 	GO111MODULE=off go get -u github.com/google/addlicense
-	addlicense -c "ChainSafe Systems" -f ./script/header.txt -y 2021 .
+	addlicense -c "ChainSafe Systems" -f ./scripts/header.txt -y 2021 .
 
 ## license-check: Checks for missing license headers
 license-check:
 	@echo "  >  \033[Checking for license headers...\033[0m "
 	GO111MODULE=off go get -u github.com/google/addlicense
-	addlicense -check -c "ChainSafe Systems" -f ./script/header.txt -y 2021 .
+	addlicense -check -c "ChainSafe Systems" -f ./scripts/header.txt -y 2021 -skip sh .
 
 

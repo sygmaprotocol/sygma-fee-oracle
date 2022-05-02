@@ -14,16 +14,20 @@ const (
 	parseRequestErrCode        = 10002
 	dbFailErrCode              = 10003
 	consensusFailErrCode       = 10004
-	ddentityStampFailErrCode   = 10005
+	identityStampFailErrCode   = 10005
+	loadDomainConfigErrCode    = 10006
+	loadResourceConfigErrCode  = 10007
 )
 
 var (
 	ErrLoadConfig          = FeeOracleError{loadConfigErrCode, "failed to load app config", ""}
+	ErrLoadDomainConfig    = FeeOracleError{loadDomainConfigErrCode, "failed to load domain config", ""}
+	ErrLoadResourceConfig  = FeeOracleError{loadResourceConfigErrCode, "failed to load resource config", ""}
 	ErrParseRequest        = FeeOracleError{parseRequestErrCode, "failed to parse request data", ""}
 	ErrInvalidRequestInput = FeeOracleError{invalidRequestInputErrCode, "invalid request input", ""}
 	ErrDBFail              = FeeOracleError{dbFailErrCode, "failed to get data from db", ""}
 	ErrConsensusFail       = FeeOracleError{consensusFailErrCode, "failed to make data consensus on the strategy", ""}
-	ErrIdentityStampFail   = FeeOracleError{ddentityStampFailErrCode, "failed to stamp oracle identity", ""}
+	ErrIdentityStampFail   = FeeOracleError{identityStampFailErrCode, "failed to stamp oracle identity", ""}
 )
 
 type FeeOracleError struct {

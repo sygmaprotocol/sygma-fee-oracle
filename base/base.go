@@ -23,8 +23,8 @@ type FeeOracleAppBase struct {
 	envInUse string
 }
 
-func NewFeeOracleAppBase(configPath, keyPath, keyType string) *FeeOracleAppBase {
-	conf, logger := config.LoadConfig(configPath)
+func NewFeeOracleAppBase(configPath, domainConfigPath, resourceConfigPath, keyPath, keyType string) *FeeOracleAppBase {
+	conf, logger := config.LoadConfig(configPath, domainConfigPath, resourceConfigPath)
 
 	base := &FeeOracleAppBase{
 		log:      logger.WithField("base", "base"),

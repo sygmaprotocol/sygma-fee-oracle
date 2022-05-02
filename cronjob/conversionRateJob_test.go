@@ -59,7 +59,7 @@ func (s *ConversionRateJobTestSuite) TearDownSuite() {
 func (s *ConversionRateJobTestSuite) SetupTest() {
 	gomockController := gomock.NewController(s.T())
 	s.oracle = mockOracle.NewMockConversionRateOracle(gomockController)
-	s.appBase = base.NewFeeOracleAppBase("../config/config.template.yaml", "./keyfile.priv", "secp256k1")
+	s.appBase = base.NewFeeOracleAppBase("../config/config.template.yaml", "../domain.json", "../resource.json", "./keyfile.priv", "secp256k1")
 	s.conversionRateOperator = oracle.NewConversionRateOracleOperator(s.appBase.GetLogger(), s.oracle)
 	s.db = mockStore.NewMockStore(gomockController)
 	s.conversionRateStore = store.NewConversionRateStore(s.db)

@@ -110,7 +110,7 @@ func (e *Etherscan) InquiryGasPrice(domainName string) (*types.GasPrices, error)
 		FastGasPrice:    new(big.Int).Mul(fastGasPriceValue, big.NewInt(types.GWei)).String(),
 		OracleName:      e.name,
 		DomainName:      domainName,
-		Time:            time.Now().UnixMilli(),
+		Time:            time.Now().Unix(),
 	}, nil
 }
 

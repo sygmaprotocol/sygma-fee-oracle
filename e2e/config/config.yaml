@@ -21,17 +21,17 @@ cron_job:
   update_conversion_rate_job:
     name: conversion rate
     enable: true
-    check_frequency: "* * * * *"
+    check_frequency: "* 0 * * *"
     process_number: 1
   update_gas_price_job:
     name: gas price
     enable: true
-    check_frequency: "* * * * *"
+    check_frequency: "* 0 * * *"
     process_number: 1
 
 # store path
 store:
-  path: ./lvldbdata
+  path: ./e2e/testdb
 
 oracle:
   etherscan:

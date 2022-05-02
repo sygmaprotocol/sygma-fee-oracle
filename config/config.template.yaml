@@ -61,3 +61,6 @@ conversion_rate_pairs:
 # strategy defines the strategy on verify and aggregate data from store when fetched
 strategy:
   local: average
+
+# data_valid_interval defines how long the endpoint response data remains valid before sending it to fee handler contract
+data_valid_interval: 3600 # second

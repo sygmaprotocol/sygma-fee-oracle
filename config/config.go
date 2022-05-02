@@ -44,9 +44,11 @@ type configData struct {
 
 	Strategy strategyConfig `mapstructure:"strategy"`
 
+	DataValidInterval int64 `mapstructure:"data_valid_interval"`
+
 	Domains map[int]domain
 
-	Resources map[int]resource
+	Resources map[string]resource
 }
 
 type strategyConfig struct {
@@ -150,8 +152,8 @@ func (c *Config) GetRegisteredDomains(domainId int) *domain {
 	return &d
 }
 
-func (c *Config) GetRegisteredResources(resourceId int) *resource {
-	r, ok := c.config.Resources[resourceId]
+func (c *Config) GetRegisteredResources(resourceId string) *resource {
+	r, ok := c.config.Resources[strings.ToLower(resourceId)]
 	if !ok {
 		return nil
 	}
@@ -167,6 +169,10 @@ func (c *Config) ConversionRatePairsChecker() error {
 
 func (c *Config) StrategyConfig() strategyConfig {
 	return c.config.Strategy
+}
+
+func (c *Config) DataValidIntervalConfig() int64 {
+	return c.config.DataValidInterval
 }
 
 func (c *Config) ConversionRatePairsConfig() [][]string {
@@ -198,7 +204,7 @@ func (c *Config) EssentialConfigCheck() error {
 	return nil
 }
 
-func LoadConfig(configPath string) (*Config, *logrus.Logger) {
+func LoadConfig(configPath, domainConfigPath, resourceConfigPath string) (*Config, *logrus.Logger) {
 	conf, err := newConfig(configPath)
 	if err != nil {
 		panic(ErrLoadConfig.Wrap(err))
@@ -207,8 +213,8 @@ func LoadConfig(configPath string) (*Config, *logrus.Logger) {
 	log.SetLevel(conf.logLevel())
 
 	// load domains and resources
-	conf.config.Domains = loadDomains()
-	conf.config.Resources = loadResources(conf.config.Domains)
+	conf.config.Domains = loadDomains(domainConfigPath)
+	conf.config.Resources = loadResources(resourceConfigPath, conf.config.Domains)
 
 	return conf, log
 }

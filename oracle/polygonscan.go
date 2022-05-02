@@ -90,9 +90,18 @@ func (p *Polygonscan) InquiryGasPrice(domainName string) (*types.GasPrices, erro
 		return nil, errors.Wrap(err, "failed to decode gas price response")
 	}
 
-	safeGasPriceValue := util.Large2SmallUnitConverter(pgp.SafeGasPrice, types.GWeiDecimal)
-	proposeGasPriceValue := util.Large2SmallUnitConverter(pgp.ProposeGasPrice, types.GWeiDecimal)
-	fastGasPriceValue := util.Large2SmallUnitConverter(pgp.FastGasPrice, types.GWeiDecimal)
+	safeGasPriceValue, err := util.Large2SmallUnitConverter(pgp.SafeGasPrice, types.GWeiDecimal)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to convert safe gasprice")
+	}
+	proposeGasPriceValue, err := util.Large2SmallUnitConverter(pgp.ProposeGasPrice, types.GWeiDecimal)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to convert propose gasprice")
+	}
+	fastGasPriceValue, err := util.Large2SmallUnitConverter(pgp.FastGasPrice, types.GWeiDecimal)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to convert fast gasprice")
+	}
 
 	return &types.GasPrices{
 		SafeGasPrice:    safeGasPriceValue.String(),
@@ -100,7 +109,7 @@ func (p *Polygonscan) InquiryGasPrice(domainName string) (*types.GasPrices, erro
 		FastGasPrice:    fastGasPriceValue.String(),
 		OracleName:      p.name,
 		DomainName:      domainName,
-		Time:            time.Now().UnixMilli(),
+		Time:            time.Now().Unix(),
 	}, nil
 }
 

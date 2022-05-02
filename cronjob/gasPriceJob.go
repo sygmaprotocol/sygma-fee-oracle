@@ -19,7 +19,7 @@ func GasPriceJobOperation(c *Job) func() {
 			}
 			for _, domain := range c.cronBase.base.GetConfig().GasPriceDomainsConfig() {
 				gasPriceData, err := oracleOperator.Run(domain)
-				if err != nil {
+				if err != nil || gasPriceData == nil {
 					if err != oracle.ErrNotSupported {
 						c.log.Error(errors.Wrapf(err, "failed to fetch data from oracle: %s", oracleOperator.GetOracleName()))
 					}

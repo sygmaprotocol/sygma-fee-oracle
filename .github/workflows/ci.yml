@@ -40,3 +40,6 @@ jobs:
 
       - name: License check
         run: make license-check
+
+      - name: E2E test
+        run: make e2e-test

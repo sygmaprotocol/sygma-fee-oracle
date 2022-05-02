@@ -24,9 +24,10 @@ vendor
 
 # store data
 lvldbdata
+e2e/testdb
 
 # prikey file
-*.priv
+/*.priv
 
 # swagger doc
 fee-oracle-1.0.0-swagger.yaml

@@ -4,7 +4,6 @@
 package api
 
 import (
-	"encoding/hex"
 	"errors"
 	"fmt"
 	"net/http"
@@ -38,11 +37,12 @@ type Handler struct {
 func AddRouterPathsV1(v1RouterGroups map[string]*gin.RouterGroup, apiHandler *Handler, log *logrus.Entry) {
 	apiHandler.log = log.WithField("api", "v1")
 
-	v1RouterGroups["rate"].GET("/from/:fromDomainID/to/:toDomainID/resource/:resourceID", apiHandler.getRate)
+	v1RouterGroups["rate"].GET("/from/:fromDomainID/to/:toDomainID/token/:address", apiHandler.getRate)
 }
 
-// endpoint: /{version}/rate/from/{fromDomainID}/to/{toDomainID}/resource/{resourceID}
-// example: /rate/from/1/to/2/resource/1 : from ethereum to polygon transfer eth   => ber = matic / eth, ter = matic / eth, gas price is from polygon
+// endpoint: /{version}/rate/from/{fromDomainID}/to/{toDomainID}/token/{address}
+// example for transferring native token:   /rate/from/1/to/2/token/0x0000000000000000000000000000000000000000 : from ethereum to polygon transfer eth    => ber = matic / eth, ter = matic / eth, gas price is from polygon
+// example for transferring standard token: /rate/from/1/to/2/token/0x8A953CfE442c5E8855cc6c61b1293FA648BAE472 : from ethereum to polygon transfer doge   => ber = matic / eth, ter = matic / doge, gas price is from polygon
 func (h *Handler) getRate(c *gin.Context) {
 	fromDomainID, err := strconv.Atoi(c.Param("fromDomainID"))
 	if err != nil {
@@ -54,13 +54,9 @@ func (h *Handler) getRate(c *gin.Context) {
 		ginErrorReturn(c, http.StatusBadRequest, newReturnErrorResp(&config.ErrInvalidRequestInput, errors.New("invalid toDomainID")))
 		return
 	}
-	resourceID, err := strconv.Atoi(c.Param("resourceID"))
-	if err != nil {
-		ginErrorReturn(c, http.StatusBadRequest, newReturnErrorResp(&config.ErrInvalidRequestInput, errors.New("invalid resourceID")))
-		return
-	}
+	resourceTokenAddr := c.Param("address")
 
-	h.log.Debugf("new request with params fromDomainID: %d, toDomainID: %d, resourceID: %d\n", fromDomainID, toDomainID, resourceID)
+	h.log.Debugf("new request with params fromDomainID: %d, toDomainID: %d, tokenAddress: %s\n", fromDomainID, toDomainID, resourceTokenAddr)
 
 	toDomain := h.conf.GetRegisteredDomains(toDomainID)
 	if toDomain == nil {
@@ -72,9 +68,11 @@ func (h *Handler) getRate(c *gin.Context) {
 		ginErrorReturn(c, http.StatusBadRequest, newReturnErrorResp(&config.ErrInvalidRequestInput, errors.New("invalid fromDomain")))
 		return
 	}
+
+	resourceID := config.ResourceIDBuilder(resourceTokenAddr, fromDomainID)
 	resource := h.conf.GetRegisteredResources(resourceID)
 	if resource == nil {
-		ginErrorReturn(c, http.StatusBadRequest, newReturnErrorResp(&config.ErrInvalidRequestInput, errors.New("invalid resourceID")))
+		ginErrorReturn(c, http.StatusBadRequest, newReturnErrorResp(&config.ErrInvalidRequestInput, errors.New("invalid token address")))
 		return
 	}
 
@@ -119,24 +117,27 @@ func (h *Handler) getRate(c *gin.Context) {
 		}
 	}
 
-	result := &FetchRateResp{
+	dataTime := aggregatedBaseRateData.Time
+	signedTime := time.Now().Unix()
+
+	endpointRespData := &FetchRateResp{
 		BaseRate:                 fmt.Sprintf("%f", aggregatedBaseRateData.Rate),
 		TokenRate:                fmt.Sprintf("%f", aggregatedTokenRateData.Rate),
 		DestinationChainGasPrice: aggregatedGasPriceData.SafeGasPrice,
 		FromDomainID:             fromDomainID,
 		ToDomainID:               toDomainID,
-		ResourceID:               resourceID,
-		DataTimestamp:            aggregatedBaseRateData.Time, // use the actual rate responding time when fetching data from oracle
-		SignatureTimestamp:       time.Now().UnixMilli(),
+		DataTimestamp:            dataTime,
+		SignatureTimestamp:       signedTime,
+		ExpirationTimestamp:      h.dataExpirationManager(dataTime),
 	}
 
-	signature, err := h.identity.Sign([]byte(fmt.Sprintf("%v", result)))
+	endpointRespData.Signature, err = h.rateSignature(endpointRespData, fromDomainID, resource.TokenAddress, resource.DomainId)
 	if err != nil {
 		ginErrorReturn(c, http.StatusInternalServerError, newReturnErrorResp(&config.ErrIdentityStampFail, err))
 		return
 	}
+	endpointRespData.ResourceID = resourceTokenAddr[len(h.conf.GetRegisteredDomains(fromDomainID).AddressPrefix):] +
+		fmt.Sprintf("%02s", strconv.FormatInt(int64(fromDomainID), 16))
 
-	result.Signature = fmt.Sprintf("0x%s", hex.EncodeToString(signature))
-
-	ginSuccessReturn(c, http.StatusOK, result)
+	ginSuccessReturn(c, http.StatusOK, endpointRespData)
 }

@@ -21,7 +21,7 @@ func ConversionRateJobOperation(c *Job) func() {
 			}
 			for _, pricePair := range pricePairs {
 				rateData, err := oracleOperator.Run(pricePair[0], pricePair[1])
-				if err != nil {
+				if err != nil || rateData == nil {
 					c.log.Error(errors.Wrapf(err, "failed to fetch data from oracle: %s", oracleOperator.GetOracleName()))
 					continue
 				}
