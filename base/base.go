@@ -65,6 +65,8 @@ func (a *FeeOracleAppBase) initKeyPair(keyPath, keyType string) {
 		panic(fmt.Sprintf("failed to load key config: %s", err))
 	}
 
+	a.log.Infof("fee oracle indentity address is %s\n", kp.Address())
+
 	a.oracleIdentity = kp
 }
 

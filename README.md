@@ -96,7 +96,7 @@ For the native current address, such as Ether on Ethereum, Matic on Polygon, the
 Each fee oracle server associates with a private key, which is used to sign the endpoint response data.
 There should be a `keyfile.priv` keyfile in the root dir of the fee oracle codebase, or you can specify which keyfile to use in CLI. 
 
-**Fee oracle does not provide key generation feature, keyfile needs to be generated separately.**
+**Fee oracle provides [key generation CLI](#keycli), keyfile needs to be generated separately.**
 
 # Quick Start
 To quickly start from makefile, make sure `config.yaml`, `domain.json`, `resource.json` and `keyfile.priv` are ready in the root dir of the codebase, then execute:
@@ -108,7 +108,7 @@ Fee oracle provides CLI.
 
 For general help:`$ chainbridge-fee-oracle -h`  
 
-### `$ chainbridge-fee-oracle server`
+#### `$ chainbridge-fee-oracle server`
 ```
 Start ChainBridge fee oracle main service
 
@@ -124,6 +124,19 @@ Flags:
   -r, --resource_config_path string
 ```
 
+#### <a id="keycli"></a>`$ chainbridge-fee-oracle key-generate`
+```
+Start ChainBridge fee oracle identity key generation
+
+Usage:
+  chainbridge-fee-oracle key-generate [flags]
+
+Flags:
+  -h, --help                  help for key-generate
+  -t, --key_type string       Support: secp256k1 (default "secp256k1")
+  -k, --keyfile_path string   Output dir for generated key file, filename is required with .priv as file extension (default "keyfile.priv")
+```
+
 # Unit Test
 `$ make test`
 
@@ -132,6 +145,21 @@ Flags:
 
 # Lint Checking
 `$ make lint`
+
+# Using Docker
+Fee oracle provides a Dockerfile to containerize the codebase.  
+To build docker image:
+```
+$ docker build -t fee_oracle .
+```
+To run docker container:
+```
+$ docker run -p 8091:8091 -it fee_oracle
+```
+`8091` will be the exposed part for the endpoint access.
+
+**Note**: fee oracle requires a private key file when starting, this key file must be a `secp256k1` type and named as `keyfile.priv` and put in the `./` dir of the codebase when building docker image,
+if no keyfile exists in `./` dir, fee oracle will auto generate a `secp256k1` keyfile to use.
 
 # End to End Test
 This will start fee oracle service, ganache-cli locally, install `solcjs`, `abigen` and generate contract go binding code, deploy fee handler contracts to local ganache.  
