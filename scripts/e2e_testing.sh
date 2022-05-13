@@ -16,6 +16,7 @@ mkdir -p $E2E_TEST_DIR/bridge
 mkdir -p $E2E_TEST_DIR/erc20Handler
 mkdir -p $E2E_TEST_DIR/erc20PresetMinterPauser
 mkdir -p $E2E_TEST_DIR/feeHandler
+mkdir -p $E2E_TEST_DIR/basicFeeHandler
 
 # clone solidity code and checkout target branch
 git clone --branch $solidity_branch https://github.com/ChainSafe/chainbridge-solidity.git $E2E_TEST_DIR/chainbridge-solidity
@@ -31,12 +32,14 @@ solcjs --include-path $SOLIDITY_DIR/node_modules/ --base-path $SOLIDITY_DIR --ab
 solcjs --include-path $SOLIDITY_DIR/node_modules/ --base-path $SOLIDITY_DIR --abi $SOLIDITY_DIR/contracts/Bridge.sol -o $SOLIDITY_DIR/tmp
 solcjs --include-path $SOLIDITY_DIR/node_modules/ --base-path $SOLIDITY_DIR --abi $SOLIDITY_DIR/node_modules/@openzeppelin/contracts/token/ERC20/presets/ERC20PresetMinterPauser.sol -o $SOLIDITY_DIR/tmp
 solcjs --include-path $SOLIDITY_DIR/node_modules/ --base-path $SOLIDITY_DIR --abi $SOLIDITY_DIR/contracts/handlers/ERC20Handler.sol -o $SOLIDITY_DIR/tmp
+solcjs --include-path $SOLIDITY_DIR/node_modules/ --base-path $SOLIDITY_DIR --abi $CONTRACT_DIR/BasicFeeHandler.sol -o $SOLIDITY_DIR/tmp
 
 # generate bin
 solcjs --include-path $SOLIDITY_DIR/node_modules/ --base-path $SOLIDITY_DIR --bin $CONTRACT_DIR/FeeHandlerWithOracle.sol -o $SOLIDITY_DIR/tmp
 solcjs --include-path $SOLIDITY_DIR/node_modules/ --base-path $SOLIDITY_DIR --bin $SOLIDITY_DIR/contracts/Bridge.sol -o $SOLIDITY_DIR/tmp
 solcjs --include-path $SOLIDITY_DIR/node_modules/ --base-path $SOLIDITY_DIR --bin $SOLIDITY_DIR/node_modules/@openzeppelin/contracts/token/ERC20/presets/ERC20PresetMinterPauser.sol -o $SOLIDITY_DIR/tmp
 solcjs --include-path $SOLIDITY_DIR/node_modules/ --base-path $SOLIDITY_DIR --bin $SOLIDITY_DIR/contracts/handlers/ERC20Handler.sol -o $SOLIDITY_DIR/tmp
+solcjs --include-path $SOLIDITY_DIR/node_modules/ --base-path $SOLIDITY_DIR --bin $CONTRACT_DIR/BasicFeeHandler.sol -o $SOLIDITY_DIR/tmp
 
 # download and extract abigen
 ABIGEN_EXISTS=false
@@ -68,6 +71,9 @@ if [ $ABIGEN_EXISTS = false ]; then
   $E2E_TEST_DIR/abigen --bin=$SOLIDITY_DIR/tmp/contracts_handlers_fee_FeeHandlerWithOracle_sol_FeeHandlerWithOracle.bin \
     --abi=$SOLIDITY_DIR/tmp/contracts_handlers_fee_FeeHandlerWithOracle_sol_FeeHandlerWithOracle.abi \
     --pkg=feeHandler --out=$E2E_TEST_DIR/feeHandler/feeHandler.go
+  $E2E_TEST_DIR/abigen --bin=$SOLIDITY_DIR/tmp/contracts_handlers_fee_BasicFeeHandler_sol_BasicFeeHandler.bin \
+    --abi=$SOLIDITY_DIR/tmp/contracts_handlers_fee_BasicFeeHandler_sol_BasicFeeHandler.abi \
+    --pkg=basicFeeHandler --out=$E2E_TEST_DIR/basicFeeHandler/basicFeeHandler.go
   $E2E_TEST_DIR/abigen --bin=$SOLIDITY_DIR/tmp/contracts_Bridge_sol_Bridge.bin \
     --abi=$SOLIDITY_DIR/tmp/contracts_Bridge_sol_Bridge.abi \
     --pkg=bridge --out=$E2E_TEST_DIR/bridge/bridge.go
@@ -81,6 +87,9 @@ else
   abigen --bin=$SOLIDITY_DIR/tmp/contracts_handlers_fee_FeeHandlerWithOracle_sol_FeeHandlerWithOracle.bin \
     --abi=$SOLIDITY_DIR/tmp/contracts_handlers_fee_FeeHandlerWithOracle_sol_FeeHandlerWithOracle.abi \
     --pkg=feeHandler --out=$E2E_TEST_DIR/feeHandler/feeHandler.go
+  abigen --bin=$SOLIDITY_DIR/tmp/contracts_handlers_fee_BasicFeeHandler_sol_BasicFeeHandler.bin \
+      --abi=$SOLIDITY_DIR/tmp/contracts_handlers_fee_BasicFeeHandler_sol_BasicFeeHandler.abi \
+      --pkg=basicFeeHandler --out=$E2E_TEST_DIR/basicFeeHandler/basicFeeHandler.go
   abigen --bin=$SOLIDITY_DIR/tmp/contracts_Bridge_sol_Bridge.bin \
     --abi=$SOLIDITY_DIR/tmp/contracts_Bridge_sol_Bridge.abi \
     --pkg=bridge --out=$E2E_TEST_DIR/bridge/bridge.go

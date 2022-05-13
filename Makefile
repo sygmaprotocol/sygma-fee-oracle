@@ -36,7 +36,7 @@ e2e-test: install
 	./scripts/prepare_test_data.sh
 	./scripts/start.sh
 	./scripts/start_ganache.sh true
-	./scripts/e2e_testing.sh viatrix/fee-handler
+	./scripts/e2e_testing.sh master
 
 ## license: Adds license header to missing files.
 license:
