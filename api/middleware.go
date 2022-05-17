@@ -27,7 +27,10 @@ func RouterSetup(ginInstance *gin.Engine, identity *identity.OracleIdentityOpera
 	// global scope middleware
 	ginInstance.Use(gin.Recovery(), corsSetup)
 
-	// router path register
+	// root router register
+	rootRouters := ginInstance.Group("/")
+
+	// v1 router path register
 	v1 := ginInstance.Group("/v1")
 	v1Rate := v1.Group("/rate")
 
@@ -38,6 +41,7 @@ func RouterSetup(ginInstance *gin.Engine, identity *identity.OracleIdentityOpera
 	v1routers := make(map[string]*gin.RouterGroup)
 	v1routers["rate"] = v1Rate
 
+	AddRouterPathsRoot(rootRouters, apiHandlerV1, log)
 	AddRouterPathsV1(v1routers, apiHandlerV1, log)
 }
 
