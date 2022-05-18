@@ -4,13 +4,10 @@
 name: Deploy ECS
 
 on:
-  workflow_run:
-    workflows:
-      - build
+  push:
     branches:
       - main
-    types:
-      - completed
+      - devops/ecs-healthcheck
 
 env:
   AWS_REGION: "us-east-2"
