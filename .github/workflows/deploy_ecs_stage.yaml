@@ -7,7 +7,6 @@ on:
   push:
     branches:
       - main
-      - devops/ecs-healthcheck
 
 env:
   AWS_REGION: "us-east-2"
