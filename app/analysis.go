@@ -3,11 +3,14 @@
 
 package app
 
-import "net/http"
+import (
+	"github.com/ChainSafe/chainbridge-fee-oracle/config"
+	"net/http"
+)
 import _ "net/http/pprof" // #nosec
 
 func (a *FeeOracleApp) goroutineMemoryLeakChecker() {
-	if a.base.GetEnv() != AppEvmProd {
+	if a.base.GetEnv() != config.AppEvmProd {
 		go func() {
 			a.base.GetLogger().Info(http.ListenAndServe("localhost:6060", nil))
 		}()

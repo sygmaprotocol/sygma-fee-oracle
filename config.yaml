@@ -14,7 +14,7 @@ http_server:
 
 # time in second before server shutdown
 # this will allow server to finish running jobs before shutdown
-finish_up_time: 3
+finish_up_time: 10
 
 # internal scheduled cronjob
 cron_job:

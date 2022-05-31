@@ -13,7 +13,7 @@ get-lint:
 	fi;
 
 lint: get-lint
-	./bin/golangci-lint run ./... --skip-dirs e2e --timeout 5m0s
+	golangci-lint run ./... --skip-dirs e2e --timeout 5m0s
 
 check:
 	gosec -exclude-dir=e2e ./...

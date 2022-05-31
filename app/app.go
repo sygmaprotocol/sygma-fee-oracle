@@ -22,11 +22,6 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-var (
-	AppEvmDev  = "dev"
-	AppEvmProd = "production"
-)
-
 type FeeOracleApp struct {
 	base *base.FeeOracleAppBase
 
@@ -89,6 +84,7 @@ func NewFeeOracleApp(appBase *base.FeeOracleAppBase) *FeeOracleApp {
 		appTerminationChecker: sync.WaitGroup{},
 	}
 
+	app.base.GetLogger().Infof("running in: %s", appBase.GetEnv())
 	app.base.GetLogger().Info("fee oracle app init success")
 
 	return app
@@ -111,6 +107,8 @@ func (a *FeeOracleApp) startHttpServer() {
 	go func() {
 		api.RouterSetup(a.ginInstance, a.identity, a.consensus, a.gasPriceStore, a.conversionRateStore, a.base.GetConfig(), a.log)
 
+		a.base.GetLogger().Infof("http server starts on port %s ", a.base.GetConfig().HttpServerConfig().Port)
+		a.base.GetLogger().Infof("http server mode: %s ", a.base.GetConfig().HttpServerConfig().Mode)
 		err := a.ginInstance.Run(a.base.GetConfig().HttpServerConfig().Port)
 		if err != nil {
 			a.base.GetLogger().Fatal("http server start error ", err)

@@ -165,6 +165,23 @@ if no keyfile exists in `./` dir, fee oracle will auto generate a `secp256k1` ke
 This will start fee oracle service, ganache-cli locally, install `solcjs`, `abigen` and generate contract go binding code, deploy fee handler contracts to local ganache.  
 `$ make e2e-test`
 
+# EVN Params
+Fee oracle loads important configs and prikey from files in CLI flags; however, the following EVN params will suppress CLI flags if provided.  
+```text
+IDENTITY_KEY=                                                // fee oracle prikey in hex, without 0x prefix 
+IDENTITY_KEY_TYPE=secp256k1                                  // fee oracle prikey type, only support secp256k1 for now
+WORKING_ENV=production                                       // fee oracle app running mode: dev or production
+LOG_LEVEL=4                                                  // log level, 4 is info, 5 is debug, using 4 on production
+HTTP_SERVER_MODE=release                                     // fee oracle http server running mode: debug or release
+HTTP_SERVER_PORT=8091                                        // fee oracle http server exposed port
+CONVERSION_RATE_JOB_FREQUENCY="* * * * *"                    // conversion rate job frequency, using cron schedule expressions(https://crontab.guru)
+GAS_PRICE_JOB_FREQUENCY="* * * * *"                          // gas price job frequency, using cron schedule expressions(https://crontab.guru)
+ETHERSCAN_API_KEY=                                           // api key of etherscan
+POLYGONSCAN_API_KEY=                                         // api key of polygonscan
+COINMARKETCAP_API_KEY=                                       // api key of coinmarketcap
+DATA_VALID_INTERVAL=3600                                     // Time of valid fee oracle response data in seconds     
+```
+
 # API Documentation
 [Swagger API Doc](https://app.swaggerhub.com/apis-docs/cb-fee-oracle/fee-oracle/1.0.0)
 

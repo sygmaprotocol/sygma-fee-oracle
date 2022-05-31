@@ -4,8 +4,12 @@
 package config
 
 import (
-	"errors"
+	"encoding/hex"
+	"github.com/pkg/errors"
+
 	"io/ioutil"
+	"os"
+	"strconv"
 
 	"github.com/ChainSafe/chainbridge-fee-oracle/identity"
 	"github.com/ChainSafe/chainbridge-fee-oracle/identity/secp256k1"
@@ -17,6 +21,13 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
+)
+
+type AppEvm string
+
+var (
+	AppEvmDev  AppEvm = "dev"
+	AppEvmProd AppEvm = "production"
 )
 
 type Config struct {
@@ -105,23 +116,57 @@ type apiUrls struct {
 	QueryRate      string `mapstructure:"query_rate"`
 }
 
-func (c *Config) logLevel() logrus.Level {
-	return c.config.LogLevel
+func (c *Config) logLevel() (logrus.Level, error) {
+	logLvl := os.Getenv("LOG_LEVEL")
+	if logLvl == "" {
+		return c.config.LogLevel, nil
+	}
+
+	lvl, err := strconv.ParseUint(logLvl, 10, 64)
+	if err != nil {
+		return logrus.InfoLevel, err
+	}
+
+	return logrus.Level(lvl), nil
 }
 
-func (c *Config) WorkingEnvConfig() string {
-	return c.config.Env
+func (c *Config) WorkingEnvConfig() AppEvm {
+	env := os.Getenv("WORKING_ENV")
+	if env == "" {
+		env = c.config.Env
+	}
+
+	switch env {
+	case "dev":
+		return AppEvmDev
+	case "production":
+		return AppEvmProd
+	default:
+		return AppEvmDev
+	}
 }
 
 func (c *Config) PrepareHttpServer() *gin.Engine {
-	gin.SetMode(c.config.HttpServer.Mode)
+	gin.SetMode(c.HttpServerConfig().Mode)
 	instance := gin.New()
 
 	return instance
 }
 
 func (c *Config) HttpServerConfig() httpServerConfig {
-	return c.config.HttpServer
+	httpConfig := c.config.HttpServer
+
+	serverMode := os.Getenv("HTTP_SERVER_MODE")
+	serverPort := os.Getenv("HTTP_SERVER_PORT")
+
+	if serverMode != "" {
+		httpConfig.Mode = serverMode
+	}
+	if serverPort != "" {
+		httpConfig.Port = ":" + serverPort
+	}
+
+	return httpConfig
 }
 
 func (c *Config) FinishUpTimeConfig() int64 {
@@ -129,11 +174,39 @@ func (c *Config) FinishUpTimeConfig() int64 {
 }
 
 func (c *Config) OracleConfig() oracle {
-	return c.config.Oracle
+	oracleConfig := c.config.Oracle
+
+	etherscanAPIKey := os.Getenv("ETHERSCAN_API_KEY")
+	polygonscanAPIKey := os.Getenv("POLYGONSCAN_API_KEY")
+	coinMarketCapAPIKey := os.Getenv("COINMARKETCAP_API_KEY")
+
+	if etherscanAPIKey != "" {
+		oracleConfig.Etherscan.ApiKey = etherscanAPIKey
+	}
+	if polygonscanAPIKey != "" {
+		oracleConfig.Polygonscan.ApiKey = polygonscanAPIKey
+	}
+	if coinMarketCapAPIKey != "" {
+		oracleConfig.CoinMarketCap.ApiKey = coinMarketCapAPIKey
+	}
+
+	return oracleConfig
 }
 
 func (c *Config) CronJobConfig() cronJobConfig {
-	return c.config.CronJob
+	cronjobConfig := c.config.CronJob
+
+	conversionRateJobFrequency := os.Getenv("CONVERSION_RATE_JOB_FREQUENCY")
+	gasPriceJobFrequency := os.Getenv("GAS_PRICE_JOB_FREQUENCY")
+
+	if conversionRateJobFrequency != "" {
+		cronjobConfig.UpdateConversionRateJob.CheckFrequency = conversionRateJobFrequency
+	}
+	if gasPriceJobFrequency != "" {
+		cronjobConfig.UpdateGasPriceJob.CheckFrequency = gasPriceJobFrequency
+	}
+
+	return cronjobConfig
 }
 
 func (c *Config) StoreConfig() store {
@@ -169,6 +242,18 @@ func (c *Config) ConversionRatePairsChecker() error {
 
 func (c *Config) StrategyConfig() strategyConfig {
 	return c.config.Strategy
+}
+
+func (c *Config) dataValidIntervalConfigLoad() int64 {
+	dataValidInterval := os.Getenv("DATA_VALID_INTERVAL")
+	if dataValidInterval != "" {
+		i, err := strconv.ParseUint(dataValidInterval, 10, 64)
+		if err != nil {
+			panic(ErrLoadConfig.Wrap(errors.Wrap(err, "invalid DATA_VALID_INTERVAL from env param")))
+		}
+		return int64(i)
+	}
+	return c.config.DataValidInterval
 }
 
 func (c *Config) DataValidIntervalConfig() int64 {
@@ -210,19 +295,55 @@ func LoadConfig(configPath, domainConfigPath, resourceConfigPath string) (*Confi
 		panic(ErrLoadConfig.Wrap(err))
 	}
 	log := logrus.New()
-	log.SetLevel(conf.logLevel())
+	logLvl, err := conf.logLevel()
+	if err != nil {
+		panic(ErrLoadConfig.Wrap(err))
+	}
+	log.SetLevel(logLvl)
 
 	// load domains and resources
 	conf.config.Domains = loadDomains(domainConfigPath)
 	conf.config.Resources = loadResources(resourceConfigPath, conf.config.Domains)
 
+	// load data valid interval
+	conf.config.DataValidInterval = conf.dataValidIntervalConfigLoad()
+
 	return conf, log
 }
 
-func LoadOracleIdentityKey(keyPath, keyType string) (identity.Keypair, error) {
+func LoadOracleIdentityKeyFromFile(keyPath string) ([]byte, error) {
 	privBytes, err := ioutil.ReadFile(filepath.Clean(keyPath))
 	if err != nil {
 		return nil, err
+	}
+
+	return privBytes, nil
+}
+
+func LoadOracleIdentityKeyFromEvn() (string, string) {
+	evnKey := os.Getenv("IDENTITY_KEY")
+	evnKeyType := os.Getenv("IDENTITY_KEY_TYPE")
+
+	return evnKey, evnKeyType
+}
+
+func LoadOracleIdentityKey(keyPath, keyType string) (identity.Keypair, error) {
+	var privBytes []byte
+	var err error
+
+	// load key from EVN params first, if not found, load from given key path
+	evnKey, envKeyType := LoadOracleIdentityKeyFromEvn()
+	if evnKey != "" && envKeyType != "" {
+		keyType = envKeyType
+		privBytes, err = hex.DecodeString(evnKey)
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		privBytes, err = LoadOracleIdentityKeyFromFile(keyPath)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	switch strings.ToLower(keyType) {

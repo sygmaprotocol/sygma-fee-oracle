@@ -5,7 +5,6 @@ package base
 
 import (
 	"fmt"
-
 	"github.com/ChainSafe/chainbridge-fee-oracle/config"
 	"github.com/ChainSafe/chainbridge-fee-oracle/identity"
 	"github.com/ChainSafe/chainbridge-fee-oracle/store"
@@ -20,16 +19,17 @@ type FeeOracleAppBase struct {
 	store          store.Store
 	oracleIdentity identity.Keypair
 
-	envInUse string
+	env config.AppEvm
 }
 
 func NewFeeOracleAppBase(configPath, domainConfigPath, resourceConfigPath, keyPath, keyType string) *FeeOracleAppBase {
 	conf, logger := config.LoadConfig(configPath, domainConfigPath, resourceConfigPath)
+	logger.Infof("log level: %s", logger.Level)
 
 	base := &FeeOracleAppBase{
-		log:      logger.WithField("base", "base"),
-		conf:     conf,
-		envInUse: conf.WorkingEnvConfig(),
+		log:  logger.WithField("base", "base"),
+		conf: conf,
+		env:  conf.WorkingEnvConfig(),
 	}
 
 	base.initKeyPair(keyPath, keyType)
@@ -47,8 +47,8 @@ func (a *FeeOracleAppBase) GetLogger() *logrus.Entry {
 	return a.log
 }
 
-func (a *FeeOracleAppBase) GetEnv() string {
-	return a.envInUse
+func (a *FeeOracleAppBase) GetEnv() config.AppEvm {
+	return a.env
 }
 
 func (a *FeeOracleAppBase) GetStore() store.Store {
@@ -65,7 +65,7 @@ func (a *FeeOracleAppBase) initKeyPair(keyPath, keyType string) {
 		panic(fmt.Sprintf("failed to load key config: %s", err))
 	}
 
-	a.log.Infof("fee oracle indentity address is %s\n", kp.Address())
+	a.log.Infof("fee oracle indentity address: %s\n", kp.Address())
 
 	a.oracleIdentity = kp
 }
