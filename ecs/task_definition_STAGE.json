@@ -43,7 +43,7 @@
         "secrets": [ 
            { 
               "name": "mychainbridgesecret",
-              "valueFrom": "/chainbridge/example"
+              "valueFrom": "arn:aws:ssm:us-east-2:852551629426:parameter/chainbridge/example"
            }
         ]
      },
@@ -84,13 +84,13 @@
           {
               "name": "ECS_FARGATE",
               "value": "true"
+          },
+          {
+            "name": "ENV",
+            "value": "STAGE"
           }
       ],
       "secrets": [
-          {
-              "name": "ENV",
-              "value": "STAGE"
-          },
           {
               "name": "DD_API_KEY",
               "valueFrom": "arn:aws:ssm:us-east-2:852551629426:parameter/common/datadog/key"
@@ -113,7 +113,7 @@
           "logDriver": "awslogs",
           "options": {
               "awslogs-group": "/ecs/fee-oracle-STAGE",
-              "awslogs-region": "${log_region}",
+              "awslogs-region": "us-east-2",
               "awslogs-stream-prefix": "ecs"
           }
       },
