@@ -4,13 +4,18 @@
 name: Deploy ECS
 
 on:
-  workflow_run:
-    workflows:
-      - build
+  push:
     branches:
-      - main
-    types:
-      - completed
+      - devops/add-datadog
+
+# on:
+#   workflow_run:
+#     workflows:
+#       - build
+#     branches:
+#       - main
+#     types:
+#       - completed
 
 env:
   AWS_REGION: "us-east-2"
