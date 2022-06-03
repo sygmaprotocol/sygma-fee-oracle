@@ -31,10 +31,6 @@
            }
         ],
         "environment": [
-         {
-            "name": "example",
-            "value": "setanenv"
-          },
           {
             "value": "fee-oracle",
             "name": "DD_SERVICE"
@@ -55,7 +51,7 @@
           "logDriver": "awslogs",
           "options": {
               "awslogs-group": "/ecs/fee-oracle-STAGE",
-              "awslogs-region": "us-east-1",
+              "awslogs-region": "us-east-2",
               "awslogs-stream-prefix": "ecs"
           }
       },
