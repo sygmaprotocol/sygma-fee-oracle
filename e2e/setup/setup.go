@@ -54,7 +54,7 @@ func ContractsSetup() *ContractsSetupResp {
 	auth := getAccountAuth(client, FeeOracleHexPriKey)
 
 	// preparation - deploying contracts
-	bridgeAddress, _, bridgeInstance, err := bridge.DeployBridge(auth, client, uint8(FromDomainId), nil, big.NewInt(0), big.NewInt(100))
+	bridgeAddress, _, bridgeInstance, err := bridge.DeployBridge(auth, client, uint8(FromDomainId))
 	if err != nil {
 		panic(err)
 	}

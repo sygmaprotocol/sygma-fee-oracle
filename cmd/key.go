@@ -78,7 +78,7 @@ func secp256k1KeyGenerator(keyPath string) string {
 	if err != nil {
 		panic(err)
 	}
-	err = os.WriteFile(keyPath, crypto.FromECDSA(priv), 0666)
+	err = os.WriteFile(keyPath, crypto.FromECDSA(priv), 0600)
 	if err != nil {
 		panic(err)
 	}
