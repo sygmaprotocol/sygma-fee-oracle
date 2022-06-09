@@ -179,7 +179,8 @@ GAS_PRICE_JOB_FREQUENCY="* * * * *"                          // gas price job fr
 ETHERSCAN_API_KEY=                                           // api key of etherscan
 POLYGONSCAN_API_KEY=                                         // api key of polygonscan
 COINMARKETCAP_API_KEY=                                       // api key of coinmarketcap
-DATA_VALID_INTERVAL=3600                                     // Time of valid fee oracle response data in seconds     
+DATA_VALID_INTERVAL=3600                                     // Time of valid fee oracle response data in seconds
+CONVERSION_RATE_PAIRS=eth,usdt,matic,usdt                    // conversion rate pairs that enabled for price fetching. Must be paired
 ```
 
 # API Documentation

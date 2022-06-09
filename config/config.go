@@ -237,11 +237,26 @@ func (c *Config) ConversionRatePairsChecker() error {
 	if len(c.config.ConversionRatePairs)%2 != 0 {
 		return errors.New("conversion_rate_pairs is invalid, must be pairs")
 	}
+	for _, e := range c.config.ConversionRatePairs {
+		if e == "" {
+			return errors.New("conversion_rate_pairs is invalid, element of pair is empty")
+		}
+	}
+
 	return nil
 }
 
 func (c *Config) StrategyConfig() strategyConfig {
 	return c.config.Strategy
+}
+
+func (c *Config) conversionRatePairsConfigLoad() []string {
+	conversionRatePairs := os.Getenv("CONVERSION_RATE_PAIRS")
+	if conversionRatePairs != "" {
+		return strings.Split(conversionRatePairs, ",")
+	}
+
+	return c.config.ConversionRatePairs
 }
 
 func (c *Config) dataValidIntervalConfigLoad() int64 {
@@ -307,6 +322,8 @@ func LoadConfig(configPath, domainConfigPath, resourceConfigPath string) (*Confi
 
 	// load data valid interval
 	conf.config.DataValidInterval = conf.dataValidIntervalConfigLoad()
+	// load conversion price pair
+	conf.config.ConversionRatePairs = conf.conversionRatePairsConfigLoad()
 
 	return conf, log
 }
