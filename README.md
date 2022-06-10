@@ -167,6 +167,7 @@ This will start fee oracle service, ganache-cli locally, install `solcjs`, `abig
 
 # EVN Params
 Fee oracle loads important configs and prikey from files in CLI flags; however, the following EVN params will suppress CLI flags if provided.  
+Note: if `REMOTE_PARAM_OPERATOR_ENABLE` is set to `true`, valid credentials of the remote service must be setup.
 ```text
 IDENTITY_KEY=                                                // fee oracle prikey in hex, without 0x prefix 
 IDENTITY_KEY_TYPE=secp256k1                                  // fee oracle prikey type, only support secp256k1 for now
@@ -181,6 +182,7 @@ POLYGONSCAN_API_KEY=                                         // api key of polyg
 COINMARKETCAP_API_KEY=                                       // api key of coinmarketcap
 DATA_VALID_INTERVAL=3600                                     // Time of valid fee oracle response data in seconds
 CONVERSION_RATE_PAIRS=eth,usdt,matic,usdt                    // conversion rate pairs that enabled for price fetching. Must be paired
+REMOTE_PARAM_OPERATOR_ENABLE=true                            // enable remote param operator, only enable this when deploying to remote environment like staging or prod
 ```
 
 # API Documentation

@@ -41,28 +41,31 @@ func newResource(tokenAddress string, decimal int, symbol string, domain domain)
 
 // loadResources registers and load all pre-defined resources
 func loadResources(resourceConfigPath string, domains map[int]domain) map[string]resource {
-	resources := make(map[string]resource, 0)
-
 	resourceData, err := ioutil.ReadFile(filepath.Clean(resourceConfigPath))
 	if err != nil {
 		panic(ErrLoadResourceConfig.Wrap(err))
 	}
 
+	return parseResources(resourceData, domains)
+}
+
+// ResourceIDBuilder builds the resourceID according to fee handler contract
+func ResourceIDBuilder(tokenAddress string, domainId int) string {
+	return fmt.Sprintf("%s%d", strings.ToLower(tokenAddress), domainId)
+}
+
+func parseResources(resourceData []byte, domains map[int]domain) map[string]resource {
 	var content resourceConfigFile
-	err = json.Unmarshal(resourceData, &content)
+	err := json.Unmarshal(resourceData, &content)
 	if err != nil {
 		panic(ErrLoadResourceConfig.Wrap(err))
 	}
 
+	resources := make(map[string]resource, 0)
 	for _, resource := range content.Resources {
 		resources[ResourceIDBuilder(resource.TokenAddress, resource.DomainId)] =
 			*newResource(strings.ToLower(resource.TokenAddress), resource.Decimal, resource.Symbol, domains[resource.DomainId])
 	}
 
 	return resources
-}
-
-// ResourceIDBuilder builds the resourceID according to fee handler contract
-func ResourceIDBuilder(tokenAddress string, domainId int) string {
-	return fmt.Sprintf("%s%d", strings.ToLower(tokenAddress), domainId)
 }

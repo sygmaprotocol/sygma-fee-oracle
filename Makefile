@@ -24,6 +24,7 @@ start: install
 genmocks:
 	mockgen -destination=./store/mock/store.go -source=./store/store.go
 	mockgen -destination=./oracle/mock/oracle.go github.com/ChainSafe/chainbridge-fee-oracle/oracle GasPriceOracle,ConversionRateOracle
+	mockgen -destination=./config/mock/remoteParamOperator.go -source=./remoteParam/base.go
 
 test:
 	go clean -testcache

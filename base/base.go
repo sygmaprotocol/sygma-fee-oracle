@@ -5,8 +5,12 @@ package base
 
 import (
 	"fmt"
+	"os"
+
 	"github.com/ChainSafe/chainbridge-fee-oracle/config"
 	"github.com/ChainSafe/chainbridge-fee-oracle/identity"
+	"github.com/ChainSafe/chainbridge-fee-oracle/remoteParam"
+	paramFetcherAws "github.com/ChainSafe/chainbridge-fee-oracle/remoteParam/aws"
 	"github.com/ChainSafe/chainbridge-fee-oracle/store"
 	"github.com/ChainSafe/chainbridge-fee-oracle/store/db"
 	"github.com/sirupsen/logrus"
@@ -18,6 +22,8 @@ type FeeOracleAppBase struct {
 
 	store          store.Store
 	oracleIdentity identity.Keypair
+
+	remoteParamOperator remoteParam.RemoteParamOperator
 
 	env config.AppEvm
 }
@@ -34,6 +40,9 @@ func NewFeeOracleAppBase(configPath, domainConfigPath, resourceConfigPath, keyPa
 
 	base.initKeyPair(keyPath, keyType)
 	base.initStore()
+	base.initRemoteParamStore()
+
+	base.conf.SetRemoteParams(base.remoteParamOperator)
 
 	base.verifyBase()
 	return base
@@ -77,6 +86,17 @@ func (a *FeeOracleAppBase) initStore() {
 	}
 
 	a.store = storeDB
+}
+
+func (a *FeeOracleAppBase) initRemoteParamStore() {
+	remoteParamFlag := os.Getenv("REMOTE_PARAM_OPERATOR_ENABLE")
+	if remoteParamFlag != "true" {
+		a.log.Warn("remote param operator is disabled")
+		return
+	}
+
+	aws := paramFetcherAws.NewAWSClient()
+	a.remoteParamOperator = paramFetcherAws.NewSSMClient(*aws)
 }
 
 // verifyBase preforms all essential checks for the app base

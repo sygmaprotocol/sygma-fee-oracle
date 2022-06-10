@@ -5,6 +5,7 @@ package config
 
 import (
 	"encoding/hex"
+	"github.com/ChainSafe/chainbridge-fee-oracle/remoteParam"
 	"github.com/pkg/errors"
 
 	"io/ioutil"
@@ -28,6 +29,9 @@ type AppEvm string
 var (
 	AppEvmDev  AppEvm = "dev"
 	AppEvmProd AppEvm = "production"
+
+	remoteparamDomaindata   = "/chainbridge/fee-oracle/domainData"
+	remoteparamResourcedata = "/chainbridge/fee-oracle/resourceData"
 )
 
 type Config struct {
@@ -217,12 +221,20 @@ func (c *Config) GasPriceDomainsConfig() []string {
 	return c.config.GasPriceDomains
 }
 
+func (c *Config) setDomains(domainData string) {
+	c.config.Domains = parseDomains([]byte(domainData))
+}
+
 func (c *Config) GetRegisteredDomains(domainId int) *domain {
 	d, ok := c.config.Domains[domainId]
 	if !ok {
 		return nil
 	}
 	return &d
+}
+
+func (c *Config) setResources(resourceData string) {
+	c.config.Resources = parseResources([]byte(resourceData), c.config.Domains)
 }
 
 func (c *Config) GetRegisteredResources(resourceId string) *resource {
@@ -287,6 +299,39 @@ func (c *Config) ConversionRatePairsConfig() [][]string {
 	}
 
 	return pricePairs
+}
+
+func (c *Config) remoteParamsLoad(operator remoteParam.RemoteParamOperator, paramName string) (string, error) {
+	out, err := operator.LoadParameter(paramName)
+	if err != nil {
+		return "", errors.Wrapf(err, "failed to load given param: %s", paramName)
+	}
+
+	return out.Value, nil
+}
+
+// SetRemoteParams fetches the remote params and override the local ones
+// only call this func when init app base
+func (c *Config) SetRemoteParams(operator remoteParam.RemoteParamOperator) {
+	if operator == nil {
+		return
+	}
+
+	domains, err := c.remoteParamsLoad(operator, remoteparamDomaindata)
+	if err != nil {
+		panic(err)
+	}
+	if domains != "" {
+		c.setDomains(domains)
+	}
+
+	resources, err := c.remoteParamsLoad(operator, remoteparamResourcedata)
+	if err != nil {
+		panic(err)
+	}
+	if resources != "" {
+		c.setResources(resources)
+	}
 }
 
 func (c *Config) EssentialConfigCheck() error {

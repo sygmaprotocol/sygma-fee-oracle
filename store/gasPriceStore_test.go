@@ -139,8 +139,6 @@ func (s *GasPriceStoreTestSuite) TestGetGasPriceByDomain_Success() {
 	s.Nil(err)
 	re = append(re, dataReceiverInterface)
 
-	fmt.Println(re)
-
 	var dataReceiver *types.GasPrices
 	s.db.EXPECT().GetByPrefix([]byte("gasprice:"), dataReceiver).Return(re, nil)
 
