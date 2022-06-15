@@ -30,8 +30,8 @@ var (
 	AppEvmDev  AppEvm = "dev"
 	AppEvmProd AppEvm = "production"
 
-	remoteparamDomaindata   = "/chainbridge/fee-oracle/domainData"
-	remoteparamResourcedata = "/chainbridge/fee-oracle/resourceData"
+	remoteParamDomainData   = "/chainbridge/fee-oracle/domainData"
+	remoteParamResourceData = "/chainbridge/fee-oracle/resourceData"
 )
 
 type Config struct {
@@ -317,7 +317,7 @@ func (c *Config) SetRemoteParams(operator remoteParam.RemoteParamOperator) {
 		return
 	}
 
-	domains, err := c.remoteParamsLoad(operator, remoteparamDomaindata)
+	domains, err := c.remoteParamsLoad(operator, remoteParamDomainData)
 	if err != nil {
 		panic(err)
 	}
@@ -325,7 +325,7 @@ func (c *Config) SetRemoteParams(operator remoteParam.RemoteParamOperator) {
 		c.setDomains(domains)
 	}
 
-	resources, err := c.remoteParamsLoad(operator, remoteparamResourcedata)
+	resources, err := c.remoteParamsLoad(operator, remoteParamResourceData)
 	if err != nil {
 		panic(err)
 	}
