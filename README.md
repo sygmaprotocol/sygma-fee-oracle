@@ -169,6 +169,7 @@ This will start fee oracle service, ganache-cli locally, install `solcjs`, `abig
 Fee oracle loads important configs and prikey from files in CLI flags; however, the following EVN params will suppress CLI flags if provided.  
 Note: if `REMOTE_PARAM_OPERATOR_ENABLE` is set to `true`, valid credentials of the remote service must be setup.
 ```text
+APP_MODE=release                                             // app mode: debug or release. app mode is used for internal testing only.
 IDENTITY_KEY=                                                // fee oracle prikey in hex, without 0x prefix 
 IDENTITY_KEY_TYPE=secp256k1                                  // fee oracle prikey type, only support secp256k1 for now
 WORKING_ENV=production                                       // fee oracle app running mode: dev or production

@@ -1,6 +1,9 @@
 # Copyright 2021 ChainSafe Systems
 # SPDX-License-Identifier: LGPL-3.0-only
 
+# app mode: debug, release
+app_mode: release
+
 # env
 env: dev # dev, production
 

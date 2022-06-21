@@ -36,6 +36,10 @@
             "value": "fee-oracle"
           },
           {
+            "name": "APP_MODE",
+            "value": "release"
+          },
+          {
             "name": "WORKING_ENV",
             "value": "dev"
           },

@@ -25,6 +25,8 @@ import (
 type FeeOracleApp struct {
 	base *base.FeeOracleAppBase
 
+	appMode config.AppMode
+
 	log *logrus.Entry
 
 	ginInstance *gin.Engine // Gin engine with http server instance
@@ -70,6 +72,7 @@ func NewFeeOracleApp(appBase *base.FeeOracleAppBase) *FeeOracleApp {
 	oracleIdentity := identity.NewOracleIdentityOperator(appBase.GetOracleIdentity())
 
 	app := &FeeOracleApp{
+		appMode:               appBase.GetConfig().AppModeConfig(),
 		base:                  appBase,
 		log:                   appBase.GetLogger().WithField("app", "app"),
 		ginInstance:           appBase.GetConfig().PrepareHttpServer(),
@@ -85,6 +88,7 @@ func NewFeeOracleApp(appBase *base.FeeOracleAppBase) *FeeOracleApp {
 	}
 
 	app.base.GetLogger().Infof("running in: %s", appBase.GetEnv())
+	app.base.GetLogger().Infof("running mode: %s", app.appMode)
 	app.base.GetLogger().Info("fee oracle app init success")
 
 	return app
@@ -93,7 +97,9 @@ func NewFeeOracleApp(appBase *base.FeeOracleAppBase) *FeeOracleApp {
 func (a *FeeOracleApp) Start() {
 	a.startHttpServer()
 
-	a.startCronJobs()
+	if a.appMode != config.AppModeDebug {
+		a.startCronJobs()
+	}
 
 	a.goroutineMemoryLeakChecker()
 

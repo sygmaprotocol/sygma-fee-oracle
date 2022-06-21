@@ -25,10 +25,14 @@ import (
 )
 
 type AppEvm string
+type AppMode string
 
 var (
 	AppEvmDev  AppEvm = "dev"
 	AppEvmProd AppEvm = "production"
+
+	AppModeRelease AppMode = "release"
+	AppModeDebug   AppMode = "debug"
 
 	remoteParamDomainData   = "/chainbridge/fee-oracle/domainData"
 	remoteParamResourceData = "/chainbridge/fee-oracle/resourceData"
@@ -39,6 +43,8 @@ type Config struct {
 }
 
 type configData struct {
+	AppMode string `mapstructure:"app_mode"`
+
 	Env string `mapstructure:"env"`
 
 	LogLevel logrus.Level `mapstructure:"log_level"`
@@ -147,6 +153,22 @@ func (c *Config) WorkingEnvConfig() AppEvm {
 		return AppEvmProd
 	default:
 		return AppEvmDev
+	}
+}
+
+func (c *Config) AppModeConfig() AppMode {
+	mode := os.Getenv("APP_MODE")
+	if mode == "" {
+		mode = c.config.AppMode
+	}
+
+	switch mode {
+	case "debug":
+		return AppModeDebug
+	case "release":
+		return AppModeRelease
+	default:
+		return AppModeRelease
 	}
 }
 

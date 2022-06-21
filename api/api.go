@@ -37,7 +37,11 @@ type Handler struct {
 func AddRouterPathsV1(v1RouterGroups map[string]*gin.RouterGroup, apiHandler *Handler, log *logrus.Entry) {
 	apiHandler.log = log.WithField("api", "v1")
 
-	v1RouterGroups["rate"].GET("/from/:fromDomainID/to/:toDomainID/token/:address", apiHandler.getRate)
+	if apiHandler.conf.AppModeConfig() == config.AppModeDebug {
+		v1RouterGroups["rate"].GET("/from/:fromDomainID/to/:toDomainID/token/:address", apiHandler.debugGetRate)
+	} else {
+		v1RouterGroups["rate"].GET("/from/:fromDomainID/to/:toDomainID/token/:address", apiHandler.getRate)
+	}
 }
 
 // endpoint: /{version}/rate/from/{fromDomainID}/to/{toDomainID}/token/{address}
@@ -136,6 +140,7 @@ func (h *Handler) getRate(c *gin.Context) {
 		ginErrorReturn(c, http.StatusInternalServerError, newReturnErrorResp(&config.ErrIdentityStampFail, err))
 		return
 	}
+
 	endpointRespData.ResourceID = resourceTokenAddr[len(h.conf.GetRegisteredDomains(fromDomainID).AddressPrefix):] +
 		fmt.Sprintf("%02s", strconv.FormatInt(int64(fromDomainID), 16))
 
