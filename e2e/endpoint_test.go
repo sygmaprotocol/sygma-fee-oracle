@@ -7,12 +7,12 @@ import (
 	"bytes"
 	"encoding/hex"
 	"encoding/json"
+	"fmt"
 	"github.com/ChainSafe/chainbridge-fee-oracle/identity/secp256k1"
 	"github.com/ethereum/go-ethereum/crypto"
 	"io/ioutil"
 	"math/big"
 	"net/http"
-	"strconv"
 	"testing"
 
 	"github.com/ChainSafe/chainbridge-fee-oracle/api"
@@ -74,7 +74,10 @@ func (s *SignatureVerificationTestSuite) TestSignatureVerification_CalculateFee(
 	s.Nil(err)
 
 	finalGasPrice := util.PaddingZero(gasPrice.Bytes(), 32)
-	finalTimestamp := util.PaddingZero([]byte(strconv.FormatInt(response.Response.ExpirationTimestamp, 16)), 32)
+	finalTimestamp := fmt.Sprintf("%064x", response.Response.ExpirationTimestamp)
+	finalTimestampBytes, err := hex.DecodeString(finalTimestamp)
+	s.Nil(err)
+
 	finalFromDomainId := util.PaddingZero([]byte{uint8(response.Response.FromDomainID)}, 32)
 	finalToDomainId := util.PaddingZero([]byte{uint8(response.Response.ToDomainID)}, 32)
 
@@ -90,7 +93,7 @@ func (s *SignatureVerificationTestSuite) TestSignatureVerification_CalculateFee(
 	feeDataMessageByte.Write(finalBaseEffectiveRate)
 	feeDataMessageByte.Write(finalTokenEffectiveRate)
 	feeDataMessageByte.Write(finalGasPrice)
-	feeDataMessageByte.Write(finalTimestamp)
+	feeDataMessageByte.Write(finalTimestampBytes)
 	feeDataMessageByte.Write(finalFromDomainId)
 	feeDataMessageByte.Write(finalToDomainId)
 	feeDataMessageByte.Write(finalResourceId)
