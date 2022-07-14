@@ -1,6 +1,6 @@
-# Chainbridge Fee Oracle
+# Sygma Fee Oracle
 
-Chainbridge fee oracle is a go implemented, centralized service that provides the endpoints to Chainbridge UI
+Sygma fee oracle is a go implemented, centralized service that provides the endpoints to Sygma UI
 for all necessary data related to bridging fee.
 
 # Architecture Overview
@@ -17,7 +17,7 @@ This will clone the main branch of fee oracle codebase to your `workplace` dir a
 `$GOPATH/bin`
 ```
 $ mkdir workplace && cd workplace  
-$ git clone https://github.com/ChainSafe/chainbridge-fee-oracle.git
+$ git clone https://github.com/ChainSafe/Sygma-fee-oracle.git
 $ make install
 ```
 
@@ -32,7 +32,7 @@ Template of the config.yaml can be found in `./config/config.template.yaml`.
 
 ### Domain config file `domain.json`
 This file indicates all the domains the fee oracle needs to fetch data for. Details need to be matched with 
-Chainbridge core configuration, such as `id`.
+Sygma core configuration, such as `id`.
 
 Example:
 ```json
@@ -110,7 +110,7 @@ For general help:`$ chainbridge-fee-oracle -h`
 
 #### `$ chainbridge-fee-oracle server`
 ```
-Start ChainBridge fee oracle main service
+Start Sygma fee oracle main service
 
 Usage:
   chainbridge-fee-oracle server [flags]
@@ -126,7 +126,7 @@ Flags:
 
 #### <a id="keycli"></a>`$ chainbridge-fee-oracle key-generate`
 ```
-Start ChainBridge fee oracle identity key generation
+Start Sygma fee oracle identity key generation
 
 Usage:
   chainbridge-fee-oracle key-generate [flags]
