@@ -7,8 +7,8 @@ import (
 	"bytes"
 	"encoding/hex"
 	"fmt"
-	"github.com/ChainSafe/chainbridge-fee-oracle/config"
-	"github.com/ChainSafe/chainbridge-fee-oracle/util"
+	"github.com/ChainSafe/sygma-fee-oracle/config"
+	"github.com/ChainSafe/sygma-fee-oracle/util"
 	"github.com/pkg/errors"
 )
 

@@ -5,7 +5,7 @@ package api
 
 import (
 	"fmt"
-	"github.com/ChainSafe/chainbridge-fee-oracle/config"
+	"github.com/ChainSafe/sygma-fee-oracle/config"
 	"github.com/gin-gonic/gin"
 	"github.com/pkg/errors"
 	"net/http"

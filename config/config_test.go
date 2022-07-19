@@ -5,10 +5,10 @@ package config_test
 
 import (
 	"errors"
-	"github.com/ChainSafe/chainbridge-fee-oracle/base"
-	"github.com/ChainSafe/chainbridge-fee-oracle/config"
-	mockremoteparam "github.com/ChainSafe/chainbridge-fee-oracle/config/mock"
-	"github.com/ChainSafe/chainbridge-fee-oracle/remoteParam"
+	"github.com/ChainSafe/sygma-fee-oracle/base"
+	"github.com/ChainSafe/sygma-fee-oracle/config"
+	mockremoteparam "github.com/ChainSafe/sygma-fee-oracle/config/mock"
+	"github.com/ChainSafe/sygma-fee-oracle/remoteParam"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/suite"

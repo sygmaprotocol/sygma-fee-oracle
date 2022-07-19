@@ -10,13 +10,13 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/ChainSafe/chainbridge-fee-oracle/types"
+	"github.com/ChainSafe/sygma-fee-oracle/types"
 
-	"github.com/ChainSafe/chainbridge-fee-oracle/config"
+	"github.com/ChainSafe/sygma-fee-oracle/config"
 
-	"github.com/ChainSafe/chainbridge-fee-oracle/consensus"
-	"github.com/ChainSafe/chainbridge-fee-oracle/identity"
-	"github.com/ChainSafe/chainbridge-fee-oracle/store"
+	"github.com/ChainSafe/sygma-fee-oracle/consensus"
+	"github.com/ChainSafe/sygma-fee-oracle/identity"
+	"github.com/ChainSafe/sygma-fee-oracle/store"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
 )

@@ -9,8 +9,8 @@ import (
 	"math"
 	"strconv"
 
-	"github.com/ChainSafe/chainbridge-fee-oracle/store"
-	"github.com/ChainSafe/chainbridge-fee-oracle/types"
+	"github.com/ChainSafe/sygma-fee-oracle/store"
+	"github.com/ChainSafe/sygma-fee-oracle/types"
 )
 
 var _ Strategy = (*Average)(nil)

@@ -1,4 +1,4 @@
-module github.com/ChainSafe/chainbridge-fee-oracle
+module github.com/ChainSafe/sygma-fee-oracle
 
 go 1.17
 

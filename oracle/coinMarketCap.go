@@ -6,15 +6,15 @@ package oracle
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/ChainSafe/chainbridge-fee-oracle/config"
+	"github.com/ChainSafe/sygma-fee-oracle/config"
 	"net/http"
 	"runtime"
 	"strings"
 	"time"
 
-	"github.com/ChainSafe/chainbridge-fee-oracle/oracle/client"
+	"github.com/ChainSafe/sygma-fee-oracle/oracle/client"
 
-	"github.com/ChainSafe/chainbridge-fee-oracle/types"
+	"github.com/ChainSafe/sygma-fee-oracle/types"
 	"github.com/mitchellh/mapstructure"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"

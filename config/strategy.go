@@ -3,7 +3,7 @@
 
 package config
 
-import "github.com/ChainSafe/chainbridge-fee-oracle/consensus/strategy"
+import "github.com/ChainSafe/sygma-fee-oracle/consensus/strategy"
 
 type RegisteredStrategy string
 

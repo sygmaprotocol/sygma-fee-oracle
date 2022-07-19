@@ -10,7 +10,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/ChainSafe/chainbridge-fee-oracle/types"
+	"github.com/ChainSafe/sygma-fee-oracle/types"
 	"github.com/mitchellh/mapstructure"
 	"github.com/syndtr/goleveldb/leveldb"
 )

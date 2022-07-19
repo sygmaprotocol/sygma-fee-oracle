@@ -7,13 +7,14 @@ solidity_branch=$1
 
 E2E_DIR=${PWD}/e2e
 SCRIPT_DIR=${PWD}/scripts
-CONTRACT_DIR=$SCRIPT_DIR/e2e_test/chainbridge-solidity/contracts/handlers/fee
+CONTRACT_DIR=$SCRIPT_DIR/e2e_test/sygma-solidity/contracts/handlers/fee
 E2E_TEST_DIR=$SCRIPT_DIR/e2e_test
-SOLIDITY_DIR=$SCRIPT_DIR/e2e_test/chainbridge-solidity
+SOLIDITY_DIR=$SCRIPT_DIR/e2e_test/sygma-solidity
 
 mkdir -p $E2E_TEST_DIR
 mkdir -p $E2E_TEST_DIR/bridge
 mkdir -p $E2E_TEST_DIR/erc20Handler
+mkdir -p $E2E_TEST_DIR/feeHandlerRouter
 mkdir -p $E2E_TEST_DIR/erc20PresetMinterPauser
 mkdir -p $E2E_TEST_DIR/feeHandler
 mkdir -p $E2E_TEST_DIR/basicFeeHandler
@@ -21,11 +22,12 @@ mkdir -p $E2E_TEST_DIR/centrifugeAsset
 mkdir -p $E2E_TEST_DIR/erc721Handler
 mkdir -p $E2E_TEST_DIR/erc721MinterBurnerPauser
 mkdir -p $E2E_TEST_DIR/genericHandler
+mkdir -p $E2E_TEST_DIR/accessControlSegregator
 
 # clone solidity code and checkout target branch
-git clone --branch $solidity_branch https://github.com/ChainSafe/chainbridge-solidity.git $E2E_TEST_DIR/chainbridge-solidity
+git clone --branch $solidity_branch https://github.com/ChainSafe/sygma-solidity.git $E2E_TEST_DIR/sygma-solidity
 
-# install chainbridge-solidity
+# install sygma-solidity
 npm i --prefix $SOLIDITY_DIR
 
 # install solc with correct version
@@ -41,6 +43,8 @@ solcjs --include-path $SOLIDITY_DIR/node_modules/ --base-path $SOLIDITY_DIR --ab
 solcjs --include-path $SOLIDITY_DIR/node_modules/ --base-path $SOLIDITY_DIR --abi $SOLIDITY_DIR/contracts/handlers/GenericHandler.sol -o $SOLIDITY_DIR/tmp
 solcjs --include-path $SOLIDITY_DIR/node_modules/ --base-path $SOLIDITY_DIR --abi $SOLIDITY_DIR/contracts/ERC721MinterBurnerPauser.sol -o $SOLIDITY_DIR/tmp
 solcjs --include-path $SOLIDITY_DIR/node_modules/ --base-path $SOLIDITY_DIR --abi $SOLIDITY_DIR/contracts/CentrifugeAsset.sol -o $SOLIDITY_DIR/tmp
+solcjs --include-path $SOLIDITY_DIR/node_modules/ --base-path $SOLIDITY_DIR --abi $SOLIDITY_DIR/contracts/handlers/FeeHandlerRouter.sol -o $SOLIDITY_DIR/tmp
+solcjs --include-path $SOLIDITY_DIR/node_modules/ --base-path $SOLIDITY_DIR --abi $SOLIDITY_DIR/contracts/utils/AccessControlSegregator.sol -o $SOLIDITY_DIR/tmp
 
 # generate bin
 solcjs --include-path $SOLIDITY_DIR/node_modules/ --base-path $SOLIDITY_DIR --bin $CONTRACT_DIR/FeeHandlerWithOracle.sol -o $SOLIDITY_DIR/tmp
@@ -52,6 +56,8 @@ solcjs --include-path $SOLIDITY_DIR/node_modules/ --base-path $SOLIDITY_DIR --bi
 solcjs --include-path $SOLIDITY_DIR/node_modules/ --base-path $SOLIDITY_DIR --bin $SOLIDITY_DIR/contracts/handlers/GenericHandler.sol -o $SOLIDITY_DIR/tmp
 solcjs --include-path $SOLIDITY_DIR/node_modules/ --base-path $SOLIDITY_DIR --bin $SOLIDITY_DIR/contracts/ERC721MinterBurnerPauser.sol -o $SOLIDITY_DIR/tmp
 solcjs --include-path $SOLIDITY_DIR/node_modules/ --base-path $SOLIDITY_DIR --bin $SOLIDITY_DIR/contracts/CentrifugeAsset.sol -o $SOLIDITY_DIR/tmp
+solcjs --include-path $SOLIDITY_DIR/node_modules/ --base-path $SOLIDITY_DIR --bin $SOLIDITY_DIR/contracts/handlers/FeeHandlerRouter.sol -o $SOLIDITY_DIR/tmp
+solcjs --include-path $SOLIDITY_DIR/node_modules/ --base-path $SOLIDITY_DIR --bin $SOLIDITY_DIR/contracts/utils/AccessControlSegregator.sol -o $SOLIDITY_DIR/tmp
 
 # download and extract abigen
 ABIGEN_EXISTS=false
@@ -107,6 +113,12 @@ if [ $ABIGEN_EXISTS = false ]; then
   $E2E_TEST_DIR/abigen --bin=$SOLIDITY_DIR/tmp/contracts_CentrifugeAsset_sol_CentrifugeAsset.bin \
     --abi=$SOLIDITY_DIR/tmp/contracts_CentrifugeAsset_sol_CentrifugeAsset.abi \
     --pkg=CentrifugeAsset --out=$E2E_TEST_DIR/centrifugeAsset/CentrifugeAsset.go
+  $E2E_TEST_DIR/abigen --bin=$SOLIDITY_DIR/tmp/contracts_handlers_FeeHandlerRouter_sol_FeeHandlerRouter.bin \
+    --abi=$SOLIDITY_DIR/tmp/contracts_handlers_FeeHandlerRouter_sol_FeeHandlerRouter.abi \
+    --pkg=FeeHandlerRouter --out=$E2E_TEST_DIR/feeHandlerRouter/FeeHandlerRouter.go
+  $E2E_TEST_DIR/abigen --bin=$SOLIDITY_DIR/tmp/contracts_utils_AccessControlSegregator_sol_AccessControlSegregator.bin \
+    --abi=$SOLIDITY_DIR/tmp/contracts_utils_AccessControlSegregator_sol_AccessControlSegregator.abi \
+    --pkg=AccessControlSegregator --out=$E2E_TEST_DIR/accessControlSegregator/AccessControlSegregator.go
 else
   abigen --bin=$SOLIDITY_DIR/tmp/contracts_handlers_fee_FeeHandlerWithOracle_sol_FeeHandlerWithOracle.bin \
     --abi=$SOLIDITY_DIR/tmp/contracts_handlers_fee_FeeHandlerWithOracle_sol_FeeHandlerWithOracle.abi \
@@ -135,6 +147,12 @@ else
   abigen --bin=$SOLIDITY_DIR/tmp/contracts_CentrifugeAsset_sol_CentrifugeAsset.bin \
     --abi=$SOLIDITY_DIR/tmp/contracts_CentrifugeAsset_sol_CentrifugeAsset.abi \
     --pkg=CentrifugeAsset --out=$E2E_TEST_DIR/centrifugeAsset/CentrifugeAsset.go
+  abigen --bin=$SOLIDITY_DIR/tmp/contracts_handlers_FeeHandlerRouter_sol_FeeHandlerRouter.bin \
+    --abi=$SOLIDITY_DIR/tmp/contracts_handlers_FeeHandlerRouter_sol_FeeHandlerRouter.abi \
+    --pkg=FeeHandlerRouter --out=$E2E_TEST_DIR/feeHandlerRouter/FeeHandlerRouter.go
+  abigen --bin=$SOLIDITY_DIR/tmp/contracts_utils_AccessControlSegregator_sol_AccessControlSegregator.bin \
+    --abi=$SOLIDITY_DIR/tmp/contracts_utils_AccessControlSegregator_sol_AccessControlSegregator.abi \
+    --pkg=AccessControlSegregator --out=$E2E_TEST_DIR/accessControlSegregator/AccessControlSegregator.go
 fi
 
 # run e2e test
@@ -150,7 +168,7 @@ then
   kill $gPid
 fi
 
-foPid=`pgrep -f "chainbridge-fee-oracle"`
+foPid=`pgrep -f "sygma-fee-oracle"`
 if [ "$foPid" ]
 then
   echo "terminating fee oracle service"

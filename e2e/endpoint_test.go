@@ -8,19 +8,19 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
-	"github.com/ChainSafe/chainbridge-fee-oracle/identity/secp256k1"
+	"github.com/ChainSafe/sygma-fee-oracle/identity/secp256k1"
 	"github.com/ethereum/go-ethereum/crypto"
 	"io/ioutil"
 	"math/big"
 	"net/http"
 	"testing"
 
-	"github.com/ChainSafe/chainbridge-fee-oracle/api"
-	"github.com/ChainSafe/chainbridge-fee-oracle/e2e/setup"
+	"github.com/ChainSafe/sygma-fee-oracle/api"
+	"github.com/ChainSafe/sygma-fee-oracle/e2e/setup"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/stretchr/testify/suite"
 
-	"github.com/ChainSafe/chainbridge-fee-oracle/util"
+	"github.com/ChainSafe/sygma-fee-oracle/util"
 )
 
 type apiRespGeneral struct {
@@ -86,6 +86,12 @@ func (s *SignatureVerificationTestSuite) TestSignatureVerification_CalculateFee(
 	resourceId.WriteByte(uint8(response.Response.FromDomainID))
 	finalResourceId := util.PaddingZero(resourceId.Bytes(), 32)
 	_, err = s.contractSetup.BridgeInstance.AdminSetResource(setup.IncreaseNonce(s.contractSetup.Auth), s.contractSetup.ERC20HandlerAddress, util.Byte32Converter(finalResourceId), s.contractSetup.ERC20PresetMinterPauserAddress)
+	s.Nil(err)
+
+	_, err = s.contractSetup.BridgeInstance.AdminChangeFeeHandler(setup.IncreaseNonce(s.contractSetup.Auth), s.contractSetup.FeeHandlerRouterAddress)
+	s.Nil(err)
+
+	_, err = s.contractSetup.FeeHandlerRouterInstance.AdminSetResourceHandler(setup.IncreaseNonce(s.contractSetup.Auth), uint8(setup.FromDomainId), util.Byte32Converter(finalResourceId), s.contractSetup.FeeHandlerAddress)
 	s.Nil(err)
 
 	// assembly data

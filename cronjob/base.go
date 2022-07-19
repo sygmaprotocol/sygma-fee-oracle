@@ -4,9 +4,9 @@
 package cronjob
 
 import (
-	"github.com/ChainSafe/chainbridge-fee-oracle/base"
-	"github.com/ChainSafe/chainbridge-fee-oracle/oracle"
-	"github.com/ChainSafe/chainbridge-fee-oracle/store"
+	"github.com/ChainSafe/sygma-fee-oracle/base"
+	"github.com/ChainSafe/sygma-fee-oracle/oracle"
+	"github.com/ChainSafe/sygma-fee-oracle/store"
 	"github.com/robfig/cron/v3"
 	"github.com/sirupsen/logrus"
 )

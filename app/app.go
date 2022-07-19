@@ -9,15 +9,15 @@ import (
 	"sync"
 	"time"
 
-	"github.com/ChainSafe/chainbridge-fee-oracle/config"
-	"github.com/ChainSafe/chainbridge-fee-oracle/consensus"
-	"github.com/ChainSafe/chainbridge-fee-oracle/identity"
+	"github.com/ChainSafe/sygma-fee-oracle/config"
+	"github.com/ChainSafe/sygma-fee-oracle/consensus"
+	"github.com/ChainSafe/sygma-fee-oracle/identity"
 
-	"github.com/ChainSafe/chainbridge-fee-oracle/api"
-	"github.com/ChainSafe/chainbridge-fee-oracle/base"
-	"github.com/ChainSafe/chainbridge-fee-oracle/cronjob"
-	"github.com/ChainSafe/chainbridge-fee-oracle/oracle"
-	"github.com/ChainSafe/chainbridge-fee-oracle/store"
+	"github.com/ChainSafe/sygma-fee-oracle/api"
+	"github.com/ChainSafe/sygma-fee-oracle/base"
+	"github.com/ChainSafe/sygma-fee-oracle/cronjob"
+	"github.com/ChainSafe/sygma-fee-oracle/oracle"
+	"github.com/ChainSafe/sygma-fee-oracle/store"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
 )

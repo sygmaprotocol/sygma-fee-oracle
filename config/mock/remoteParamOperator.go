@@ -7,7 +7,7 @@ package mock_remoteParam
 import (
 	reflect "reflect"
 
-	remoteParam "github.com/ChainSafe/chainbridge-fee-oracle/remoteParam"
+	remoteParam "github.com/ChainSafe/sygma-fee-oracle/remoteParam"
 	gomock "github.com/golang/mock/gomock"
 )
 

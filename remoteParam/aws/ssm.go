@@ -5,7 +5,7 @@ package aws
 
 import (
 	"context"
-	"github.com/ChainSafe/chainbridge-fee-oracle/remoteParam"
+	"github.com/ChainSafe/sygma-fee-oracle/remoteParam"
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/ssm"
 )

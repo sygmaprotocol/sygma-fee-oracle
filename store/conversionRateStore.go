@@ -11,7 +11,7 @@ import (
 	"github.com/mitchellh/mapstructure"
 	"strings"
 
-	"github.com/ChainSafe/chainbridge-fee-oracle/types"
+	"github.com/ChainSafe/sygma-fee-oracle/types"
 	"github.com/syndtr/goleveldb/leveldb"
 )
 

@@ -7,12 +7,12 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/ChainSafe/chainbridge-fee-oracle/config"
-	"github.com/ChainSafe/chainbridge-fee-oracle/identity"
-	"github.com/ChainSafe/chainbridge-fee-oracle/remoteParam"
-	paramFetcherAws "github.com/ChainSafe/chainbridge-fee-oracle/remoteParam/aws"
-	"github.com/ChainSafe/chainbridge-fee-oracle/store"
-	"github.com/ChainSafe/chainbridge-fee-oracle/store/db"
+	"github.com/ChainSafe/sygma-fee-oracle/config"
+	"github.com/ChainSafe/sygma-fee-oracle/identity"
+	"github.com/ChainSafe/sygma-fee-oracle/remoteParam"
+	paramFetcherAws "github.com/ChainSafe/sygma-fee-oracle/remoteParam/aws"
+	"github.com/ChainSafe/sygma-fee-oracle/store"
+	"github.com/ChainSafe/sygma-fee-oracle/store/db"
 	"github.com/sirupsen/logrus"
 )
 

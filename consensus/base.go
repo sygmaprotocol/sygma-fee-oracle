@@ -4,9 +4,9 @@
 package consensus
 
 import (
-	"github.com/ChainSafe/chainbridge-fee-oracle/consensus/strategy"
-	"github.com/ChainSafe/chainbridge-fee-oracle/store"
-	"github.com/ChainSafe/chainbridge-fee-oracle/types"
+	"github.com/ChainSafe/sygma-fee-oracle/consensus/strategy"
+	"github.com/ChainSafe/sygma-fee-oracle/store"
+	"github.com/ChainSafe/sygma-fee-oracle/types"
 	"github.com/sirupsen/logrus"
 )
 

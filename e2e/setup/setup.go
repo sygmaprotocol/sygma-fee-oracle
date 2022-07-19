@@ -7,17 +7,20 @@ import (
 	"bytes"
 	"context"
 	"crypto/ecdsa"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	AccessControlSegregator "github.com/ChainSafe/sygma-fee-oracle/scripts/e2e_test/accessControlSegregator"
+	FeeHandlerRouter "github.com/ChainSafe/sygma-fee-oracle/scripts/e2e_test/feeHandlerRouter"
 	"math/big"
 	"time"
 
-	"github.com/ChainSafe/chainbridge-fee-oracle/scripts/e2e_test/bridge"
-	ERC20Handler "github.com/ChainSafe/chainbridge-fee-oracle/scripts/e2e_test/erc20Handler"
-	ERC20PresetMinterPauser "github.com/ChainSafe/chainbridge-fee-oracle/scripts/e2e_test/erc20PresetMinterPauser"
-	"github.com/ChainSafe/chainbridge-fee-oracle/scripts/e2e_test/feeHandler"
-	"github.com/ChainSafe/chainbridge-fee-oracle/store/db"
-	"github.com/ChainSafe/chainbridge-fee-oracle/types"
+	"github.com/ChainSafe/sygma-fee-oracle/scripts/e2e_test/bridge"
+	ERC20Handler "github.com/ChainSafe/sygma-fee-oracle/scripts/e2e_test/erc20Handler"
+	ERC20PresetMinterPauser "github.com/ChainSafe/sygma-fee-oracle/scripts/e2e_test/erc20PresetMinterPauser"
+	"github.com/ChainSafe/sygma-fee-oracle/scripts/e2e_test/feeHandler"
+	"github.com/ChainSafe/sygma-fee-oracle/store/db"
+	"github.com/ChainSafe/sygma-fee-oracle/types"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/crypto"
@@ -44,6 +47,8 @@ type ContractsSetupResp struct {
 	ERC20PresetMinterPauserAddress  common.Address
 	ERC20HandlerInstance            *ERC20Handler.ERC20Handler
 	ERC20HandlerAddress             common.Address
+	FeeHandlerRouterInstance        *FeeHandlerRouter.FeeHandlerRouter
+	FeeHandlerRouterAddress         common.Address
 }
 
 func ContractsSetup() *ContractsSetupResp {
@@ -54,11 +59,51 @@ func ContractsSetup() *ContractsSetupResp {
 	auth := getAccountAuth(client, FeeOracleHexPriKey)
 
 	// preparation - deploying contracts
-	bridgeAddress, _, bridgeInstance, err := bridge.DeployBridge(auth, client, uint8(FromDomainId))
+	adminSetResource, err := hex.DecodeString("cb10f215")
 	if err != nil {
 		panic(err)
 	}
-	feeHandlerAddress, _, feeHandlerInstance, err := feeHandler.DeployFeeHandler(IncreaseNonce(auth), client, bridgeAddress)
+	adminChangeAccessControl, err := hex.DecodeString("9d33b6d4")
+	if err != nil {
+		panic(err)
+	}
+	adminChangeFeeHandler, err := hex.DecodeString("8b63aebf")
+	if err != nil {
+		panic(err)
+	}
+
+	f1 := [4]byte{}
+	copy(f1[:], adminSetResource)
+	f2 := [4]byte{}
+	copy(f2[:], adminChangeAccessControl)
+	f3 := [4]byte{}
+	copy(f3[:], adminChangeFeeHandler)
+	funcs := [][4]byte{
+		f1, f2, f3,
+	}
+	accounts := []common.Address{auth.From, auth.From, auth.From}
+
+	AccessControlSegregatorAddress, _, _, err := AccessControlSegregator.DeployAccessControlSegregator(auth, client, funcs, accounts)
+	if err != nil {
+		panic(err)
+	}
+	bridgeAddress, _, bridgeInstance, err := bridge.DeployBridge(IncreaseNonce(auth), client, uint8(FromDomainId), AccessControlSegregatorAddress)
+	if err != nil {
+		panic(err)
+	}
+	resourceTokenAddress, _, _, err := ERC20PresetMinterPauser.DeployERC20PresetMinterPauser(IncreaseNonce(auth), client, "token", "TOK")
+	if err != nil {
+		panic(err)
+	}
+	erc20HandlerAddress, _, _, err := ERC20Handler.DeployERC20Handler(IncreaseNonce(auth), client, bridgeAddress)
+	if err != nil {
+		panic(err)
+	}
+	feeHandlerRouterAddress, _, feeHandlerRouterInstance, err := FeeHandlerRouter.DeployFeeHandlerRouter(IncreaseNonce(auth), client, bridgeAddress)
+	if err != nil {
+		panic(err)
+	}
+	feeHandlerAddress, _, feeHandlerInstance, err := feeHandler.DeployFeeHandler(IncreaseNonce(auth), client, bridgeAddress, feeHandlerRouterAddress)
 	if err != nil {
 		panic(err)
 	}
@@ -77,17 +122,10 @@ func ContractsSetup() *ContractsSetupResp {
 	if err != nil {
 		panic(err)
 	}
-	resourceTokenAddress, _, _, err := ERC20PresetMinterPauser.DeployERC20PresetMinterPauser(IncreaseNonce(auth), client, "token", "TOK")
-	if err != nil {
-		panic(err)
-	}
-	erc20HandlerAddress, _, _, err := ERC20Handler.DeployERC20Handler(IncreaseNonce(auth), client, bridgeAddress)
-	if err != nil {
-		panic(err)
-	}
 
 	fmt.Println("bridgeAddress:", bridgeAddress.String())
 	fmt.Println("feeHandlerAddress:", feeHandlerAddress.String())
+	fmt.Println("feeHandlerRouterAddress:", feeHandlerRouterAddress.String())
 	fmt.Println("resourceTokenAddress:", resourceTokenAddress.String())
 	fmt.Println("erc20HandlerAddress:", erc20HandlerAddress.String())
 
@@ -99,6 +137,8 @@ func ContractsSetup() *ContractsSetupResp {
 		FeeHandlerAddress:              feeHandlerAddress,
 		ERC20PresetMinterPauserAddress: resourceTokenAddress,
 		ERC20HandlerAddress:            erc20HandlerAddress,
+		FeeHandlerRouterInstance:       feeHandlerRouterInstance,
+		FeeHandlerRouterAddress:        feeHandlerRouterAddress,
 	}
 }
 

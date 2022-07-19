@@ -5,15 +5,15 @@ package config
 
 import (
 	"encoding/hex"
-	"github.com/ChainSafe/chainbridge-fee-oracle/remoteParam"
+	"github.com/ChainSafe/sygma-fee-oracle/remoteParam"
 	"github.com/pkg/errors"
 
 	"io/ioutil"
 	"os"
 	"strconv"
 
-	"github.com/ChainSafe/chainbridge-fee-oracle/identity"
-	"github.com/ChainSafe/chainbridge-fee-oracle/identity/secp256k1"
+	"github.com/ChainSafe/sygma-fee-oracle/identity"
+	"github.com/ChainSafe/sygma-fee-oracle/identity/secp256k1"
 
 	"path"
 	"path/filepath"

@@ -4,7 +4,7 @@
 package app
 
 import (
-	"github.com/ChainSafe/chainbridge-fee-oracle/config"
+	"github.com/ChainSafe/sygma-fee-oracle/config"
 	"net/http"
 )
 import _ "net/http/pprof" // #nosec

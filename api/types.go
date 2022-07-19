@@ -6,7 +6,7 @@ package api
 import (
 	"errors"
 
-	"github.com/ChainSafe/chainbridge-fee-oracle/config"
+	"github.com/ChainSafe/sygma-fee-oracle/config"
 	"github.com/gin-gonic/gin"
 )
 

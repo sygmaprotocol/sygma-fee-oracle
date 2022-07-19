@@ -106,14 +106,14 @@ To quickly start from makefile, make sure `config.yaml`, `domain.json`, `resourc
 # Command Line
 Fee oracle provides CLI.  
 
-For general help:`$ chainbridge-fee-oracle -h`  
+For general help:`$ sygma-fee-oracle -h`  
 
-#### `$ chainbridge-fee-oracle server`
+#### `$ sygma-fee-oracle server`
 ```
 Start Sygma fee oracle main service
 
 Usage:
-  chainbridge-fee-oracle server [flags]
+  sygma-fee-oracle server [flags]
 
 Flags:
   -c, --config_path string            
@@ -124,12 +124,12 @@ Flags:
   -r, --resource_config_path string
 ```
 
-#### <a id="keycli"></a>`$ chainbridge-fee-oracle key-generate`
+#### <a id="keycli"></a>`$ sygma-fee-oracle key-generate`
 ```
 Start Sygma fee oracle identity key generation
 
 Usage:
-  chainbridge-fee-oracle key-generate [flags]
+  sygma-fee-oracle key-generate [flags]
 
 Flags:
   -h, --help                  help for key-generate
