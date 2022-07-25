@@ -4,8 +4,6 @@
 name: Build and publish Docker image
 
 on:
-  pull_request:
-    types: [ opened ]
   push:
     branches:
       - main
@@ -24,7 +22,7 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Extract metadata (tags, labels) for Docker
+      - name: Docker meta
         id: meta
         uses: docker/metadata-action@v4
         with:
