@@ -180,6 +180,7 @@
   ],
   "cpu": "256",
   "executionRoleArn": "arn:aws:iam::852551629426:role/fee-oracle-ecsTaskExecutionRole",
+  "taskRoleArn": "arn:aws:iam::852551629426:role/fee-oracle-ecsTaskRole",
   "family": "fee-oracle-container-STAGE",
   "memory": "512",
   "networkMode": "awsvpc",
