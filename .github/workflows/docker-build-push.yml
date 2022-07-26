@@ -31,11 +31,12 @@ jobs:
           # check if branch/tag that triggered workflow was from tags
           if [[ $GITHUB_REF == refs/tags/* ]]; then
           
-          # set version
-          VERSION=${GITHUB_REF#refs/tags/}
+            # set version
+            VERSION=${GITHUB_REF#refs/tags/}
           
-          # append version to tags
-          TAGS="${TAGS},${DOCKER_IMAGE}:${VERSION}"
+            # append version to tags
+            TAGS="${TAGS},${DOCKER_IMAGE}:${VERSION}"
+          
           fi
           
           # sets output of step
