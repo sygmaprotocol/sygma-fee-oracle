@@ -5,7 +5,7 @@ package db
 
 import (
 	"encoding/json"
-	"github.com/ChainSafe/chainbridge-fee-oracle/store"
+	"github.com/ChainSafe/sygma-fee-oracle/store"
 	"github.com/pkg/errors"
 	"github.com/syndtr/goleveldb/leveldb"
 	"github.com/syndtr/goleveldb/leveldb/util"

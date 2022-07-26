@@ -7,10 +7,10 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/ChainSafe/chainbridge-fee-oracle/consensus/strategy"
-	"github.com/ChainSafe/chainbridge-fee-oracle/store"
-	mockStore "github.com/ChainSafe/chainbridge-fee-oracle/store/mock"
-	"github.com/ChainSafe/chainbridge-fee-oracle/types"
+	"github.com/ChainSafe/sygma-fee-oracle/consensus/strategy"
+	"github.com/ChainSafe/sygma-fee-oracle/store"
+	mockStore "github.com/ChainSafe/sygma-fee-oracle/store/mock"
+	"github.com/ChainSafe/sygma-fee-oracle/types"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/suite"
 )

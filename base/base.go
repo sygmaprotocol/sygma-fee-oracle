@@ -5,11 +5,14 @@ package base
 
 import (
 	"fmt"
+	"os"
 
-	"github.com/ChainSafe/chainbridge-fee-oracle/config"
-	"github.com/ChainSafe/chainbridge-fee-oracle/identity"
-	"github.com/ChainSafe/chainbridge-fee-oracle/store"
-	"github.com/ChainSafe/chainbridge-fee-oracle/store/db"
+	"github.com/ChainSafe/sygma-fee-oracle/config"
+	"github.com/ChainSafe/sygma-fee-oracle/identity"
+	"github.com/ChainSafe/sygma-fee-oracle/remoteParam"
+	paramFetcherAws "github.com/ChainSafe/sygma-fee-oracle/remoteParam/aws"
+	"github.com/ChainSafe/sygma-fee-oracle/store"
+	"github.com/ChainSafe/sygma-fee-oracle/store/db"
 	"github.com/sirupsen/logrus"
 )
 
@@ -20,20 +23,26 @@ type FeeOracleAppBase struct {
 	store          store.Store
 	oracleIdentity identity.Keypair
 
-	envInUse string
+	remoteParamOperator remoteParam.RemoteParamOperator
+
+	env config.AppEvm
 }
 
 func NewFeeOracleAppBase(configPath, domainConfigPath, resourceConfigPath, keyPath, keyType string) *FeeOracleAppBase {
 	conf, logger := config.LoadConfig(configPath, domainConfigPath, resourceConfigPath)
+	logger.Infof("log level: %s", logger.Level)
 
 	base := &FeeOracleAppBase{
-		log:      logger.WithField("base", "base"),
-		conf:     conf,
-		envInUse: conf.WorkingEnvConfig(),
+		log:  logger.WithField("base", "base"),
+		conf: conf,
+		env:  conf.WorkingEnvConfig(),
 	}
 
 	base.initKeyPair(keyPath, keyType)
 	base.initStore()
+	base.initRemoteParamStore()
+
+	base.conf.SetRemoteParams(base.remoteParamOperator)
 
 	base.verifyBase()
 	return base
@@ -47,8 +56,8 @@ func (a *FeeOracleAppBase) GetLogger() *logrus.Entry {
 	return a.log
 }
 
-func (a *FeeOracleAppBase) GetEnv() string {
-	return a.envInUse
+func (a *FeeOracleAppBase) GetEnv() config.AppEvm {
+	return a.env
 }
 
 func (a *FeeOracleAppBase) GetStore() store.Store {
@@ -65,7 +74,7 @@ func (a *FeeOracleAppBase) initKeyPair(keyPath, keyType string) {
 		panic(fmt.Sprintf("failed to load key config: %s", err))
 	}
 
-	a.log.Infof("fee oracle indentity address is %s\n", kp.Address())
+	a.log.Infof("fee oracle indentity address: %s\n", kp.Address())
 
 	a.oracleIdentity = kp
 }
@@ -77,6 +86,17 @@ func (a *FeeOracleAppBase) initStore() {
 	}
 
 	a.store = storeDB
+}
+
+func (a *FeeOracleAppBase) initRemoteParamStore() {
+	remoteParamFlag := os.Getenv("REMOTE_PARAM_OPERATOR_ENABLE")
+	if remoteParamFlag != "true" {
+		a.log.Warn("remote param operator is disabled")
+		return
+	}
+
+	aws := paramFetcherAws.NewAWSClient()
+	a.remoteParamOperator = paramFetcherAws.NewSSMClient(*aws)
 }
 
 // verifyBase preforms all essential checks for the app base

@@ -9,10 +9,10 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/ChainSafe/chainbridge-fee-oracle/identity/secp256k1"
+	"github.com/ChainSafe/sygma-fee-oracle/identity/secp256k1"
 	"github.com/pkg/errors"
 
-	"github.com/ChainSafe/chainbridge-fee-oracle/identity"
+	"github.com/ChainSafe/sygma-fee-oracle/identity"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/spf13/cobra"
 )
@@ -36,7 +36,7 @@ type oracleKeyGeneration struct {
 
 var oracleKeyGenerationCmd = &cobra.Command{
 	Use:   "key-generate",
-	Short: "Start ChainBridge fee oracle identity key generation",
+	Short: "Start Sygma fee oracle identity key generation",
 	RunE:  generateKey,
 }
 
@@ -78,7 +78,7 @@ func secp256k1KeyGenerator(keyPath string) string {
 	if err != nil {
 		panic(err)
 	}
-	err = os.WriteFile(keyPath, crypto.FromECDSA(priv), 0666)
+	err = os.WriteFile(keyPath, crypto.FromECDSA(priv), 0600)
 	if err != nil {
 		panic(err)
 	}

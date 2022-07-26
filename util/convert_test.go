@@ -5,7 +5,7 @@ package util_test
 
 import (
 	"errors"
-	"github.com/ChainSafe/chainbridge-fee-oracle/util"
+	"github.com/ChainSafe/sygma-fee-oracle/util"
 
 	"math/big"
 	"testing"

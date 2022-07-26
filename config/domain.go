@@ -5,7 +5,6 @@ package config
 
 import (
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"path/filepath"
 )
@@ -34,20 +33,23 @@ func newDomain(id int, name, baseCurrencyFullName, baseCurrencySymbol, addressPr
 
 // loadDomains registers and load all pre-defined domains
 func loadDomains(domainConfigPath string) map[int]domain {
-	domains := make(map[int]domain, 0)
-
 	domainData, err := ioutil.ReadFile(filepath.Clean(domainConfigPath))
 	if err != nil {
-		fmt.Println(err)
 		panic(ErrLoadDomainConfig.Wrap(err))
 	}
 
+	return parseDomains(domainData)
+}
+
+func parseDomains(domainData []byte) map[int]domain {
 	var content domainConfigFile
-	err = json.Unmarshal(domainData, &content)
+
+	err := json.Unmarshal(domainData, &content)
 	if err != nil {
 		panic(ErrLoadDomainConfig.Wrap(err))
 	}
 
+	domains := make(map[int]domain, 0)
 	for _, domain := range content.Domains {
 		domains[domain.ID] = *newDomain(domain.ID, domain.Name, domain.BaseCurrencyFullName, domain.BaseCurrencySymbol, domain.AddressPrefix)
 	}

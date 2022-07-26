@@ -4,10 +4,10 @@
 package api
 
 import (
-	"github.com/ChainSafe/chainbridge-fee-oracle/config"
-	"github.com/ChainSafe/chainbridge-fee-oracle/consensus"
-	"github.com/ChainSafe/chainbridge-fee-oracle/identity"
-	"github.com/ChainSafe/chainbridge-fee-oracle/store"
+	"github.com/ChainSafe/sygma-fee-oracle/config"
+	"github.com/ChainSafe/sygma-fee-oracle/consensus"
+	"github.com/ChainSafe/sygma-fee-oracle/identity"
+	"github.com/ChainSafe/sygma-fee-oracle/store"
 	"github.com/sirupsen/logrus"
 	"net/http"
 

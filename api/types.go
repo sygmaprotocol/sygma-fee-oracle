@@ -6,7 +6,7 @@ package api
 import (
 	"errors"
 
-	"github.com/ChainSafe/chainbridge-fee-oracle/config"
+	"github.com/ChainSafe/sygma-fee-oracle/config"
 	"github.com/gin-gonic/gin"
 )
 
@@ -55,4 +55,6 @@ type FetchRateResp struct {
 	SignatureTimestamp int64 `json:"signatureTimestamp"`
 	// ExpirationTimestamp represents the timestamp that the response data expires on the fee handler contract
 	ExpirationTimestamp int64 `json:"expirationTimestamp"`
+	// Indicator if the app is running in debug mode
+	Debug bool `json:"debug"`
 }

@@ -39,7 +39,10 @@ jobs:
           make check
       
       - name: Lint check
-        run: make lint
+        uses: golangci/golangci-lint-action@v3
+        with:
+          version: latest
+          args: --skip-dirs e2e -v --timeout 300s
 
       - name: License check
         run: make license-check

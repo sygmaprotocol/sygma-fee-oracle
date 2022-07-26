@@ -4,11 +4,16 @@
 package config
 
 import (
-	"errors"
-	"io/ioutil"
+	"encoding/hex"
+	"github.com/ChainSafe/sygma-fee-oracle/remoteParam"
+	"github.com/pkg/errors"
 
-	"github.com/ChainSafe/chainbridge-fee-oracle/identity"
-	"github.com/ChainSafe/chainbridge-fee-oracle/identity/secp256k1"
+	"io/ioutil"
+	"os"
+	"strconv"
+
+	"github.com/ChainSafe/sygma-fee-oracle/identity"
+	"github.com/ChainSafe/sygma-fee-oracle/identity/secp256k1"
 
 	"path"
 	"path/filepath"
@@ -19,11 +24,27 @@ import (
 	"github.com/spf13/viper"
 )
 
+type AppEvm string
+type AppMode string
+
+var (
+	AppEvmDev  AppEvm = "dev"
+	AppEvmProd AppEvm = "production"
+
+	AppModeRelease AppMode = "release"
+	AppModeDebug   AppMode = "debug"
+
+	remoteParamDomainData   = "/chainbridge/fee-oracle/domainData"
+	remoteParamResourceData = "/chainbridge/fee-oracle/resourceData"
+)
+
 type Config struct {
 	config configData
 }
 
 type configData struct {
+	AppMode string `mapstructure:"app_mode"`
+
 	Env string `mapstructure:"env"`
 
 	LogLevel logrus.Level `mapstructure:"log_level"`
@@ -105,23 +126,73 @@ type apiUrls struct {
 	QueryRate      string `mapstructure:"query_rate"`
 }
 
-func (c *Config) logLevel() logrus.Level {
-	return c.config.LogLevel
+func (c *Config) logLevel() (logrus.Level, error) {
+	logLvl := os.Getenv("LOG_LEVEL")
+	if logLvl == "" {
+		return c.config.LogLevel, nil
+	}
+
+	lvl, err := strconv.ParseUint(logLvl, 10, 64)
+	if err != nil {
+		return logrus.InfoLevel, err
+	}
+
+	return logrus.Level(lvl), nil
 }
 
-func (c *Config) WorkingEnvConfig() string {
-	return c.config.Env
+func (c *Config) WorkingEnvConfig() AppEvm {
+	env := os.Getenv("WORKING_ENV")
+	if env == "" {
+		env = c.config.Env
+	}
+
+	switch env {
+	case "dev":
+		return AppEvmDev
+	case "production":
+		return AppEvmProd
+	default:
+		return AppEvmDev
+	}
+}
+
+func (c *Config) AppModeConfig() AppMode {
+	mode := os.Getenv("APP_MODE")
+	if mode == "" {
+		mode = c.config.AppMode
+	}
+
+	switch mode {
+	case "debug":
+		return AppModeDebug
+	case "release":
+		return AppModeRelease
+	default:
+		return AppModeRelease
+	}
 }
 
 func (c *Config) PrepareHttpServer() *gin.Engine {
-	gin.SetMode(c.config.HttpServer.Mode)
+	gin.SetMode(c.HttpServerConfig().Mode)
 	instance := gin.New()
 
 	return instance
 }
 
 func (c *Config) HttpServerConfig() httpServerConfig {
-	return c.config.HttpServer
+	httpConfig := c.config.HttpServer
+
+	serverMode := os.Getenv("HTTP_SERVER_MODE")
+	serverPort := os.Getenv("HTTP_SERVER_PORT")
+
+	if serverMode != "" {
+		httpConfig.Mode = serverMode
+	}
+	if serverPort != "" {
+		httpConfig.Port = ":" + serverPort
+	}
+
+	return httpConfig
 }
 
 func (c *Config) FinishUpTimeConfig() int64 {
@@ -129,11 +200,39 @@ func (c *Config) FinishUpTimeConfig() int64 {
 }
 
 func (c *Config) OracleConfig() oracle {
-	return c.config.Oracle
+	oracleConfig := c.config.Oracle
+
+	etherscanAPIKey := os.Getenv("ETHERSCAN_API_KEY")
+	polygonscanAPIKey := os.Getenv("POLYGONSCAN_API_KEY")
+	coinMarketCapAPIKey := os.Getenv("COINMARKETCAP_API_KEY")
+
+	if etherscanAPIKey != "" {
+		oracleConfig.Etherscan.ApiKey = etherscanAPIKey
+	}
+	if polygonscanAPIKey != "" {
+		oracleConfig.Polygonscan.ApiKey = polygonscanAPIKey
+	}
+	if coinMarketCapAPIKey != "" {
+		oracleConfig.CoinMarketCap.ApiKey = coinMarketCapAPIKey
+	}
+
+	return oracleConfig
 }
 
 func (c *Config) CronJobConfig() cronJobConfig {
-	return c.config.CronJob
+	cronjobConfig := c.config.CronJob
+
+	conversionRateJobFrequency := os.Getenv("CONVERSION_RATE_JOB_FREQUENCY")
+	gasPriceJobFrequency := os.Getenv("GAS_PRICE_JOB_FREQUENCY")
+
+	if conversionRateJobFrequency != "" {
+		cronjobConfig.UpdateConversionRateJob.CheckFrequency = conversionRateJobFrequency
+	}
+	if gasPriceJobFrequency != "" {
+		cronjobConfig.UpdateGasPriceJob.CheckFrequency = gasPriceJobFrequency
+	}
+
+	return cronjobConfig
 }
 
 func (c *Config) StoreConfig() store {
@@ -144,12 +243,20 @@ func (c *Config) GasPriceDomainsConfig() []string {
 	return c.config.GasPriceDomains
 }
 
+func (c *Config) setDomains(domainData string) {
+	c.config.Domains = parseDomains([]byte(domainData))
+}
+
 func (c *Config) GetRegisteredDomains(domainId int) *domain {
 	d, ok := c.config.Domains[domainId]
 	if !ok {
 		return nil
 	}
 	return &d
+}
+
+func (c *Config) setResources(resourceData string) {
+	c.config.Resources = parseResources([]byte(resourceData), c.config.Domains)
 }
 
 func (c *Config) GetRegisteredResources(resourceId string) *resource {
@@ -164,11 +271,38 @@ func (c *Config) ConversionRatePairsChecker() error {
 	if len(c.config.ConversionRatePairs)%2 != 0 {
 		return errors.New("conversion_rate_pairs is invalid, must be pairs")
 	}
+	for _, e := range c.config.ConversionRatePairs {
+		if e == "" {
+			return errors.New("conversion_rate_pairs is invalid, element of pair is empty")
+		}
+	}
+
 	return nil
 }
 
 func (c *Config) StrategyConfig() strategyConfig {
 	return c.config.Strategy
+}
+
+func (c *Config) conversionRatePairsConfigLoad() []string {
+	conversionRatePairs := os.Getenv("CONVERSION_RATE_PAIRS")
+	if conversionRatePairs != "" {
+		return strings.Split(conversionRatePairs, ",")
+	}
+
+	return c.config.ConversionRatePairs
+}
+
+func (c *Config) dataValidIntervalConfigLoad() int64 {
+	dataValidInterval := os.Getenv("DATA_VALID_INTERVAL")
+	if dataValidInterval != "" {
+		i, err := strconv.ParseUint(dataValidInterval, 10, 64)
+		if err != nil {
+			panic(ErrLoadConfig.Wrap(errors.Wrap(err, "invalid DATA_VALID_INTERVAL from env param")))
+		}
+		return int64(i)
+	}
+	return c.config.DataValidInterval
 }
 
 func (c *Config) DataValidIntervalConfig() int64 {
@@ -187,6 +321,39 @@ func (c *Config) ConversionRatePairsConfig() [][]string {
 	}
 
 	return pricePairs
+}
+
+func (c *Config) remoteParamsLoad(operator remoteParam.RemoteParamOperator, paramName string) (string, error) {
+	out, err := operator.LoadParameter(paramName)
+	if err != nil {
+		return "", errors.Wrapf(err, "failed to load given param: %s", paramName)
+	}
+
+	return out.Value, nil
+}
+
+// SetRemoteParams fetches the remote params and override the local ones
+// only call this func when init app base
+func (c *Config) SetRemoteParams(operator remoteParam.RemoteParamOperator) {
+	if operator == nil {
+		return
+	}
+
+	domains, err := c.remoteParamsLoad(operator, remoteParamDomainData)
+	if err != nil {
+		panic(err)
+	}
+	if domains != "" {
+		c.setDomains(domains)
+	}
+
+	resources, err := c.remoteParamsLoad(operator, remoteParamResourceData)
+	if err != nil {
+		panic(err)
+	}
+	if resources != "" {
+		c.setResources(resources)
+	}
 }
 
 func (c *Config) EssentialConfigCheck() error {
@@ -210,19 +377,57 @@ func LoadConfig(configPath, domainConfigPath, resourceConfigPath string) (*Confi
 		panic(ErrLoadConfig.Wrap(err))
 	}
 	log := logrus.New()
-	log.SetLevel(conf.logLevel())
+	logLvl, err := conf.logLevel()
+	if err != nil {
+		panic(ErrLoadConfig.Wrap(err))
+	}
+	log.SetLevel(logLvl)
 
 	// load domains and resources
 	conf.config.Domains = loadDomains(domainConfigPath)
 	conf.config.Resources = loadResources(resourceConfigPath, conf.config.Domains)
 
+	// load data valid interval
+	conf.config.DataValidInterval = conf.dataValidIntervalConfigLoad()
+	// load conversion price pair
+	conf.config.ConversionRatePairs = conf.conversionRatePairsConfigLoad()
+
 	return conf, log
 }
 
-func LoadOracleIdentityKey(keyPath, keyType string) (identity.Keypair, error) {
+func LoadOracleIdentityKeyFromFile(keyPath string) ([]byte, error) {
 	privBytes, err := ioutil.ReadFile(filepath.Clean(keyPath))
 	if err != nil {
 		return nil, err
+	}
+
+	return privBytes, nil
+}
+
+func LoadOracleIdentityKeyFromEvn() (string, string) {
+	evnKey := os.Getenv("IDENTITY_KEY")
+	evnKeyType := os.Getenv("IDENTITY_KEY_TYPE")
+
+	return evnKey, evnKeyType
+}
+
+func LoadOracleIdentityKey(keyPath, keyType string) (identity.Keypair, error) {
+	var privBytes []byte
+	var err error
+
+	// load key from EVN params first, if not found, load from given key path
+	evnKey, envKeyType := LoadOracleIdentityKeyFromEvn()
+	if evnKey != "" && envKeyType != "" {
+		keyType = envKeyType
+		privBytes, err = hex.DecodeString(evnKey)
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		privBytes, err = LoadOracleIdentityKeyFromFile(keyPath)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	switch strings.ToLower(keyType) {

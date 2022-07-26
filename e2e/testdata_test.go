@@ -4,7 +4,7 @@
 package e2e
 
 import (
-	"github.com/ChainSafe/chainbridge-fee-oracle/e2e/setup"
+	"github.com/ChainSafe/sygma-fee-oracle/e2e/setup"
 	"testing"
 )
 

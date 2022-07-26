@@ -7,20 +7,20 @@ import (
 	"bytes"
 	"encoding/hex"
 	"encoding/json"
-	"github.com/ChainSafe/chainbridge-fee-oracle/identity/secp256k1"
+	"fmt"
+	"github.com/ChainSafe/sygma-fee-oracle/identity/secp256k1"
 	"github.com/ethereum/go-ethereum/crypto"
 	"io/ioutil"
 	"math/big"
 	"net/http"
-	"strconv"
 	"testing"
 
-	"github.com/ChainSafe/chainbridge-fee-oracle/api"
-	"github.com/ChainSafe/chainbridge-fee-oracle/e2e/setup"
+	"github.com/ChainSafe/sygma-fee-oracle/api"
+	"github.com/ChainSafe/sygma-fee-oracle/e2e/setup"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/stretchr/testify/suite"
 
-	"github.com/ChainSafe/chainbridge-fee-oracle/util"
+	"github.com/ChainSafe/sygma-fee-oracle/util"
 )
 
 type apiRespGeneral struct {
@@ -74,7 +74,10 @@ func (s *SignatureVerificationTestSuite) TestSignatureVerification_CalculateFee(
 	s.Nil(err)
 
 	finalGasPrice := util.PaddingZero(gasPrice.Bytes(), 32)
-	finalTimestamp := util.PaddingZero([]byte(strconv.FormatInt(response.Response.ExpirationTimestamp, 16)), 32)
+	finalTimestamp := fmt.Sprintf("%064x", response.Response.ExpirationTimestamp)
+	finalTimestampBytes, err := hex.DecodeString(finalTimestamp)
+	s.Nil(err)
+
 	finalFromDomainId := util.PaddingZero([]byte{uint8(response.Response.FromDomainID)}, 32)
 	finalToDomainId := util.PaddingZero([]byte{uint8(response.Response.ToDomainID)}, 32)
 
@@ -85,12 +88,18 @@ func (s *SignatureVerificationTestSuite) TestSignatureVerification_CalculateFee(
 	_, err = s.contractSetup.BridgeInstance.AdminSetResource(setup.IncreaseNonce(s.contractSetup.Auth), s.contractSetup.ERC20HandlerAddress, util.Byte32Converter(finalResourceId), s.contractSetup.ERC20PresetMinterPauserAddress)
 	s.Nil(err)
 
+	_, err = s.contractSetup.BridgeInstance.AdminChangeFeeHandler(setup.IncreaseNonce(s.contractSetup.Auth), s.contractSetup.FeeHandlerRouterAddress)
+	s.Nil(err)
+
+	_, err = s.contractSetup.FeeHandlerRouterInstance.AdminSetResourceHandler(setup.IncreaseNonce(s.contractSetup.Auth), uint8(setup.FromDomainId), util.Byte32Converter(finalResourceId), s.contractSetup.FeeHandlerAddress)
+	s.Nil(err)
+
 	// assembly data
 	feeDataMessageByte := bytes.Buffer{}
 	feeDataMessageByte.Write(finalBaseEffectiveRate)
 	feeDataMessageByte.Write(finalTokenEffectiveRate)
 	feeDataMessageByte.Write(finalGasPrice)
-	feeDataMessageByte.Write(finalTimestamp)
+	feeDataMessageByte.Write(finalTimestampBytes)
 	feeDataMessageByte.Write(finalFromDomainId)
 	feeDataMessageByte.Write(finalToDomainId)
 	feeDataMessageByte.Write(finalResourceId)

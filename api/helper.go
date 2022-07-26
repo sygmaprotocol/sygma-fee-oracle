@@ -6,10 +6,10 @@ package api
 import (
 	"bytes"
 	"encoding/hex"
-	"github.com/ChainSafe/chainbridge-fee-oracle/config"
-	"github.com/ChainSafe/chainbridge-fee-oracle/util"
+	"fmt"
+	"github.com/ChainSafe/sygma-fee-oracle/config"
+	"github.com/ChainSafe/sygma-fee-oracle/util"
 	"github.com/pkg/errors"
-	"strconv"
 )
 
 func (h *Handler) rateSignature(result *FetchRateResp, fromDomainID int, resourceTokenAddr string, resourceDomainId int) (string, error) {
@@ -39,7 +39,7 @@ func (h *Handler) rateSignature(result *FetchRateResp, fromDomainID int, resourc
 	}
 	finalGasPrice := util.PaddingZero(gasPrice.Bytes(), 32)
 
-	finalTimestamp := util.PaddingZero([]byte(strconv.FormatInt(result.ExpirationTimestamp, 16)), 32)
+	finalTimestamp := fmt.Sprintf("%064x", result.ExpirationTimestamp)
 	finalFromDomainId := util.PaddingZero([]byte{uint8(result.FromDomainID)}, 32)
 	finalToDomainId := util.PaddingZero([]byte{uint8(result.ToDomainID)}, 32)
 
@@ -52,11 +52,16 @@ func (h *Handler) rateSignature(result *FetchRateResp, fromDomainID int, resourc
 	resourceId.WriteByte(uint8(result.FromDomainID))
 	finalResourceId := util.PaddingZero(resourceId.Bytes(), 32)
 
+	finalTimestampBytes, err := hex.DecodeString(finalTimestamp)
+	if err != nil {
+		return "", errors.Wrap(err, "failed to decode timestamp")
+	}
+
 	feeDataMessageByte := bytes.Buffer{}
 	feeDataMessageByte.Write(finalBaseEffectiveRate)
 	feeDataMessageByte.Write(finalTokenEffectiveRate)
 	feeDataMessageByte.Write(finalGasPrice)
-	feeDataMessageByte.Write(finalTimestamp)
+	feeDataMessageByte.Write(finalTimestampBytes)
 	feeDataMessageByte.Write(finalFromDomainId)
 	feeDataMessageByte.Write(finalToDomainId)
 	feeDataMessageByte.Write(finalResourceId)

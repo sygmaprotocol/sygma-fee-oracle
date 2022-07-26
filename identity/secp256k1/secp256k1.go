@@ -6,7 +6,7 @@ package secp256k1
 import (
 	"crypto/ecdsa"
 
-	"github.com/ChainSafe/chainbridge-fee-oracle/identity"
+	"github.com/ChainSafe/sygma-fee-oracle/identity"
 
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	secp256k1 "github.com/ethereum/go-ethereum/crypto"

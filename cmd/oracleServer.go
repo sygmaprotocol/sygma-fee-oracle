@@ -4,8 +4,8 @@
 package cmd
 
 import (
-	"github.com/ChainSafe/chainbridge-fee-oracle/app"
-	"github.com/ChainSafe/chainbridge-fee-oracle/base"
+	"github.com/ChainSafe/sygma-fee-oracle/app"
+	"github.com/ChainSafe/sygma-fee-oracle/base"
 	"github.com/spf13/cobra"
 )
 
@@ -19,7 +19,7 @@ type oracleServer struct {
 
 var oracleServerCmd = &cobra.Command{
 	Use:   "server",
-	Short: "Start ChainBridge fee oracle main service",
+	Short: "Start Sygma fee oracle main service",
 	RunE:  startServer,
 }
 

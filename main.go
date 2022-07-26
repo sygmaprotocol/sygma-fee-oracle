@@ -4,7 +4,7 @@
 package main
 
 import (
-	"github.com/ChainSafe/chainbridge-fee-oracle/cmd"
+	"github.com/ChainSafe/sygma-fee-oracle/cmd"
 )
 
 func main() {

@@ -9,9 +9,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ChainSafe/chainbridge-fee-oracle/store"
-	mockStore "github.com/ChainSafe/chainbridge-fee-oracle/store/mock"
-	"github.com/ChainSafe/chainbridge-fee-oracle/types"
+	"github.com/ChainSafe/sygma-fee-oracle/store"
+	mockStore "github.com/ChainSafe/sygma-fee-oracle/store/mock"
+	"github.com/ChainSafe/sygma-fee-oracle/types"
 	"github.com/golang/mock/gomock"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/suite"
@@ -138,8 +138,6 @@ func (s *GasPriceStoreTestSuite) TestGetGasPriceByDomain_Success() {
 	err = json.Unmarshal(jd2, &dataReceiverInterface)
 	s.Nil(err)
 	re = append(re, dataReceiverInterface)
-
-	fmt.Println(re)
 
 	var dataReceiver *types.GasPrices
 	s.db.EXPECT().GetByPrefix([]byte("gasprice:"), dataReceiver).Return(re, nil)

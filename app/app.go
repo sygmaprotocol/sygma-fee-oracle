@@ -9,26 +9,23 @@ import (
 	"sync"
 	"time"
 
-	"github.com/ChainSafe/chainbridge-fee-oracle/config"
-	"github.com/ChainSafe/chainbridge-fee-oracle/consensus"
-	"github.com/ChainSafe/chainbridge-fee-oracle/identity"
+	"github.com/ChainSafe/sygma-fee-oracle/config"
+	"github.com/ChainSafe/sygma-fee-oracle/consensus"
+	"github.com/ChainSafe/sygma-fee-oracle/identity"
 
-	"github.com/ChainSafe/chainbridge-fee-oracle/api"
-	"github.com/ChainSafe/chainbridge-fee-oracle/base"
-	"github.com/ChainSafe/chainbridge-fee-oracle/cronjob"
-	"github.com/ChainSafe/chainbridge-fee-oracle/oracle"
-	"github.com/ChainSafe/chainbridge-fee-oracle/store"
+	"github.com/ChainSafe/sygma-fee-oracle/api"
+	"github.com/ChainSafe/sygma-fee-oracle/base"
+	"github.com/ChainSafe/sygma-fee-oracle/cronjob"
+	"github.com/ChainSafe/sygma-fee-oracle/oracle"
+	"github.com/ChainSafe/sygma-fee-oracle/store"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
 )
 
-var (
-	AppEvmDev  = "dev"
-	AppEvmProd = "production"
-)
-
 type FeeOracleApp struct {
 	base *base.FeeOracleAppBase
+
+	appMode config.AppMode
 
 	log *logrus.Entry
 
@@ -75,6 +72,7 @@ func NewFeeOracleApp(appBase *base.FeeOracleAppBase) *FeeOracleApp {
 	oracleIdentity := identity.NewOracleIdentityOperator(appBase.GetOracleIdentity())
 
 	app := &FeeOracleApp{
+		appMode:               appBase.GetConfig().AppModeConfig(),
 		base:                  appBase,
 		log:                   appBase.GetLogger().WithField("app", "app"),
 		ginInstance:           appBase.GetConfig().PrepareHttpServer(),
@@ -89,6 +87,8 @@ func NewFeeOracleApp(appBase *base.FeeOracleAppBase) *FeeOracleApp {
 		appTerminationChecker: sync.WaitGroup{},
 	}
 
+	app.base.GetLogger().Infof("running in: %s", appBase.GetEnv())
+	app.base.GetLogger().Infof("running mode: %s", app.appMode)
 	app.base.GetLogger().Info("fee oracle app init success")
 
 	return app
@@ -97,7 +97,9 @@ func NewFeeOracleApp(appBase *base.FeeOracleAppBase) *FeeOracleApp {
 func (a *FeeOracleApp) Start() {
 	a.startHttpServer()
 
-	a.startCronJobs()
+	if a.appMode != config.AppModeDebug {
+		a.startCronJobs()
+	}
 
 	a.goroutineMemoryLeakChecker()
 
@@ -111,6 +113,8 @@ func (a *FeeOracleApp) startHttpServer() {
 	go func() {
 		api.RouterSetup(a.ginInstance, a.identity, a.consensus, a.gasPriceStore, a.conversionRateStore, a.base.GetConfig(), a.log)
 
+		a.base.GetLogger().Infof("http server starts on port %s ", a.base.GetConfig().HttpServerConfig().Port)
+		a.base.GetLogger().Infof("http server mode: %s ", a.base.GetConfig().HttpServerConfig().Mode)
 		err := a.ginInstance.Run(a.base.GetConfig().HttpServerConfig().Port)
 		if err != nil {
 			a.base.GetLogger().Fatal("http server start error ", err)

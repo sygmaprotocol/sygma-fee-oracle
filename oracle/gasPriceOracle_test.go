@@ -11,10 +11,10 @@ import (
 
 	"github.com/ethereum/go-ethereum/crypto"
 
-	"github.com/ChainSafe/chainbridge-fee-oracle/base"
-	"github.com/ChainSafe/chainbridge-fee-oracle/oracle"
-	mockOracle "github.com/ChainSafe/chainbridge-fee-oracle/oracle/mock"
-	"github.com/ChainSafe/chainbridge-fee-oracle/types"
+	"github.com/ChainSafe/sygma-fee-oracle/base"
+	"github.com/ChainSafe/sygma-fee-oracle/oracle"
+	mockOracle "github.com/ChainSafe/sygma-fee-oracle/oracle/mock"
+	"github.com/ChainSafe/sygma-fee-oracle/types"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/suite"
 )

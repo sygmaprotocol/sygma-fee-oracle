@@ -1,6 +1,6 @@
-# Chainbridge Fee Oracle
+# Sygma Fee Oracle
 
-Chainbridge fee oracle is a go implemented, centralized service that provides the endpoints to Chainbridge UI
+Sygma fee oracle is a go implemented, centralized service that provides the endpoints to Sygma UI
 for all necessary data related to bridging fee.
 
 # Architecture Overview
@@ -17,7 +17,7 @@ This will clone the main branch of fee oracle codebase to your `workplace` dir a
 `$GOPATH/bin`
 ```
 $ mkdir workplace && cd workplace  
-$ git clone https://github.com/ChainSafe/chainbridge-fee-oracle.git
+$ git clone https://github.com/ChainSafe/Sygma-fee-oracle.git
 $ make install
 ```
 
@@ -32,7 +32,7 @@ Template of the config.yaml can be found in `./config/config.template.yaml`.
 
 ### Domain config file `domain.json`
 This file indicates all the domains the fee oracle needs to fetch data for. Details need to be matched with 
-Chainbridge core configuration, such as `id`.
+Sygma core configuration, such as `id`.
 
 Example:
 ```json
@@ -106,14 +106,14 @@ To quickly start from makefile, make sure `config.yaml`, `domain.json`, `resourc
 # Command Line
 Fee oracle provides CLI.  
 
-For general help:`$ chainbridge-fee-oracle -h`  
+For general help:`$ sygma-fee-oracle -h`  
 
-#### `$ chainbridge-fee-oracle server`
+#### `$ sygma-fee-oracle server`
 ```
-Start ChainBridge fee oracle main service
+Start Sygma fee oracle main service
 
 Usage:
-  chainbridge-fee-oracle server [flags]
+  sygma-fee-oracle server [flags]
 
 Flags:
   -c, --config_path string            
@@ -124,12 +124,12 @@ Flags:
   -r, --resource_config_path string
 ```
 
-#### <a id="keycli"></a>`$ chainbridge-fee-oracle key-generate`
+#### <a id="keycli"></a>`$ sygma-fee-oracle key-generate`
 ```
-Start ChainBridge fee oracle identity key generation
+Start Sygma fee oracle identity key generation
 
 Usage:
-  chainbridge-fee-oracle key-generate [flags]
+  sygma-fee-oracle key-generate [flags]
 
 Flags:
   -h, --help                  help for key-generate
@@ -164,6 +164,27 @@ if no keyfile exists in `./` dir, fee oracle will auto generate a `secp256k1` ke
 # End to End Test
 This will start fee oracle service, ganache-cli locally, install `solcjs`, `abigen` and generate contract go binding code, deploy fee handler contracts to local ganache.  
 `$ make e2e-test`
+
+# EVN Params
+Fee oracle loads important configs and prikey from files in CLI flags; however, the following EVN params will suppress CLI flags if provided.  
+Note: if `REMOTE_PARAM_OPERATOR_ENABLE` is set to `true`, valid credentials of the remote service must be setup.
+```text
+APP_MODE=release                                             // app mode: debug or release. app mode is used for internal testing only.
+IDENTITY_KEY=                                                // fee oracle prikey in hex, without 0x prefix 
+IDENTITY_KEY_TYPE=secp256k1                                  // fee oracle prikey type, only support secp256k1 for now
+WORKING_ENV=production                                       // fee oracle app running mode: dev or production
+LOG_LEVEL=4                                                  // log level, 4 is info, 5 is debug, using 4 on production
+HTTP_SERVER_MODE=release                                     // fee oracle http server running mode: debug or release
+HTTP_SERVER_PORT=8091                                        // fee oracle http server exposed port
+CONVERSION_RATE_JOB_FREQUENCY="* * * * *"                    // conversion rate job frequency, using cron schedule expressions(https://crontab.guru)
+GAS_PRICE_JOB_FREQUENCY="* * * * *"                          // gas price job frequency, using cron schedule expressions(https://crontab.guru)
+ETHERSCAN_API_KEY=                                           // api key of etherscan
+POLYGONSCAN_API_KEY=                                         // api key of polygonscan
+COINMARKETCAP_API_KEY=                                       // api key of coinmarketcap
+DATA_VALID_INTERVAL=3600                                     // Time of valid fee oracle response data in seconds
+CONVERSION_RATE_PAIRS=eth,usdt,matic,usdt                    // conversion rate pairs that enabled for price fetching. Must be paired
+REMOTE_PARAM_OPERATOR_ENABLE=true                            // enable remote param operator, only enable this when deploying to remote environment like staging or prod
+```
 
 # API Documentation
 [Swagger API Doc](https://app.swaggerhub.com/apis-docs/cb-fee-oracle/fee-oracle/1.0.0)

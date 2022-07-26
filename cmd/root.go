@@ -10,9 +10,9 @@ import (
 )
 
 var RootCmd = &cobra.Command{
-	Use:   "chainbridge-fee-oracle",
-	Short: "Chainbridge fee oracle CLI",
-	Long:  "Chainbridge fee oracle CLI",
+	Use:   "sygma-fee-oracle",
+	Short: "sygma fee oracle CLI",
+	Long:  "sygma fee oracle CLI",
 }
 
 func Execute() {

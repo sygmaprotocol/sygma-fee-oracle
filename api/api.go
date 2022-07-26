@@ -10,13 +10,13 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/ChainSafe/chainbridge-fee-oracle/types"
+	"github.com/ChainSafe/sygma-fee-oracle/types"
 
-	"github.com/ChainSafe/chainbridge-fee-oracle/config"
+	"github.com/ChainSafe/sygma-fee-oracle/config"
 
-	"github.com/ChainSafe/chainbridge-fee-oracle/consensus"
-	"github.com/ChainSafe/chainbridge-fee-oracle/identity"
-	"github.com/ChainSafe/chainbridge-fee-oracle/store"
+	"github.com/ChainSafe/sygma-fee-oracle/consensus"
+	"github.com/ChainSafe/sygma-fee-oracle/identity"
+	"github.com/ChainSafe/sygma-fee-oracle/store"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
 )
@@ -37,7 +37,11 @@ type Handler struct {
 func AddRouterPathsV1(v1RouterGroups map[string]*gin.RouterGroup, apiHandler *Handler, log *logrus.Entry) {
 	apiHandler.log = log.WithField("api", "v1")
 
-	v1RouterGroups["rate"].GET("/from/:fromDomainID/to/:toDomainID/token/:address", apiHandler.getRate)
+	if apiHandler.conf.AppModeConfig() == config.AppModeDebug {
+		v1RouterGroups["rate"].GET("/from/:fromDomainID/to/:toDomainID/token/:address", apiHandler.debugGetRate)
+	} else {
+		v1RouterGroups["rate"].GET("/from/:fromDomainID/to/:toDomainID/token/:address", apiHandler.getRate)
+	}
 }
 
 // endpoint: /{version}/rate/from/{fromDomainID}/to/{toDomainID}/token/{address}
@@ -136,6 +140,7 @@ func (h *Handler) getRate(c *gin.Context) {
 		ginErrorReturn(c, http.StatusInternalServerError, newReturnErrorResp(&config.ErrIdentityStampFail, err))
 		return
 	}
+
 	endpointRespData.ResourceID = resourceTokenAddr[len(h.conf.GetRegisteredDomains(fromDomainID).AddressPrefix):] +
 		fmt.Sprintf("%02s", strconv.FormatInt(int64(fromDomainID), 16))
 

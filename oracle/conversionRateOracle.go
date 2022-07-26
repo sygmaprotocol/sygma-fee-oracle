@@ -4,7 +4,7 @@
 package oracle
 
 import (
-	"github.com/ChainSafe/chainbridge-fee-oracle/types"
+	"github.com/ChainSafe/sygma-fee-oracle/types"
 	"github.com/sirupsen/logrus"
 )
 
