@@ -89,7 +89,7 @@
           },
           {
             "name": "CONVERSION_RATE_PAIRS",
-            "value": "eth,usdt,matic,usdt"
+            "value": "eth,usdt,eth,matic,matic,usdt"
           }
         ],
         "secrets": [
