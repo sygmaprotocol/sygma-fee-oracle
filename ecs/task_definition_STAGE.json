@@ -76,18 +76,6 @@
             "value": "secp256k1"
           },
           {
-            "name": "ETHERSCAN_API_KEY",
-            "value": "Z46H2I5FZJMV6N7TDZZ7QKMCX89IRB1VT3"
-          },
-          {
-            "name": "POLYGONSCAN_API_KEY",
-            "value": "SGKG7JRVE5EXP8NT7NI2R1UQE6R7JEIU66"
-          },
-          {
-            "name": "COINMARKETCAP_API_KEY",
-            "value": "dde34d0f-7fe4-42b9-885a-7f9aa744d9d2"
-          },
-          {
             "name": "CONVERSION_RATE_PAIRS",
             "value": "eth,usdt,eth,matic,matic,usdt"
           }
@@ -96,6 +84,18 @@
            {
               "name": "IDENTITY_KEY",
               "valueFrom": "arn:aws:ssm:us-east-2:852551629426:parameter/chainbridge/fee-oracle/IDENTITY_KEY"
+           },
+           {
+              "name": "ETHERSCAN_API_KEY",
+              "valueFrom": "arn:aws:ssm:us-east-2:852551629426:parameter/chainbridge/fee-oracle/ETHERSCAN_API_KEY"
+           },
+           {
+              "name": "POLYGONSCAN_API_KEY",
+              "valueFrom": "arn:aws:ssm:us-east-2:852551629426:parameter/chainbridge/fee-oracle/POLYGONSCAN_API_KEY"
+           },
+           {
+              "name": "COINMARKETCAP_API_KEY",
+              "valueFrom": "arn:aws:ssm:us-east-2:852551629426:parameter/chainbridge/fee-oracle/COINMARKETCAP_API_KEY"
            }
         ]
      },
