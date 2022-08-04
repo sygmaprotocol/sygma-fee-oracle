@@ -38,15 +38,15 @@ func AddRouterPathsV1(v1RouterGroups map[string]*gin.RouterGroup, apiHandler *Ha
 	apiHandler.log = log.WithField("api", "v1")
 
 	if apiHandler.conf.AppModeConfig() == config.AppModeDebug {
-		v1RouterGroups["rate"].GET("/from/:fromDomainID/to/:toDomainID/token/:address", apiHandler.debugGetRate)
+		v1RouterGroups["rate"].GET("/from/:fromDomainID/to/:toDomainID/resourceid/:resourceID", apiHandler.debugGetRate)
 	} else {
-		v1RouterGroups["rate"].GET("/from/:fromDomainID/to/:toDomainID/token/:address", apiHandler.getRate)
+		v1RouterGroups["rate"].GET("/from/:fromDomainID/to/:toDomainID/resourceid/:resourceID", apiHandler.getRate)
 	}
 }
 
 // endpoint: /{version}/rate/from/{fromDomainID}/to/{toDomainID}/token/{address}
-// example for transferring native token:   /rate/from/1/to/2/token/0x0000000000000000000000000000000000000000 : from ethereum to polygon transfer eth    => ber = matic / eth, ter = matic / eth, gas price is from polygon
-// example for transferring standard token: /rate/from/1/to/2/token/0x8A953CfE442c5E8855cc6c61b1293FA648BAE472 : from ethereum to polygon transfer doge   => ber = matic / eth, ter = matic / doge, gas price is from polygon
+// example for transferring native token:   /rate/from/0/to/1/resourceid/0x0000000000000000000000000000000000000000 : from ethereum to polygon transfer eth    => ber = matic / eth, ter = matic / eth, gas price is from polygon
+// example for transferring standard token: /rate/from/0/to/1/resourceid/0x0000000000000000000000000000000000000000000000000000000000000001 : from ethereum to polygon transfer doge   => ber = matic / eth, ter = matic / doge, gas price is from polygon
 func (h *Handler) getRate(c *gin.Context) {
 	fromDomainID, err := strconv.Atoi(c.Param("fromDomainID"))
 	if err != nil {
@@ -58,9 +58,9 @@ func (h *Handler) getRate(c *gin.Context) {
 		ginErrorReturn(c, http.StatusBadRequest, newReturnErrorResp(&config.ErrInvalidRequestInput, errors.New("invalid toDomainID")))
 		return
 	}
-	resourceTokenAddr := c.Param("address")
+	resourceID := c.Param("resourceID")
 
-	h.log.Debugf("new request with params fromDomainID: %d, toDomainID: %d, tokenAddress: %s\n", fromDomainID, toDomainID, resourceTokenAddr)
+	h.log.Debugf("new request with params fromDomainID: %d, toDomainID: %d, resourceID: %s\n", fromDomainID, toDomainID, resourceID)
 
 	toDomain := h.conf.GetRegisteredDomains(toDomainID)
 	if toDomain == nil {
@@ -73,10 +73,9 @@ func (h *Handler) getRate(c *gin.Context) {
 		return
 	}
 
-	resourceID := config.ResourceIDBuilder(resourceTokenAddr, fromDomainID)
 	resource := h.conf.GetRegisteredResources(resourceID)
 	if resource == nil {
-		ginErrorReturn(c, http.StatusBadRequest, newReturnErrorResp(&config.ErrInvalidRequestInput, errors.New("invalid token address")))
+		ginErrorReturn(c, http.StatusBadRequest, newReturnErrorResp(&config.ErrInvalidRequestInput, errors.New("invalid resourceID")))
 		return
 	}
 
@@ -135,14 +134,13 @@ func (h *Handler) getRate(c *gin.Context) {
 		ExpirationTimestamp:      h.dataExpirationManager(dataTime),
 	}
 
-	endpointRespData.Signature, err = h.rateSignature(endpointRespData, fromDomainID, resource.TokenAddress, resource.DomainId)
+	endpointRespData.Signature, err = h.rateSignature(endpointRespData, fromDomainID, resource.TokenAddress, resource.ID)
 	if err != nil {
 		ginErrorReturn(c, http.StatusInternalServerError, newReturnErrorResp(&config.ErrIdentityStampFail, err))
 		return
 	}
 
-	endpointRespData.ResourceID = resourceTokenAddr[len(h.conf.GetRegisteredDomains(fromDomainID).AddressPrefix):] +
-		fmt.Sprintf("%02s", strconv.FormatInt(int64(fromDomainID), 16))
+	endpointRespData.ResourceID = resource.ID
 
 	ginSuccessReturn(c, http.StatusOK, endpointRespData)
 }

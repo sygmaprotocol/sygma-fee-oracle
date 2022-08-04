@@ -4,7 +4,6 @@
 package api
 
 import (
-	"fmt"
 	"github.com/ChainSafe/sygma-fee-oracle/config"
 	"github.com/gin-gonic/gin"
 	"github.com/pkg/errors"
@@ -24,8 +23,14 @@ func (h *Handler) debugGetRate(c *gin.Context) {
 		ginErrorReturn(c, http.StatusBadRequest, newReturnErrorResp(&config.ErrInvalidRequestInput, errors.New("invalid toDomainID")))
 		return
 	}
-	resourceTokenAddr := c.Param("address")
+	resourceID := c.Param("resourceID")
 
+	resource := h.conf.GetRegisteredResources(resourceID)
+	if resource == nil {
+		ginErrorReturn(c, http.StatusBadRequest, newReturnErrorResp(&config.ErrInvalidRequestInput, errors.New("invalid resourceID, make "+
+			"sure you config token address under the corresponding resource in resource.json")))
+		return
+	}
 	endpointRespData := &FetchRateResp{
 		BaseRate:                 "0.000445",
 		TokenRate:                "8.948864",
@@ -36,10 +41,9 @@ func (h *Handler) debugGetRate(c *gin.Context) {
 		SignatureTimestamp:       time.Now().Unix(),
 		ExpirationTimestamp:      h.dataExpirationManager(time.Now().Unix()),
 		Debug:                    true,
-		ResourceID: resourceTokenAddr[len(h.conf.GetRegisteredDomains(fromDomainID).AddressPrefix):] +
-			fmt.Sprintf("%02s", strconv.FormatInt(int64(fromDomainID), 16)),
+		ResourceID:               resourceID,
 	}
-	endpointRespData.Signature, err = h.rateSignature(endpointRespData, fromDomainID, resourceTokenAddr, fromDomainID)
+	endpointRespData.Signature, err = h.rateSignature(endpointRespData, fromDomainID, resource.TokenAddress, resourceID)
 	if err != nil {
 		ginErrorReturn(c, http.StatusInternalServerError, newReturnErrorResp(&config.ErrIdentityStampFail, err))
 		return

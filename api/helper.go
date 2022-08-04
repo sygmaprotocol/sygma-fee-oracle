@@ -12,7 +12,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-func (h *Handler) rateSignature(result *FetchRateResp, fromDomainID int, resourceTokenAddr string, resourceDomainId int) (string, error) {
+func (h *Handler) rateSignature(result *FetchRateResp, fromDomainID int, resourceTokenAddr, resourceID string) (string, error) {
 	fromDomainBaseCurrency := h.conf.GetRegisteredResources(config.ResourceIDBuilder(config.NativeCurrencyAddr, fromDomainID))
 	if fromDomainBaseCurrency == nil {
 		return "", errors.New("failed to find the registered resource for native currency of from domain")
@@ -23,7 +23,7 @@ func (h *Handler) rateSignature(result *FetchRateResp, fromDomainID int, resourc
 	}
 	finalBaseEffectiveRate := util.PaddingZero(baseRate.Bytes(), 32)
 
-	tokenRateCurrency := h.conf.GetRegisteredResources(config.ResourceIDBuilder(resourceTokenAddr, resourceDomainId))
+	tokenRateCurrency := h.conf.GetRegisteredResources(resourceID)
 	if tokenRateCurrency == nil {
 		return "", errors.New("failed to find the registered resource for given address and domainId")
 	}

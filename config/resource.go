@@ -28,9 +28,9 @@ type resource struct {
 	TokenAddress string `json:"tokenAddress"`
 }
 
-func newResource(tokenAddress string, decimal int, symbol string, domain domain) *resource {
+func newResource(resourceID, tokenAddress string, decimal int, symbol string, domain domain) *resource {
 	return &resource{
-		ID:           ResourceIDBuilder(tokenAddress, domain.ID),
+		ID:           resourceID,
 		Symbol:       symbol,
 		Domain:       domain,
 		DomainId:     domain.ID,
@@ -63,8 +63,8 @@ func parseResources(resourceData []byte, domains map[int]domain) map[string]reso
 
 	resources := make(map[string]resource, 0)
 	for _, resource := range content.Resources {
-		resources[ResourceIDBuilder(resource.TokenAddress, resource.DomainId)] =
-			*newResource(strings.ToLower(resource.TokenAddress), resource.Decimal, resource.Symbol, domains[resource.DomainId])
+		resources[strings.ToLower(resource.ID)] =
+			*newResource(resource.ID, strings.ToLower(resource.TokenAddress), resource.Decimal, resource.Symbol, domains[resource.DomainId])
 	}
 
 	return resources
