@@ -28,8 +28,8 @@ import (
 )
 
 var (
-	FromDomainId       = 1
-	ToDomainID         = 2
+	FromDomainId       = 0
+	ToDomainID         = 1
 	gasUsed            = 100000
 	feePercent         = 500
 	FeeOracleHexPriKey = "6937d1d0b52f2fa7f4e071c7e64934ad988a8f21c6bf4f323fc19af4c77e3c5e" // 0x74d2946319bEEe4A140068eb83F9ee3a90B06F4f
@@ -208,10 +208,10 @@ func DataPrepare(path string) error {
 	}
 
 	dataKey2 := bytes.Buffer{}
-	dataKey2.WriteString(fmt.Sprintf("%s%s:%s:%s", "conversionrate:", "coinmarketcap", "matic", "doge"))
+	dataKey2.WriteString(fmt.Sprintf("%s%s:%s:%s", "conversionrate:", "coinmarketcap", "matic", "usdt"))
 	dataValue2 := &types.ConversionRate{
 		Base:       "matic",
-		Foreign:    "doge",
+		Foreign:    "usdt",
 		Rate:       8.948864,
 		OracleName: "coinmarketcap",
 		Time:       time.Now().Unix(),

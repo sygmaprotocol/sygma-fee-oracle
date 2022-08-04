@@ -43,15 +43,11 @@ func (h *Handler) rateSignature(result *FetchRateResp, fromDomainID int, resourc
 	finalFromDomainId := util.PaddingZero([]byte{uint8(result.FromDomainID)}, 32)
 	finalToDomainId := util.PaddingZero([]byte{uint8(result.ToDomainID)}, 32)
 
-	resourceId := bytes.Buffer{}
-	resourceIdBytes, err := hex.DecodeString(resourceTokenAddr[len(h.conf.GetRegisteredDomains(fromDomainID).AddressPrefix):])
+	finalResourceId, err := hex.DecodeString(resourceID[len(h.conf.GetRegisteredDomains(fromDomainID).AddressPrefix):])
 	if err != nil {
-		return "", errors.Wrap(err, "failed to decode resource address")
+		return "", errors.Wrap(err, "failed to decode resourceID")
 	}
-	resourceId.Write(resourceIdBytes)
-	resourceId.WriteByte(uint8(result.FromDomainID))
-	finalResourceId := util.PaddingZero(resourceId.Bytes(), 32)
-
+	
 	finalTimestampBytes, err := hex.DecodeString(finalTimestamp)
 	if err != nil {
 		return "", errors.Wrap(err, "failed to decode timestamp")

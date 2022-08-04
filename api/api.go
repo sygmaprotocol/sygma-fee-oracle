@@ -44,7 +44,7 @@ func AddRouterPathsV1(v1RouterGroups map[string]*gin.RouterGroup, apiHandler *Ha
 	}
 }
 
-// endpoint: /{version}/rate/from/{fromDomainID}/to/{toDomainID}/token/{address}
+// endpoint: /{version}/rate/from/{fromDomainID}/to/{toDomainID}/resourceid/{resourceID}
 // example for transferring native token:   /rate/from/0/to/1/resourceid/0x0000000000000000000000000000000000000000 : from ethereum to polygon transfer eth    => ber = matic / eth, ter = matic / eth, gas price is from polygon
 // example for transferring standard token: /rate/from/0/to/1/resourceid/0x0000000000000000000000000000000000000000000000000000000000000001 : from ethereum to polygon transfer doge   => ber = matic / eth, ter = matic / doge, gas price is from polygon
 func (h *Handler) getRate(c *gin.Context) {
