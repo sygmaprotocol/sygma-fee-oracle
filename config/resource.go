@@ -19,34 +19,33 @@ type resourceConfigFile struct {
 	Resources []resource `json:"resources"`
 }
 
-type resource struct {
-	ID           string `json:"id"`
-	Symbol       string `json:"symbol"`
-	DomainId     int    `json:"domainId"`
-	Domain       domain `json:"domain"`
-	Decimal      int    `json:"decimal"`
-	TokenAddress string `json:"tokenAddress"`
+type resourceDomainInfo struct {
+	DomainId int `json:"domainId"`
+	Decimal  int `json:"decimal"`
 }
 
-func newResource(resourceID, tokenAddress string, decimal int, symbol string, domain domain) *resource {
+type resource struct {
+	ID      string               `json:"id"`
+	Symbol  string               `json:"symbol"`
+	Domains []resourceDomainInfo `json:"domains"`
+}
+
+func newResource(resourceID string, symbol string, domains []resourceDomainInfo) *resource {
 	return &resource{
-		ID:           resourceID,
-		Symbol:       symbol,
-		Domain:       domain,
-		DomainId:     domain.ID,
-		Decimal:      decimal,
-		TokenAddress: tokenAddress,
+		ID:      resourceID,
+		Symbol:  symbol,
+		Domains: domains,
 	}
 }
 
 // loadResources registers and load all pre-defined resources
-func loadResources(resourceConfigPath string, domains map[int]domain) map[string]resource {
+func loadResources(resourceConfigPath string) map[string]resource {
 	resourceData, err := ioutil.ReadFile(filepath.Clean(resourceConfigPath))
 	if err != nil {
 		panic(ErrLoadResourceConfig.Wrap(err))
 	}
 
-	return parseResources(resourceData, domains)
+	return parseResources(resourceData)
 }
 
 // ResourceIDBuilder builds the resourceID according to fee handler contract
@@ -54,7 +53,7 @@ func ResourceIDBuilder(tokenAddress string, domainId int) string {
 	return fmt.Sprintf("%s%d", strings.ToLower(tokenAddress), domainId)
 }
 
-func parseResources(resourceData []byte, domains map[int]domain) map[string]resource {
+func parseResources(resourceData []byte) map[string]resource {
 	var content resourceConfigFile
 	err := json.Unmarshal(resourceData, &content)
 	if err != nil {
@@ -64,7 +63,7 @@ func parseResources(resourceData []byte, domains map[int]domain) map[string]reso
 	resources := make(map[string]resource, 0)
 	for _, resource := range content.Resources {
 		resources[strings.ToLower(resource.ID)] =
-			*newResource(resource.ID, strings.ToLower(resource.TokenAddress), resource.Decimal, resource.Symbol, domains[resource.DomainId])
+			*newResource(resource.ID, resource.Symbol, resource.Domains)
 	}
 
 	return resources

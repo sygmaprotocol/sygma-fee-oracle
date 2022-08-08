@@ -256,7 +256,7 @@ func (c *Config) GetRegisteredDomains(domainId int) *domain {
 }
 
 func (c *Config) setResources(resourceData string) {
-	c.config.Resources = parseResources([]byte(resourceData), c.config.Domains)
+	c.config.Resources = parseResources([]byte(resourceData))
 }
 
 func (c *Config) GetRegisteredResources(resourceId string) *resource {
@@ -265,6 +265,20 @@ func (c *Config) GetRegisteredResources(resourceId string) *resource {
 		return nil
 	}
 	return &r
+}
+
+func (c *Config) GetRegisteredResourceDomainInfo(resourceId string, domainId int) *resourceDomainInfo {
+	r, ok := c.config.Resources[strings.ToLower(resourceId)]
+	if !ok {
+		return nil
+	}
+
+	for _, d := range r.Domains {
+		if d.DomainId == domainId {
+			return &d
+		}
+	}
+	return nil
 }
 
 func (c *Config) ConversionRatePairsChecker() error {
@@ -385,7 +399,7 @@ func LoadConfig(configPath, domainConfigPath, resourceConfigPath string) (*Confi
 
 	// load domains and resources
 	conf.config.Domains = loadDomains(domainConfigPath)
-	conf.config.Resources = loadResources(resourceConfigPath, conf.config.Domains)
+	conf.config.Resources = loadResources(resourceConfigPath)
 
 	// load data valid interval
 	conf.config.DataValidInterval = conf.dataValidIntervalConfigLoad()
