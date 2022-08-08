@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/ChainSafe/sygma-fee-oracle/types"
@@ -45,8 +46,9 @@ func AddRouterPathsV1(v1RouterGroups map[string]*gin.RouterGroup, apiHandler *Ha
 }
 
 // endpoint: /{version}/rate/from/{fromDomainID}/to/{toDomainID}/resourceid/{resourceID}
-// example for transferring native token:   /rate/from/0/to/1/resourceid/0x0000000000000000000000000000000000000000 : from ethereum to polygon transfer eth    => ber = matic / eth, ter = matic / eth, gas price is from polygon
-// example for transferring standard token: /rate/from/0/to/1/resourceid/0x0000000000000000000000000000000000000000000000000000000000000001 : from ethereum to polygon transfer usdt   => ber = matic / eth, ter = matic / usdt, gas price is from polygon
+// api call example:   /rate/from/0/to/1/resourceid/0x0000000000000000000000000000000000000000000000000000000000000001
+// calculation of transferring native resource: from ethereum to polygon transfer eth    => ber = matic / eth, ter = matic / eth, gas price is from polygon
+// calculation of transferring standard token : from ethereum to polygon transfer usdt   => ber = matic / eth, ter = matic / usdt, gas price is from polygon
 func (h *Handler) getRate(c *gin.Context) {
 	fromDomainID, err := strconv.Atoi(c.Param("fromDomainID"))
 	if err != nil {
@@ -58,24 +60,31 @@ func (h *Handler) getRate(c *gin.Context) {
 		ginErrorReturn(c, http.StatusBadRequest, newReturnErrorResp(&config.ErrInvalidRequestInput, errors.New("invalid toDomainID")))
 		return
 	}
+	if fromDomainID == toDomainID {
+		ginErrorReturn(c, http.StatusBadRequest, newReturnErrorResp(&config.ErrInvalidRequestInput, errors.New("fromDomainID cannot be the same as toDomainID")))
+		return
+	}
 	resourceID := c.Param("resourceID")
-
+	if !strings.HasPrefix(resourceID, "0x") || len(resourceID) != 66 {
+		ginErrorReturn(c, http.StatusBadRequest, newReturnErrorResp(&config.ErrInvalidRequestInput, errors.New("invalid resourceID")))
+		return
+	}
 	h.log.Debugf("new request with params fromDomainID: %d, toDomainID: %d, resourceID: %s\n", fromDomainID, toDomainID, resourceID)
 
 	toDomain := h.conf.GetRegisteredDomains(toDomainID)
 	if toDomain == nil {
-		ginErrorReturn(c, http.StatusBadRequest, newReturnErrorResp(&config.ErrInvalidRequestInput, errors.New("invalid toDomainID")))
+		ginErrorReturn(c, http.StatusBadRequest, newReturnErrorResp(&config.ErrInvalidRequestInput, errors.New("toDomainID not registered")))
 		return
 	}
 	fromDomain := h.conf.GetRegisteredDomains(fromDomainID)
 	if fromDomain == nil {
-		ginErrorReturn(c, http.StatusBadRequest, newReturnErrorResp(&config.ErrInvalidRequestInput, errors.New("invalid fromDomain")))
+		ginErrorReturn(c, http.StatusBadRequest, newReturnErrorResp(&config.ErrInvalidRequestInput, errors.New("fromDomain not registered")))
 		return
 	}
 
 	resource := h.conf.GetRegisteredResources(resourceID)
 	if resource == nil {
-		ginErrorReturn(c, http.StatusBadRequest, newReturnErrorResp(&config.ErrInvalidRequestInput, errors.New("invalid resourceID")))
+		ginErrorReturn(c, http.StatusBadRequest, newReturnErrorResp(&config.ErrInvalidRequestInput, errors.New("resourceID not registered")))
 		return
 	}
 

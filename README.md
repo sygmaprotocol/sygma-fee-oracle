@@ -59,8 +59,7 @@ Example:
 ### Resource config file `resource.json`
 `resource` stands for the asset that can be bridged in Sygma. This `resource.json` file indicates all the resources the fee oracle needs to fetch data for.
 Each resource has one unique `id` across all supported domains(networks), and it also has `domains` subsection to address some special domain related information each as `decimal`.
-For the native currency, such as Ether on Ethereum, Matic on Polygon, the `id` is constructed with zero address and its native `domainId`.
-The native currency resourceId is used in baseRate calculation.
+Sygma currently does not support bridging the native currency, such as Ether on Ethereum, Matic on Polygon, however, the `id` is constructed with zero address and its native `domainId` and is used in baseRate calculation internally.
 
 ```json
 {

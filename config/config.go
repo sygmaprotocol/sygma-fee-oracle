@@ -268,8 +268,8 @@ func (c *Config) GetRegisteredResources(resourceId string) *resource {
 }
 
 func (c *Config) GetRegisteredResourceDomainInfo(resourceId string, domainId int) *resourceDomainInfo {
-	r, ok := c.config.Resources[strings.ToLower(resourceId)]
-	if !ok {
+	r := c.GetRegisteredResources(resourceId)
+	if r == nil {
 		return nil
 	}
 
