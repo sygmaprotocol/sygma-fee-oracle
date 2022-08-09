@@ -12,22 +12,23 @@ import (
 	"github.com/pkg/errors"
 )
 
-func (h *Handler) rateSignature(result *FetchRateResp, fromDomainID int, resourceTokenAddr string, resourceDomainId int) (string, error) {
-	fromDomainBaseCurrency := h.conf.GetRegisteredResources(config.ResourceIDBuilder(config.NativeCurrencyAddr, fromDomainID))
-	if fromDomainBaseCurrency == nil {
-		return "", errors.New("failed to find the registered resource for native currency of from domain")
+func (h *Handler) rateSignature(result *FetchRateResp, fromDomainID int, resourceID string) (string, error) {
+	fromDomainBaseCurrencyResourceId := config.ResourceIDBuilder(config.NativeCurrencyAddr, fromDomainID)
+	fromDomainBaseCurrencyDomainInfo := h.conf.GetRegisteredResourceDomainInfo(fromDomainBaseCurrencyResourceId, fromDomainID)
+	if fromDomainBaseCurrencyDomainInfo == nil {
+		return "", errors.New("failed to find the registered resource domain info for native currency of from domain")
 	}
-	baseRate, err := util.Large2SmallUnitConverter(result.BaseRate, uint(fromDomainBaseCurrency.Decimal))
+	baseRate, err := util.Large2SmallUnitConverter(result.BaseRate, uint(fromDomainBaseCurrencyDomainInfo.Decimal))
 	if err != nil {
 		return "", errors.Wrap(err, "failed to convert BaseRate")
 	}
 	finalBaseEffectiveRate := util.PaddingZero(baseRate.Bytes(), 32)
 
-	tokenRateCurrency := h.conf.GetRegisteredResources(config.ResourceIDBuilder(resourceTokenAddr, resourceDomainId))
-	if tokenRateCurrency == nil {
-		return "", errors.New("failed to find the registered resource for given address and domainId")
+	tokenRateCurrencyDomainInfo := h.conf.GetRegisteredResourceDomainInfo(resourceID, fromDomainID)
+	if tokenRateCurrencyDomainInfo == nil {
+		return "", errors.New("failed to find the registered resource domain info for given resourceID")
 	}
-	tokenRate, err := util.Large2SmallUnitConverter(result.TokenRate, uint(tokenRateCurrency.Decimal))
+	tokenRate, err := util.Large2SmallUnitConverter(result.TokenRate, uint(tokenRateCurrencyDomainInfo.Decimal))
 	if err != nil {
 		return "", errors.Wrap(err, "failed to convert TokenRate")
 	}
@@ -43,15 +44,11 @@ func (h *Handler) rateSignature(result *FetchRateResp, fromDomainID int, resourc
 	finalFromDomainId := util.PaddingZero([]byte{uint8(result.FromDomainID)}, 32)
 	finalToDomainId := util.PaddingZero([]byte{uint8(result.ToDomainID)}, 32)
 
-	resourceId := bytes.Buffer{}
-	resourceIdBytes, err := hex.DecodeString(resourceTokenAddr[len(h.conf.GetRegisteredDomains(fromDomainID).AddressPrefix):])
+	finalResourceId, err := hex.DecodeString(resourceID[len(h.conf.GetRegisteredDomains(fromDomainID).AddressPrefix):])
 	if err != nil {
-		return "", errors.Wrap(err, "failed to decode resource address")
+		return "", errors.Wrap(err, "failed to decode resourceID")
 	}
-	resourceId.Write(resourceIdBytes)
-	resourceId.WriteByte(uint8(result.FromDomainID))
-	finalResourceId := util.PaddingZero(resourceId.Bytes(), 32)
-
+	
 	finalTimestampBytes, err := hex.DecodeString(finalTimestamp)
 	if err != nil {
 		return "", errors.Wrap(err, "failed to decode timestamp")

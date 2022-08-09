@@ -39,14 +39,14 @@ Example:
 {
   "domains": [
     {
-      "id": 1,
+      "id": 0,
       "name": "ethereum",
       "baseCurrencyFullName": "ether",
       "baseCurrencySymbol": "eth",
       "addressPrefix": "0x"
     },
     {
-      "id": 2,
+      "id": 1,
       "name": "polygon",
       "baseCurrencyFullName": "matic",
       "baseCurrencySymbol": "matic",
@@ -57,36 +57,46 @@ Example:
 ```
 
 ### Resource config file `resource.json`
-This file indicates all the resources(assets) the fee oracle needs to fetch data for. Details need to be matched with the asset contract that 
-deployed on the target chain. For example, USDT token address on ethereum(domainId is 1 in domain.json) is `0xdAC17F958D2ee523a2206206994597C13D831ec7`.
-For the native current address, such as Ether on Ethereum, Matic on Polygon, the `tokenAddress` is always `0x0000000000000000000000000000000000000000`
+`resource` stands for the asset that can be bridged in Sygma. This `resource.json` file indicates all the resources the fee oracle needs to fetch data for.
+Each resource has one unique `id` across all supported domains(networks), and it also has `domains` subsection to address some special domain related information each as `decimal`.
+Sygma currently does not support bridging the native currency, such as Ether on Ethereum, Matic on Polygon, however, the `id` is constructed with zero address and its native `domainId` and is used in baseRate calculation internally.
 
 ```json
 {
   "resources": [
     {
+      "id": "0x00000000000000000000000000000000000000000",
       "symbol": "eth",
-      "decimal": 18,
-      "tokenAddress": "0x0000000000000000000000000000000000000000",
-      "domainId": 1
+      "domains": [
+        {
+          "domainId": 0,
+          "decimal": 18
+        }
+      ]
     },
     {
-      "symbol": "usdt",
-      "decimal": 6,
-      "tokenAddress": "0xdAC17F958D2ee523a2206206994597C13D831ec7",
-      "domainId": 1
-    },
-    {
+      "id": "0x00000000000000000000000000000000000000001",
       "symbol": "matic",
-      "decimal": 18,
-      "tokenAddress": "0x0000000000000000000000000000000000000000",
-      "domainId": 2
+      "domains": [
+        {
+          "domainId": 1,
+          "decimal": 18
+        }
+      ]
     },
     {
-      "symbol": "doge",
-      "decimal": 18,
-      "tokenAddress": "0x8A953CfE442c5E8855cc6c61b1293FA648BAE472",
-      "domainId": 2
+      "id": "0x0000000000000000000000000000000000000000000000000000000000000001",
+      "symbol": "usdt",
+      "domains": [
+        {
+          "domainId": 0,
+          "decimal": 18
+        },
+        {
+          "domainId": 1,
+          "decimal": 18
+        }
+      ]
     }
   ]
 }

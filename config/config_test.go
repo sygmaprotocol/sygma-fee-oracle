@@ -84,17 +84,18 @@ func (s *RemoteParamOperatorTestSuite) TestSetRemoteParams_Success() {
 	domainData := "{\n  \"domains\": [\n    {\n      \"id\": 10,\n      \"name\": \"ethereum\",\n      \"baseCurrencyFullName\": \"ether\",\n      \"baseCurrencySymbol\": \"eth\",\n      \"addressPrefix\": \"0x\"\n    }\n  ]\n}"
 
 	// mock resource data
-	// {
-	//  "resources": [
-	//    {
-	//      "symbol": "eth",
-	//      "decimal": 18,
-	//      "tokenAddress": "0xfC2e2618147813E510CFc92747f0D09C14A653c5",
-	//      "domainId": 3
-	//    }
-	//  ]
+	//{
+	// "resources": [
+	//   {
+	//     "id": "0x0000000000000000000000000000000000000000000000000000000000000001",
+	//     "symbol": "eth",
+	//     "decimal": 18,
+	//     "tokenAddress": "0xfC2e2618147813E510CFc92747f0D09C14A653c5",
+	//     "domainId": 3
+	//   }
+	// ]
 	//}
-	resourceData := "{\n  \"resources\": [\n    {\n      \"symbol\": \"eth\",\n      \"decimal\": 18,\n      \"tokenAddress\": \"0xfC2e2618147813E510CFc92747f0D09C14A653c5\",\n      \"domainId\": 3\n    }\n  ]\n}"
+	resourceData := "{\n\t \"resources\": [\n\t   {\n\t     \"id\": \"0x0000000000000000000000000000000000000000000000000000000000000001\",\n\t     \"symbol\": \"eth\",\n\t     \"decimal\": 18,\n\t     \"tokenAddress\": \"0xfC2e2618147813E510CFc92747f0D09C14A653c5\",\n\t     \"domainId\": 3\n\t   }\n\t ]\n\t}\n"
 
 	s.remoteParamOperator.EXPECT().LoadParameter("/chainbridge/fee-oracle/domainData").Times(1).Return(&remoteParam.RemoteParamResult{Value: domainData}, nil)
 	s.remoteParamOperator.EXPECT().LoadParameter("/chainbridge/fee-oracle/resourceData").Times(1).Return(&remoteParam.RemoteParamResult{Value: resourceData}, nil)
@@ -102,5 +103,5 @@ func (s *RemoteParamOperatorTestSuite) TestSetRemoteParams_Success() {
 	s.NotPanics(func() { s.conf.SetRemoteParams(s.remoteParamOperator) }, "should not panic")
 
 	s.NotNil(s.conf.GetRegisteredDomains(10))
-	s.NotNil(s.conf.GetRegisteredResources(config.ResourceIDBuilder("0xfC2e2618147813E510CFc92747f0D09C14A653c5", 3)))
+	s.NotNil(s.conf.GetRegisteredResources("0x0000000000000000000000000000000000000000000000000000000000000001"))
 }

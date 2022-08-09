@@ -52,7 +52,7 @@ func (s *SignatureVerificationTestSuite) TestSignatureVerification_CalculateFee(
 	finalAmount := util.PaddingZero(amount.Bytes(), 32)
 
 	// fee oracle endpoints request
-	resp, err := http.Get("http://127.0.0.1:8091/v1/rate/from/1/to/2/token/0xbA2aE424d960c26247Dd6c32edC70B295c744C43")
+	resp, err := http.Get("http://127.0.0.1:8091/v1/rate/from/0/to/1/resourceid/0x0000000000000000000000000000000000000000000000000000000000000001")
 	s.Nil(err)
 
 	body, err := ioutil.ReadAll(resp.Body)
@@ -81,10 +81,9 @@ func (s *SignatureVerificationTestSuite) TestSignatureVerification_CalculateFee(
 	finalFromDomainId := util.PaddingZero([]byte{uint8(response.Response.FromDomainID)}, 32)
 	finalToDomainId := util.PaddingZero([]byte{uint8(response.Response.ToDomainID)}, 32)
 
-	resourceId := bytes.Buffer{}
-	resourceId.Write(s.contractSetup.ERC20PresetMinterPauserAddress.Bytes())
-	resourceId.WriteByte(uint8(response.Response.FromDomainID))
-	finalResourceId := util.PaddingZero(resourceId.Bytes(), 32)
+	finalResourceId, err := hex.DecodeString(response.Response.ResourceID[2:])
+	s.Nil(err)
+
 	_, err = s.contractSetup.BridgeInstance.AdminSetResource(setup.IncreaseNonce(s.contractSetup.Auth), s.contractSetup.ERC20HandlerAddress, util.Byte32Converter(finalResourceId), s.contractSetup.ERC20PresetMinterPauserAddress)
 	s.Nil(err)
 
@@ -146,14 +145,14 @@ func (s *SignatureVerificationTestSuite) TestSignatureVerification_CalculateFee(
 		panic(err)
 	}
 	if crypto.PubkeyToAddress(*signerPubKey).String() != feeOracleKey.Address() {
-		panic("singer does not match")
+		panic("signer does not match")
 	}
 
 	// calling actual test: CalculateFee in Fee handler contract
 	result, err := s.contractSetup.FeeHandlerInstance.CalculateFee(&bind.CallOpts{From: s.contractSetup.Auth.From}, setup.SenderAddress, uint8(setup.FromDomainId), uint8(setup.ToDomainID), util.Byte32Converter(finalResourceId), []byte(""), feeData.Bytes())
 	s.Nil(err)
 
-	// test result verfication
+	// test result verification
 	s.EqualValues(result.TokenAddress.String(), s.contractSetup.ERC20PresetMinterPauserAddress.String(), "resource token address does not match")
 	s.EqualValues("50000000000000000", result.Fee.String(), "fee does not match")
 }
