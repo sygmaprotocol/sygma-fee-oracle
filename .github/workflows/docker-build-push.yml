@@ -29,7 +29,7 @@ jobs:
           COMMIT_HASH=$(echo $GITHUB_SHA | head -c7)
           
           # creates local variable to hold docker images
-          TAGS="${{ env.IMAGE_NAME }}:${COMMIT_HASH},${{ env.IMAGE_NAME }}:latest"
+          TAGS="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${COMMIT_HASH},${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest"
           
           # check if branch/tag that triggered workflow was from tags
           if [[ $GITHUB_REF == refs/tags/* ]]; then
@@ -38,7 +38,7 @@ jobs:
             VERSION=${GITHUB_REF#refs/tags/}
           
             # append version to tags
-            TAGS="${TAGS},${{ env.IMAGE_NAME }}:${VERSION}"
+            TAGS="${TAGS},${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${VERSION}"
           
           fi
           
