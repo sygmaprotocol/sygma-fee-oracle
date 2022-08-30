@@ -200,4 +200,4 @@ REMOTE_PARAM_OPERATOR_ENABLE=true                            // enable remote pa
 [Swagger API Doc](https://app.swaggerhub.com/apis-docs/cb-fee-oracle/fee-oracle/1.0.0)
 
 # License
-_GNU Lesser General Public License v3.0_
+_Business Source License 1.1_
