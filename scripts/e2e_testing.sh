@@ -28,7 +28,7 @@ mkdir -p $E2E_TEST_DIR/genericHandler
 mkdir -p $E2E_TEST_DIR/accessControlSegregator
 
 # clone solidity code and checkout target branch
-git clone --branch $solidity_branch https://github.com/ChainSafe/sygma-solidity.git $E2E_TEST_DIR/sygma-solidity
+git clone --branch $solidity_branch https://github.com/sygmaprotocol/sygma-solidity.git $E2E_TEST_DIR/sygma-solidity
 
 # install sygma-solidity
 npm i --prefix $SOLIDITY_DIR
