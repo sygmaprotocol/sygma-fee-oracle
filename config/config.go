@@ -80,6 +80,7 @@ type oracle struct {
 	Etherscan     etherscan     `mapstructure:"etherscan"`
 	Polygonscan   polygonscan   `mapstructure:"polygonscan"`
 	CoinMarketCap coinMarketCap `mapstructure:"coinmarketcap"`
+	Moonscan      coinMarketCap `mapstructure:"moonscan"`
 }
 
 type store struct {
@@ -205,6 +206,7 @@ func (c *Config) OracleConfig() oracle {
 	etherscanAPIKey := os.Getenv("ETHERSCAN_API_KEY")
 	polygonscanAPIKey := os.Getenv("POLYGONSCAN_API_KEY")
 	coinMarketCapAPIKey := os.Getenv("COINMARKETCAP_API_KEY")
+	moonscanAPIKey := os.Getenv("MOONSCAN_API_KEY")
 
 	if etherscanAPIKey != "" {
 		oracleConfig.Etherscan.ApiKey = etherscanAPIKey
@@ -214,6 +216,9 @@ func (c *Config) OracleConfig() oracle {
 	}
 	if coinMarketCapAPIKey != "" {
 		oracleConfig.CoinMarketCap.ApiKey = coinMarketCapAPIKey
+	}
+	if moonscanAPIKey != "" {
+		oracleConfig.Moonscan.ApiKey = moonscanAPIKey
 	}
 
 	return oracleConfig

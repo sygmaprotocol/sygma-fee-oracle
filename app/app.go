@@ -53,11 +53,13 @@ func NewFeeOracleApp(appBase *base.FeeOracleAppBase) *FeeOracleApp {
 	coinMarketCap := oracle.NewCoinMarketCap(appBase.GetConfig(), appBase.GetLogger())
 	etherscan := oracle.NewEtherscan(appBase.GetConfig(), appBase.GetLogger())
 	polygonscan := oracle.NewPolygonscan(appBase.GetConfig(), appBase.GetLogger())
+	moonscan := oracle.NewMoonscan(appBase.GetConfig(), appBase.GetLogger())
 
 	// register concrete oracle services in operator
 	coinMarketCapConversionRateOracle := oracle.NewConversionRateOracleOperator(appBase.GetLogger(), coinMarketCap)
 	etherscanGasPriceOracle := oracle.NewGasPriceOracleOperator(appBase.GetLogger(), etherscan)
 	polygonscanGasPriceOracle := oracle.NewGasPriceOracleOperator(appBase.GetLogger(), polygonscan)
+	moonscanGasPriceOracle := oracle.NewGasPriceOracleOperator(appBase.GetLogger(), moonscan)
 
 	conversionRateOracles := make(map[string]*oracle.ConversionRateOracleOperator)
 	conversionRateOracles[coinMarketCap.Name()] = coinMarketCapConversionRateOracle
@@ -65,6 +67,7 @@ func NewFeeOracleApp(appBase *base.FeeOracleAppBase) *FeeOracleApp {
 	gasPriceOracles := make(map[string]*oracle.GasPriceOracleOperator)
 	gasPriceOracles[etherscan.Name()] = etherscanGasPriceOracle
 	gasPriceOracles[polygonscan.Name()] = polygonscanGasPriceOracle
+	gasPriceOracles[moonscan.Name()] = moonscanGasPriceOracle
 
 	conversionRateStore := store.NewConversionRateStore(appBase.GetStore())
 	gasPriceStore := store.NewGasPriceStore(appBase.GetStore())

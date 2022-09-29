@@ -13,6 +13,13 @@
       "baseCurrencyFullName": "matic",
       "baseCurrencySymbol": "matic",
       "addressPrefix": "0x"
+    },
+    {
+      "id": 2,
+      "name": "moonbeam",
+      "baseCurrencyFullName": "glimmer",
+      "baseCurrencySymbol": "GLMR",
+      "addressPrefix": "0x"
     }
   ]
 }
