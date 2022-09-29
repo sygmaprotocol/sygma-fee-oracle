@@ -18,7 +18,7 @@
       "id": 2,
       "name": "moonbeam",
       "baseCurrencyFullName": "glimmer",
-      "baseCurrencySymbol": "GLMR",
+      "baseCurrencySymbol": "glmr",
       "addressPrefix": "0x"
     }
   ]

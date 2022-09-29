@@ -56,6 +56,9 @@ func (m *Moonscan) InquiryGasPrice(domainName string) (*types.GasPrices, error) 
 		return nil, ErrNotSupported
 	}
 
+	// Moonscan doesn't support GasTracker API like Etherscan and Polygonscan does,
+	// so we will use eth_gasPrice RPC call here
+	// the JSON2.0 response will be different: if Message is empty, it means a successful call
 	statusCode, body, err := client.NewHttpRequestMessage(http.MethodGet, m.apis.GasPriceRequest,
 		nil, nil, m.log).Request()
 	if err != nil || statusCode != http.StatusOK {
@@ -70,11 +73,11 @@ func (m *Moonscan) InquiryGasPrice(domainName string) (*types.GasPrices, error) 
 		return nil, errors.Wrap(err, "failed to unmarshal resp body of querying gas price")
 	}
 
-	if prResult.Message != "OK" {
+	if prResult.Message != "" {
 		return nil, errors.Errorf("failed to fetch gas price: %s", prResult.Result)
 	}
 
-	gp, ok := new(big.Int).SetString(pr.Result, 16)
+	gp, ok := big.NewInt(0).SetString(pr.Result[2:], 16)
 	if !ok {
 		return nil, errors.Wrap(err, "failed to decode gas price response")
 	}
