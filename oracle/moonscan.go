@@ -52,7 +52,7 @@ func NewMoonscan(conf *config.Config, log *logrus.Entry) *Moonscan {
 }
 
 func (m *Moonscan) InquiryGasPrice(domainName string) (*types.GasPrices, error) {
-	if strings.ToLower(domainName) != "moonbeam" { // TODO: moonbeam
+	if strings.ToLower(domainName) != "moonbeam" {
 		return nil, ErrNotSupported
 	}
 
