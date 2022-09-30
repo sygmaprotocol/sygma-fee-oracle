@@ -191,6 +191,7 @@ GAS_PRICE_JOB_FREQUENCY="* * * * *"                          // gas price job fr
 ETHERSCAN_API_KEY=                                           // api key of etherscan
 POLYGONSCAN_API_KEY=                                         // api key of polygonscan
 COINMARKETCAP_API_KEY=                                       // api key of coinmarketcap
+MOONSCAN_API_KEY=                                            // api key of moonscan
 DATA_VALID_INTERVAL=3600                                     // Time of valid fee oracle response data in seconds
 CONVERSION_RATE_PAIRS=eth,usdt,matic,usdt                    // conversion rate pairs that enabled for price fetching. Must be paired
 REMOTE_PARAM_OPERATOR_ENABLE=true                            // enable remote param operator, only enable this when deploying to remote environment like staging or prod
