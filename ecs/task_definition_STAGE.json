@@ -77,7 +77,7 @@
           },
           {
             "name": "CONVERSION_RATE_PAIRS",
-            "value": "eth,usdt,eth,matic,matic,usdt"
+            "value": "eth,usdt,eth,matic,matic,usdt,eth,glmr,glmr,usdt"
           }
         ],
         "secrets": [
@@ -96,6 +96,10 @@
            {
               "name": "COINMARKETCAP_API_KEY",
               "valueFrom": "arn:aws:ssm:us-east-2:852551629426:parameter/chainbridge/fee-oracle/COINMARKETCAP_API_KEY"
+           },
+           {
+            "name": "MOONSCAN_API_KEY",
+            "valueFrom": "arn:aws:ssm:us-east-2:852551629426:parameter/chainbridge/fee-oracle/MOONSCAN_API_KEY"
            }
         ]
      },
