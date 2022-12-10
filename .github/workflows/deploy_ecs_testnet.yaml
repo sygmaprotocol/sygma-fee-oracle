@@ -11,7 +11,7 @@ on:
 env:
   AWS_REGION: 'us-east-2'
   ECR_REPOSITORY: fee-oracle
-  ENVIRONMENT: PROD
+  ENVIRONMENT: TESTNET
 
 jobs:
   deploy:

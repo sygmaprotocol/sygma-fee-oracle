@@ -1,13 +1,13 @@
 {
   "containerDefinitions": [
     {
-      "name": "fee-oracle-container-PROD",
+      "name": "fee-oracle-container-TESTNET",
       "essential": true,
       "image": "852551629426.dkr.ecr.us-east-2.amazonaws.com/fee-oracle:stable",
       "logConfiguration": {
         "logDriver": "awslogs",
         "options": {
-          "awslogs-group": "/ecs/fee-oracle-PROD",
+          "awslogs-group": "/ecs/fee-oracle-TESTNET",
           "awslogs-region": "us-east-2",
           "awslogs-stream-prefix": "ecs"
         }
@@ -99,7 +99,7 @@
       "logConfiguration": {
         "logDriver": "awslogs",
         "options": {
-          "awslogs-group": "/ecs/fee-oracle-PROD",
+          "awslogs-group": "/ecs/fee-oracle-TESTNET",
           "awslogs-region": "us-east-2",
           "awslogs-stream-prefix": "ecs"
         }
@@ -124,7 +124,7 @@
         },
         {
           "name": "DD_TAGS",
-          "value": "env:PROD,project:fee-oracle"
+          "value": "env:TESTNET,project:fee-oracle"
         },
         {
           "name": "ECS_FARGATE",
@@ -132,7 +132,7 @@
         },
         {
           "name": "ENV",
-          "value": "PROD"
+          "value": "TESTNET"
         }
       ],
       "secrets": [
@@ -157,7 +157,7 @@
       "logConfiguration": {
         "logDriver": "awslogs",
         "options": {
-          "awslogs-group": "/ecs/fee-oracle-PROD",
+          "awslogs-group": "/ecs/fee-oracle-TESTNET",
           "awslogs-region": "us-east-2",
           "awslogs-stream-prefix": "ecs"
         }
@@ -174,7 +174,7 @@
   "cpu": "256",
   "executionRoleArn": "arn:aws:iam::852551629426:role/fee-oracle-ecsTaskExecutionRole",
   "taskRoleArn": "arn:aws:iam::852551629426:role/fee-oracle-ecsTaskRole",
-  "family": "fee-oracle-container-PROD",
+  "family": "fee-oracle-container-TESTNET",
   "memory": "512",
   "networkMode": "awsvpc",
   "runtimePlatform": {
