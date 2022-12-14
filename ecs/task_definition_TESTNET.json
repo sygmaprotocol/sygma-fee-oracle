@@ -72,23 +72,31 @@
       "secrets": [
         {
           "name": "IDENTITY_KEY",
-          "valueFrom": "arn:aws:ssm:us-east-2:852551629426:parameter/chainbridge/fee-oracle/IDENTITY_KEY"
+          "valueFrom": "arn:aws:ssm:us-east-2:852551629426:parameter/sygma/testnet/feeoracle/IDENTITY_KEY"
         },
         {
           "name": "ETHERSCAN_API_KEY",
-          "valueFrom": "arn:aws:ssm:us-east-2:852551629426:parameter/chainbridge/fee-oracle/ETHERSCAN_API_KEY"
+          "valueFrom": "arn:aws:ssm:us-east-2:852551629426:parameter/sygma/testnet/feeoracle/ETHERSCAN_API_KEY"
         },
         {
           "name": "POLYGONSCAN_API_KEY",
-          "valueFrom": "arn:aws:ssm:us-east-2:852551629426:parameter/chainbridge/fee-oracle/POLYGONSCAN_API_KEY"
+          "valueFrom": "arn:aws:ssm:us-east-2:852551629426:parameter/sygma/testnet/feeoracle/POLYGONSCAN_API_KEY"
         },
         {
           "name": "COINMARKETCAP_API_KEY",
-          "valueFrom": "arn:aws:ssm:us-east-2:852551629426:parameter/chainbridge/fee-oracle/COINMARKETCAP_API_KEY"
+          "valueFrom": "arn:aws:ssm:us-east-2:852551629426:parameter/sygma/testnet/feeoracle/COINMARKETCAP_API_KEY"
         },
         {
           "name": "MOONSCAN_API_KEY",
-          "valueFrom": "arn:aws:ssm:us-east-2:852551629426:parameter/chainbridge/fee-oracle/MOONSCAN_API_KEY"
+          "valueFrom": "arn:aws:ssm:us-east-2:852551629426:parameter/sygma/testnet/feeoracle/MOONSCAN_API_KEY"
+        },
+        {
+          "name": "RESOURCE_DATA",
+          "valueFrom": "arn:aws:ssm:us-east-2:852551629426:parameter/sygma/testnet/feeoracle/resourceData"
+        },
+        {
+          "name": "DOMAIN_DATA",
+          "valueFrom": "arn:aws:ssm:us-east-2:852551629426:parameter/sygma/testnet/feeoracle/domainData"
         }
       ]
     },
