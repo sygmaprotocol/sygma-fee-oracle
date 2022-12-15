@@ -35,16 +35,16 @@ func (h *Handler) debugGetRate(c *gin.Context) {
 	}
 
 	msgGasLimitParam := c.DefaultQuery("msgGasLimit", "0")
-	finalMsgGasLimit, err := util.MsgGasLimitChecker(msgGasLimitParam)
-	if err != nil {
+	validValue := util.CheckInteger(msgGasLimitParam)
+	if !validValue {
 		ginErrorReturn(c, http.StatusBadRequest, newReturnErrorResp(&config.ErrInvalidRequestInput, errors.New("invalid msgGasLimit")))
 		return
 	}
 
 	endpointRespData := &FetchRateResp{
-		BaseRate:                 "0.000316",
-		TokenRate:                "0.485081",
-		DestinationChainGasPrice: "100000000000",
+		BaseRate:                 "0.000445",
+		TokenRate:                "15.948864",
+		DestinationChainGasPrice: "2000000000",
 		FromDomainID:             fromDomainID,
 		ToDomainID:               toDomainID,
 		DataTimestamp:            time.Now().Unix(),
@@ -52,7 +52,7 @@ func (h *Handler) debugGetRate(c *gin.Context) {
 		ExpirationTimestamp:      h.dataExpirationManager(time.Now().Unix() + 100000000),
 		Debug:                    true,
 		ResourceID:               resourceID,
-		MsgGasLimit:              finalMsgGasLimit,
+		MsgGasLimit:              msgGasLimitParam,
 	}
 
 	endpointRespData.Signature, err = h.rateSignature(endpointRespData, fromDomainID, resourceID)

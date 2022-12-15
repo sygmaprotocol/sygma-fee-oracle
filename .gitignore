@@ -16,8 +16,10 @@
 # Dependency directories (remove the comment below to include it)
 # vendor/
 
-# intellij
+# IDE
 .idea/
+.vscode/
+.history/
 
 /bin
 vendor
@@ -36,5 +38,5 @@ fee-oracle-1.0.0-swagger.yaml
 playground.go
 
 feeOracle.log
-
-scripts/e2e_test/sygma-solidity
+# e2e tests
+scripts/e2e_test/
