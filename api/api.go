@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"regexp"
 	"strconv"
 	"strings"
 	"time"
@@ -18,7 +19,6 @@ import (
 	"github.com/ChainSafe/sygma-fee-oracle/consensus"
 	"github.com/ChainSafe/sygma-fee-oracle/identity"
 	"github.com/ChainSafe/sygma-fee-oracle/store"
-	"github.com/ChainSafe/sygma-fee-oracle/util"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
 )
@@ -131,8 +131,8 @@ func (h *Handler) getRate(c *gin.Context) {
 	}
 
 	msgGasLimitParam := c.DefaultQuery("msgGasLimit", "0")
-	msgGasLimit, err := util.MsgGasLimitChecker(msgGasLimitParam)
-	if err != nil {
+	checkIntegerRegex := regexp.MustCompile(`^[0-9]+$`)
+	if !checkIntegerRegex.MatchString(msgGasLimitParam) {
 		ginErrorReturn(c, http.StatusBadRequest, newReturnErrorResp(&config.ErrInvalidRequestInput, errors.New("invalid msgGasLimit")))
 		return
 	}
@@ -146,13 +146,13 @@ func (h *Handler) getRate(c *gin.Context) {
 		DestinationChainGasPrice: aggregatedGasPriceData.SafeGasPrice,
 		FromDomainID:             fromDomainID,
 		ToDomainID:               toDomainID,
-		MsgGasLimit:              msgGasLimit,
+		MsgGasLimit:              msgGasLimitParam,
 		DataTimestamp:            dataTime,
 		SignatureTimestamp:       signedTime,
 		ExpirationTimestamp:      h.dataExpirationManager(dataTime),
 	}
 
-	endpointRespData.Signature, err = h.rateSignature(endpointRespData, fromDomainID, "0x0000000000000000000000000000000000000000000000000000000000000000")
+	endpointRespData.Signature, err = h.rateSignature(endpointRespData, fromDomainID, resource.ID)
 	if err != nil {
 		ginErrorReturn(c, http.StatusInternalServerError, newReturnErrorResp(&config.ErrIdentityStampFail, err))
 		return

@@ -55,7 +55,11 @@ func (h *Handler) rateSignature(result *FetchRateResp, fromDomainID int, resourc
 		return "", errors.Wrap(err, "failed to decode resourceID")
 	}
 
-	finalMsgGasLimitBytes := util.PaddingZero(result.MsgGasLimit.Bytes(), 32)
+	finalMsgGasLimit := fmt.Sprintf("%064x", result.MsgGasLimit)
+	finalMsgGasLimitBytes, err := hex.DecodeString(finalMsgGasLimit)
+	if err != nil {
+		return "", errors.Wrap(err, "failed to decode MsgGasLimit")
+	}
 
 	feeDataMessageByte := bytes.Buffer{}
 	feeDataMessageByte.Write(finalBaseEffectiveRate)
