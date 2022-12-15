@@ -5,6 +5,7 @@ package api
 
 import (
 	"errors"
+	"math/big"
 
 	"github.com/ChainSafe/sygma-fee-oracle/config"
 	"github.com/gin-gonic/gin"
@@ -42,13 +43,14 @@ func ginSuccessReturn(c *gin.Context, httpCode int, resp ReturnSuccessResponse) 
 }
 
 type FetchRateResp struct {
-	BaseRate                 string `json:"baseEffectiveRate"`
-	TokenRate                string `json:"tokenEffectiveRate"`
-	DestinationChainGasPrice string `json:"dstGasPrice"`
-	Signature                string `json:"signature"`
-	FromDomainID             int    `json:"fromDomainID"`
-	ToDomainID               int    `json:"toDomainID"`
-	ResourceID               string `json:"resourceID"`
+	BaseRate                 string   `json:"baseEffectiveRate"`
+	TokenRate                string   `json:"tokenEffectiveRate"`
+	DestinationChainGasPrice string   `json:"dstGasPrice"`
+	Signature                string   `json:"signature"`
+	FromDomainID             int      `json:"fromDomainID"`
+	ToDomainID               int      `json:"toDomainID"`
+	ResourceID               string   `json:"resourceID"`
+	MsgGasLimit              *big.Int `json:"msgGasLimit"`
 	// DataTimestamp represents the timestamp that the data is fetched from external services
 	DataTimestamp int64 `json:"dataTimestamp"`
 	// SignatureTimestamp represents the timestamp that the endpoint responses with the signature
