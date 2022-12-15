@@ -6,8 +6,15 @@ name: Build and publish Docker image
 on:
   push:
     branches:
+      # when main branch receives a push
       - main
-
+    # when any of these versions receive a push
+    tags:
+      - "v*.*.*"
+  # when any releases are created
+  release:
+    types:
+      - created
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
