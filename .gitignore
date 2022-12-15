@@ -36,3 +36,5 @@ fee-oracle-1.0.0-swagger.yaml
 playground.go
 
 feeOracle.log
+
+scripts/e2e_test/sygma-solidity
