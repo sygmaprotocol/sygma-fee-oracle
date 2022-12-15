@@ -1,27 +1,16 @@
 {
   "containerDefinitions": [
     {
-      "name": "fee-oracle-container-STAGE",
+      "name": "fee-oracle-container-TESTNET",
       "essential": true,
-      "image": "852551629426.dkr.ecr.us-east-2.amazonaws.com/fee-oracle-stage:STAGE",
+      "image": "852551629426.dkr.ecr.us-east-2.amazonaws.com/fee-oracle:stable",
       "logConfiguration": {
-        "logDriver": "awsfirelens",
+        "logDriver": "awslogs",
         "options": {
-          "provider": "ecs",
-          "dd_service": "fee-oracle",
-          "dd_tags": "env:STAGE,project:chainbridge",
-          "dd_message_key": "log",
-          "Host": "http-intake.logs.datadoghq.com",
-          "TLS": "on",
-          "dd_source": "fee-oracle-container-STAGE",
-          "Name": "datadog"
-        },
-        "secretOptions": [
-          {
-            "name": "apikey",
-            "valueFrom": "arn:aws:ssm:us-east-2:852551629426:parameter/common/datadog/key"
-          }
-        ]
+          "awslogs-group": "/ecs/fee-oracle-TESTNET",
+          "awslogs-region": "us-east-2",
+          "awslogs-stream-prefix": "ecs"
+        }
       },
       "portMappings": [
         {
@@ -73,11 +62,11 @@
         },
         {
           "name": "REMOTE_PARAM_DOMAIN_DATA",
-          "value": "/sygma/stage/feeoracle/domainData"
+          "value": "/sygma/testnet/feeoracle/domainData"
         },
         {
           "name": "REMOTE_PARAM_RESOURCE_DATA",
-          "value": "/sygma/stage/feeoracle/resourceData"
+          "value": "/sygma/testnet/feeoracle/resourceData"
         },
         {
           "name": "IDENTITY_KEY_TYPE",
@@ -91,31 +80,31 @@
       "secrets": [
         {
           "name": "IDENTITY_KEY",
-          "valueFrom": "arn:aws:ssm:us-east-2:852551629426:parameter/chainbridge/fee-oracle/IDENTITY_KEY"
+          "valueFrom": "arn:aws:ssm:us-east-2:852551629426:parameter/sygma/testnet/feeoracle/IDENTITY_KEY"
         },
         {
           "name": "ETHERSCAN_API_KEY",
-          "valueFrom": "arn:aws:ssm:us-east-2:852551629426:parameter/chainbridge/fee-oracle/ETHERSCAN_API_KEY"
+          "valueFrom": "arn:aws:ssm:us-east-2:852551629426:parameter/sygma/testnet/feeoracle/ETHERSCAN_API_KEY"
         },
         {
           "name": "POLYGONSCAN_API_KEY",
-          "valueFrom": "arn:aws:ssm:us-east-2:852551629426:parameter/chainbridge/fee-oracle/POLYGONSCAN_API_KEY"
+          "valueFrom": "arn:aws:ssm:us-east-2:852551629426:parameter/sygma/testnet/feeoracle/POLYGONSCAN_API_KEY"
         },
         {
           "name": "COINMARKETCAP_API_KEY",
-          "valueFrom": "arn:aws:ssm:us-east-2:852551629426:parameter/chainbridge/fee-oracle/COINMARKETCAP_API_KEY"
+          "valueFrom": "arn:aws:ssm:us-east-2:852551629426:parameter/sygma/testnet/feeoracle/COINMARKETCAP_API_KEY"
         },
         {
           "name": "MOONSCAN_API_KEY",
-          "valueFrom": "arn:aws:ssm:us-east-2:852551629426:parameter/chainbridge/fee-oracle/MOONSCAN_API_KEY"
+          "valueFrom": "arn:aws:ssm:us-east-2:852551629426:parameter/sygma/testnet/feeoracle/MOONSCAN_API_KEY"
         },
         {
           "name": "RESOURCE_DATA",
-          "valueFrom": "arn:aws:ssm:us-east-2:852551629426:parameter/sygma/stage/feeoracle/resourceData"
+          "valueFrom": "arn:aws:ssm:us-east-2:852551629426:parameter/sygma/testnet/feeoracle/resourceData"
         },
         {
           "name": "DOMAIN_DATA",
-          "valueFrom": "arn:aws:ssm:us-east-2:852551629426:parameter/sygma/stage/feeoracle/domainData"
+          "valueFrom": "arn:aws:ssm:us-east-2:852551629426:parameter/sygma/testnet/feeoracle/domainData"
         }
       ]
     },
@@ -126,7 +115,7 @@
       "logConfiguration": {
         "logDriver": "awslogs",
         "options": {
-          "awslogs-group": "/ecs/fee-oracle-STAGE",
+          "awslogs-group": "/ecs/fee-oracle-TESTNET",
           "awslogs-region": "us-east-2",
           "awslogs-stream-prefix": "ecs"
         }
@@ -151,7 +140,7 @@
         },
         {
           "name": "DD_TAGS",
-          "value": "env:STAGE,project:fee-oracle"
+          "value": "env:TESTNET,project:fee-oracle"
         },
         {
           "name": "ECS_FARGATE",
@@ -159,7 +148,7 @@
         },
         {
           "name": "ENV",
-          "value": "STAGE"
+          "value": "TESTNET"
         }
       ],
       "secrets": [
@@ -174,7 +163,7 @@
     {
       "name": "log_router",
       "image": "906394416424.dkr.ecr.us-east-2.amazonaws.com/aws-for-fluent-bit:latest",
-      "essential": true,
+      "essential": false,
       "firelensConfiguration": {
         "type": "fluentbit",
         "options": {
@@ -184,7 +173,7 @@
       "logConfiguration": {
         "logDriver": "awslogs",
         "options": {
-          "awslogs-group": "/ecs/fee-oracle-STAGE",
+          "awslogs-group": "/ecs/fee-oracle-TESTNET",
           "awslogs-region": "us-east-2",
           "awslogs-stream-prefix": "ecs"
         }
@@ -201,7 +190,7 @@
   "cpu": "256",
   "executionRoleArn": "arn:aws:iam::852551629426:role/fee-oracle-ecsTaskExecutionRole",
   "taskRoleArn": "arn:aws:iam::852551629426:role/fee-oracle-ecsTaskRole",
-  "family": "fee-oracle-container-STAGE",
+  "family": "fee-oracle-container-TESTNET",
   "memory": "512",
   "networkMode": "awsvpc",
   "runtimePlatform": {
