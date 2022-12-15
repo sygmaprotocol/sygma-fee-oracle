@@ -72,6 +72,14 @@
           "value": "true"
         },
         {
+          "name": "REMOTE_PARAM_DOMAIN_DATA",
+          "value": "/sygma/stage/feeoracle/domainData"
+        },
+        {
+          "name": "REMOTE_PARAM_RESOURCE_DATA",
+          "value": "/sygma/stage/feeoracle/resourceData"
+        },
+        {
           "name": "IDENTITY_KEY_TYPE",
           "value": "secp256k1"
         },
