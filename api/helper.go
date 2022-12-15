@@ -7,6 +7,7 @@ import (
 	"bytes"
 	"encoding/hex"
 	"fmt"
+
 	"github.com/ChainSafe/sygma-fee-oracle/config"
 	"github.com/ChainSafe/sygma-fee-oracle/util"
 	"github.com/pkg/errors"
@@ -41,6 +42,11 @@ func (h *Handler) rateSignature(result *FetchRateResp, fromDomainID int, resourc
 	finalGasPrice := util.PaddingZero(gasPrice.Bytes(), 32)
 
 	finalTimestamp := fmt.Sprintf("%064x", result.ExpirationTimestamp)
+	finalTimestampBytes, err := hex.DecodeString(finalTimestamp)
+	if err != nil {
+		return "", errors.Wrap(err, "failed to decode timestamp")
+	}
+
 	finalFromDomainId := util.PaddingZero([]byte{uint8(result.FromDomainID)}, 32)
 	finalToDomainId := util.PaddingZero([]byte{uint8(result.ToDomainID)}, 32)
 
@@ -49,9 +55,10 @@ func (h *Handler) rateSignature(result *FetchRateResp, fromDomainID int, resourc
 		return "", errors.Wrap(err, "failed to decode resourceID")
 	}
 
-	finalTimestampBytes, err := hex.DecodeString(finalTimestamp)
+	finalMsgGasLimit := fmt.Sprintf("%064x", result.MsgGasLimit)
+	finalMsgGasLimitBytes, err := hex.DecodeString(finalMsgGasLimit)
 	if err != nil {
-		return "", errors.Wrap(err, "failed to decode timestamp")
+		return "", errors.Wrap(err, "failed to decode MsgGasLimit")
 	}
 
 	feeDataMessageByte := bytes.Buffer{}
@@ -62,6 +69,7 @@ func (h *Handler) rateSignature(result *FetchRateResp, fromDomainID int, resourc
 	feeDataMessageByte.Write(finalFromDomainId)
 	feeDataMessageByte.Write(finalToDomainId)
 	feeDataMessageByte.Write(finalResourceId)
+	feeDataMessageByte.Write(finalMsgGasLimitBytes)
 	feeDataRaw := feeDataMessageByte.Bytes()
 
 	signature, err := h.identity.Sign(feeDataRaw)
