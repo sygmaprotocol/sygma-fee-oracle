@@ -4,6 +4,9 @@
 name: Deploy ECS
 
 on:
+  push:
+    branches:
+      - 'feat/deployment-pipeline' # this is temporary so we don't need to release everytime a change is made
   release:
     types:
       - published

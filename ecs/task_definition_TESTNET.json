@@ -5,12 +5,23 @@
       "essential": true,
       "image": "852551629426.dkr.ecr.us-east-2.amazonaws.com/fee-oracle:stable",
       "logConfiguration": {
-        "logDriver": "awslogs",
+        "logDriver": "awsfirelens",
         "options": {
-          "awslogs-group": "/ecs/fee-oracle-TESTNET",
-          "awslogs-region": "us-east-2",
-          "awslogs-stream-prefix": "ecs"
-        }
+          "provider": "ecs",
+          "dd_service": "fee-oracle",
+          "dd_tags": "env:TESTNETS,project:chainbridge",
+          "dd_message_key": "log",
+          "Host": "http-intake.logs.datadoghq.com",
+          "TLS": "on",
+          "dd_source": "fee-oracle-container-TESTNET",
+          "Name": "datadog"
+        },
+        "secretOptions": [
+          {
+            "name": "apikey",
+            "valueFrom": "arn:aws:ssm:us-east-2:852551629426:parameter/common/datadog/key"
+          }
+        ]
       },
       "portMappings": [
         {
