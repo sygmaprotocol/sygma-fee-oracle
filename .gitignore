@@ -39,3 +39,6 @@ playground.go
 
 # e2e tests
 scripts/e2e_test/
+
+# generated log files
+*.log
