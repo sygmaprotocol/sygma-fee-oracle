@@ -53,6 +53,9 @@ func (s *RemoteParamOperatorTestSuite) SetupTest() {
 
 func (s *RemoteParamOperatorTestSuite) TearDownTest() {
 	_ = s.appBase.GetStore().Close()
+
+	_ = os.Setenv("REMOTE_PARAM_DOMAIN_DATA", "")
+	_ = os.Setenv("REMOTE_PARAM_RESOURCE_DATA", "")
 }
 
 func (s *RemoteParamOperatorTestSuite) TestSetRemoteParams_operatorIsNil() {
@@ -60,9 +63,17 @@ func (s *RemoteParamOperatorTestSuite) TestSetRemoteParams_operatorIsNil() {
 	s.NotPanics(func() { s.conf.SetRemoteParams(nil) }, "should not panic")
 }
 
-func (s *RemoteParamOperatorTestSuite) TestSetRemoteParams_Failure() {
+func (s *RemoteParamOperatorTestSuite) TestSetRemoteParams_nonExistingParam_Failure() {
 	s.remoteParamOperator.EXPECT().LoadParameter("/chainbridge/fee-oracle/domainData").Return(nil, errors.New("error"))
+
+	_ = os.Setenv("REMOTE_PARAM_DOMAIN_DATA", "/chainbridge/fee-oracle/domainData")
+	_ = os.Setenv("REMOTE_PARAM_RESOURCE_DATA", "/chainbridge/fee-oracle/resourceData")
+
 	s.Panics(func() { s.conf.SetRemoteParams(s.remoteParamOperator) }, "should panic on non existing param name")
+}
+
+func (s *RemoteParamOperatorTestSuite) TestSetRemoteParams_paramNameNotSet_Failure() {
+	s.Panics(func() { s.conf.SetRemoteParams(s.remoteParamOperator) }, "should panic if params name not set")
 }
 
 func (s *RemoteParamOperatorTestSuite) TestSetRemoteParams_Success() {
@@ -96,6 +107,9 @@ func (s *RemoteParamOperatorTestSuite) TestSetRemoteParams_Success() {
 	// ]
 	//}
 	resourceData := "{\n\t \"resources\": [\n\t   {\n\t     \"id\": \"0x0000000000000000000000000000000000000000000000000000000000000001\",\n\t     \"symbol\": \"eth\",\n\t     \"decimal\": 18,\n\t     \"tokenAddress\": \"0xfC2e2618147813E510CFc92747f0D09C14A653c5\",\n\t     \"domainId\": 3\n\t   }\n\t ]\n\t}\n"
+
+	_ = os.Setenv("REMOTE_PARAM_DOMAIN_DATA", "/chainbridge/fee-oracle/domainData")
+	_ = os.Setenv("REMOTE_PARAM_RESOURCE_DATA", "/chainbridge/fee-oracle/resourceData")
 
 	s.remoteParamOperator.EXPECT().LoadParameter("/chainbridge/fee-oracle/domainData").Times(1).Return(&remoteParam.RemoteParamResult{Value: domainData}, nil)
 	s.remoteParamOperator.EXPECT().LoadParameter("/chainbridge/fee-oracle/resourceData").Times(1).Return(&remoteParam.RemoteParamResult{Value: resourceData}, nil)

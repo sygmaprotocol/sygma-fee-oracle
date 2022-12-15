@@ -33,9 +33,6 @@ var (
 
 	AppModeRelease AppMode = "release"
 	AppModeDebug   AppMode = "debug"
-
-	remoteParamDomainData   = "/chainbridge/fee-oracle/domainData"
-	remoteParamResourceData = "/chainbridge/fee-oracle/resourceData"
 )
 
 type Config struct {
@@ -358,6 +355,10 @@ func (c *Config) SetRemoteParams(operator remoteParam.RemoteParamOperator) {
 		return
 	}
 
+	remoteParamDomainData := os.Getenv("REMOTE_PARAM_DOMAIN_DATA")
+	if remoteParamDomainData == "" {
+		panic(errors.New("empty REMOTE_PARAM_DOMAIN_DATA from env param"))
+	}
 	domains, err := c.remoteParamsLoad(operator, remoteParamDomainData)
 	if err != nil {
 		panic(err)
@@ -366,6 +367,10 @@ func (c *Config) SetRemoteParams(operator remoteParam.RemoteParamOperator) {
 		c.setDomains(domains)
 	}
 
+	remoteParamResourceData := os.Getenv("REMOTE_PARAM_RESOURCE_DATA")
+	if remoteParamResourceData == "" {
+		panic(errors.New("empty REMOTE_PARAM_RESOURCE_DATA from env param"))
+	}
 	resources, err := c.remoteParamsLoad(operator, remoteParamResourceData)
 	if err != nil {
 		panic(err)
