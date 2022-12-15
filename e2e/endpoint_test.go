@@ -8,12 +8,13 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
-	"github.com/ChainSafe/sygma-fee-oracle/identity/secp256k1"
-	"github.com/ethereum/go-ethereum/crypto"
 	"io/ioutil"
 	"math/big"
 	"net/http"
 	"testing"
+
+	"github.com/ChainSafe/sygma-fee-oracle/identity/secp256k1"
+	"github.com/ethereum/go-ethereum/crypto"
 
 	"github.com/ChainSafe/sygma-fee-oracle/api"
 	"github.com/ChainSafe/sygma-fee-oracle/e2e/setup"
@@ -50,6 +51,7 @@ func (s *SignatureVerificationTestSuite) TestSignatureVerification_CalculateFee(
 	// test related params define
 	amount := big.NewInt(1000000000000000000) // 1 ether
 	finalAmount := util.PaddingZero(amount.Bytes(), 32)
+	emptySetResourceData := []byte{}
 
 	// fee oracle endpoints request
 	resp, err := http.Get("http://127.0.0.1:8091/v1/rate/from/0/to/1/resourceid/0x0000000000000000000000000000000000000000000000000000000000000001")
@@ -84,7 +86,11 @@ func (s *SignatureVerificationTestSuite) TestSignatureVerification_CalculateFee(
 	finalResourceId, err := hex.DecodeString(response.Response.ResourceID[2:])
 	s.Nil(err)
 
-	_, err = s.contractSetup.BridgeInstance.AdminSetResource(setup.IncreaseNonce(s.contractSetup.Auth), s.contractSetup.ERC20HandlerAddress, util.Byte32Converter(finalResourceId), s.contractSetup.ERC20PresetMinterPauserAddress)
+	finalMsgGasLimit := fmt.Sprintf("%064x", response.Response.MsgGasLimit)
+	finalMsgGasLimitBytes, err := hex.DecodeString(finalMsgGasLimit)
+	s.Nil(err)
+
+	_, err = s.contractSetup.BridgeInstance.AdminSetResource(setup.IncreaseNonce(s.contractSetup.Auth), s.contractSetup.ERC20HandlerAddress, util.Byte32Converter(finalResourceId), s.contractSetup.ERC20PresetMinterPauserAddress, emptySetResourceData)
 	s.Nil(err)
 
 	_, err = s.contractSetup.BridgeInstance.AdminChangeFeeHandler(setup.IncreaseNonce(s.contractSetup.Auth), s.contractSetup.FeeHandlerRouterAddress)
@@ -102,6 +108,7 @@ func (s *SignatureVerificationTestSuite) TestSignatureVerification_CalculateFee(
 	feeDataMessageByte.Write(finalFromDomainId)
 	feeDataMessageByte.Write(finalToDomainId)
 	feeDataMessageByte.Write(finalResourceId)
+	feeDataMessageByte.Write(finalMsgGasLimitBytes)
 	finalFeeDataMessage := feeDataMessageByte.Bytes()
 
 	// prepare to sign
@@ -124,16 +131,16 @@ func (s *SignatureVerificationTestSuite) TestSignatureVerification_CalculateFee(
 	sig = sigb.Bytes()
 
 	// assembly feeData
-	// 224 + 65 + 32
+	// 256 + 65 + 32
 	feeData := bytes.Buffer{}
 	feeData.Write(finalFeeDataMessage)
 	feeData.Write(sig)
 	feeData.Write(finalAmount)
-	s.EqualValues(321, feeData.Len(), "invalid feeData")
+	s.EqualValues(353, feeData.Len(), "invalid feeData")
 
-	s.True(bytes.Equal(feeData.Bytes()[:224], finalFeeDataMessage))
-	s.True(bytes.Equal(feeData.Bytes()[224:289], sig))
-	s.True(bytes.Equal(feeData.Bytes()[289:], finalAmount))
+	s.True(bytes.Equal(feeData.Bytes()[:256], finalFeeDataMessage))
+	s.True(bytes.Equal(feeData.Bytes()[256:321], sig))
+	s.True(bytes.Equal(feeData.Bytes()[321:], finalAmount))
 
 	// ecrecover verify signer
 	signer, err := crypto.Ecrecover(crypto.Keccak256(finalFeeDataMessage), originalSig)

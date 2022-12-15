@@ -5,6 +5,7 @@ package util_test
 
 import (
 	"errors"
+
 	"github.com/ChainSafe/sygma-fee-oracle/util"
 
 	"math/big"

@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/ChainSafe/sygma-fee-oracle/types"
+	"github.com/ChainSafe/sygma-fee-oracle/util"
 
 	"github.com/ChainSafe/sygma-fee-oracle/config"
 
@@ -45,7 +46,7 @@ func AddRouterPathsV1(v1RouterGroups map[string]*gin.RouterGroup, apiHandler *Ha
 	}
 }
 
-// endpoint: /{version}/rate/from/{fromDomainID}/to/{toDomainID}/resourceid/{resourceID}
+// endpoint: /{version}/rate/from/{fromDomainID}/to/{toDomainID}/resourceid/{resourceID}?msgGasLimit={msgGasLimit}
 // api call example:   /rate/from/0/to/1/resourceid/0x0000000000000000000000000000000000000000000000000000000000000001
 // calculation of transferring native resource: from ethereum to polygon transfer eth    => ber = matic / eth, ter = matic / eth, gas price is from polygon
 // calculation of transferring standard token : from ethereum to polygon transfer usdt   => ber = matic / eth, ter = matic / usdt, gas price is from polygon
@@ -129,6 +130,13 @@ func (h *Handler) getRate(c *gin.Context) {
 		}
 	}
 
+	msgGasLimitParam := c.DefaultQuery("msgGasLimit", "0")
+	validValue := util.CheckInteger(msgGasLimitParam)
+	if !validValue {
+		ginErrorReturn(c, http.StatusBadRequest, newReturnErrorResp(&config.ErrInvalidRequestInput, errors.New("invalid msgGasLimit")))
+		return
+	}
+
 	dataTime := aggregatedBaseRateData.Time
 	signedTime := time.Now().Unix()
 
@@ -138,6 +146,7 @@ func (h *Handler) getRate(c *gin.Context) {
 		DestinationChainGasPrice: aggregatedGasPriceData.SafeGasPrice,
 		FromDomainID:             fromDomainID,
 		ToDomainID:               toDomainID,
+		MsgGasLimit:              msgGasLimitParam,
 		DataTimestamp:            dataTime,
 		SignatureTimestamp:       signedTime,
 		ExpirationTimestamp:      h.dataExpirationManager(dataTime),
