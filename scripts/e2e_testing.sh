@@ -21,10 +21,10 @@ mkdir -p $E2E_TEST_DIR/feeHandlerRouter
 mkdir -p $E2E_TEST_DIR/erc20PresetMinterPauser
 mkdir -p $E2E_TEST_DIR/feeHandler
 mkdir -p $E2E_TEST_DIR/basicFeeHandler
-mkdir -p $E2E_TEST_DIR/centrifugeAsset
+mkdir -p $E2E_TEST_DIR/testContracts
 mkdir -p $E2E_TEST_DIR/erc721Handler
 mkdir -p $E2E_TEST_DIR/erc721MinterBurnerPauser
-mkdir -p $E2E_TEST_DIR/genericHandler
+mkdir -p $E2E_TEST_DIR/permissionedGenericHandler
 mkdir -p $E2E_TEST_DIR/accessControlSegregator
 
 # clone solidity code and checkout target branch
@@ -43,9 +43,9 @@ solcjs --include-path $SOLIDITY_DIR/node_modules/ --base-path $SOLIDITY_DIR --ab
 solcjs --include-path $SOLIDITY_DIR/node_modules/ --base-path $SOLIDITY_DIR --abi $SOLIDITY_DIR/contracts/handlers/ERC20Handler.sol -o $SOLIDITY_DIR/tmp
 solcjs --include-path $SOLIDITY_DIR/node_modules/ --base-path $SOLIDITY_DIR --abi $CONTRACT_DIR/BasicFeeHandler.sol -o $SOLIDITY_DIR/tmp
 solcjs --include-path $SOLIDITY_DIR/node_modules/ --base-path $SOLIDITY_DIR --abi $SOLIDITY_DIR/contracts/handlers/ERC721Handler.sol -o $SOLIDITY_DIR/tmp
-solcjs --include-path $SOLIDITY_DIR/node_modules/ --base-path $SOLIDITY_DIR --abi $SOLIDITY_DIR/contracts/handlers/GenericHandler.sol -o $SOLIDITY_DIR/tmp
+solcjs --include-path $SOLIDITY_DIR/node_modules/ --base-path $SOLIDITY_DIR --abi $SOLIDITY_DIR/contracts/handlers/PermissionedGenericHandler.sol -o $SOLIDITY_DIR/tmp
 solcjs --include-path $SOLIDITY_DIR/node_modules/ --base-path $SOLIDITY_DIR --abi $SOLIDITY_DIR/contracts/ERC721MinterBurnerPauser.sol -o $SOLIDITY_DIR/tmp
-solcjs --include-path $SOLIDITY_DIR/node_modules/ --base-path $SOLIDITY_DIR --abi $SOLIDITY_DIR/contracts/CentrifugeAsset.sol -o $SOLIDITY_DIR/tmp
+solcjs --include-path $SOLIDITY_DIR/node_modules/ --base-path $SOLIDITY_DIR --abi $SOLIDITY_DIR/contracts/TestContracts.sol -o $SOLIDITY_DIR/tmp
 solcjs --include-path $SOLIDITY_DIR/node_modules/ --base-path $SOLIDITY_DIR --abi $SOLIDITY_DIR/contracts/handlers/FeeHandlerRouter.sol -o $SOLIDITY_DIR/tmp
 solcjs --include-path $SOLIDITY_DIR/node_modules/ --base-path $SOLIDITY_DIR --abi $SOLIDITY_DIR/contracts/utils/AccessControlSegregator.sol -o $SOLIDITY_DIR/tmp
 
@@ -56,9 +56,9 @@ solcjs --include-path $SOLIDITY_DIR/node_modules/ --base-path $SOLIDITY_DIR --bi
 solcjs --include-path $SOLIDITY_DIR/node_modules/ --base-path $SOLIDITY_DIR --bin $SOLIDITY_DIR/contracts/handlers/ERC20Handler.sol -o $SOLIDITY_DIR/tmp
 solcjs --include-path $SOLIDITY_DIR/node_modules/ --base-path $SOLIDITY_DIR --bin $CONTRACT_DIR/BasicFeeHandler.sol -o $SOLIDITY_DIR/tmp
 solcjs --include-path $SOLIDITY_DIR/node_modules/ --base-path $SOLIDITY_DIR --bin $SOLIDITY_DIR/contracts/handlers/ERC721Handler.sol -o $SOLIDITY_DIR/tmp
-solcjs --include-path $SOLIDITY_DIR/node_modules/ --base-path $SOLIDITY_DIR --bin $SOLIDITY_DIR/contracts/handlers/GenericHandler.sol -o $SOLIDITY_DIR/tmp
+solcjs --include-path $SOLIDITY_DIR/node_modules/ --base-path $SOLIDITY_DIR --bin $SOLIDITY_DIR/contracts/handlers/PermissionedGenericHandler.sol -o $SOLIDITY_DIR/tmp
 solcjs --include-path $SOLIDITY_DIR/node_modules/ --base-path $SOLIDITY_DIR --bin $SOLIDITY_DIR/contracts/ERC721MinterBurnerPauser.sol -o $SOLIDITY_DIR/tmp
-solcjs --include-path $SOLIDITY_DIR/node_modules/ --base-path $SOLIDITY_DIR --bin $SOLIDITY_DIR/contracts/CentrifugeAsset.sol -o $SOLIDITY_DIR/tmp
+solcjs --include-path $SOLIDITY_DIR/node_modules/ --base-path $SOLIDITY_DIR --bin $SOLIDITY_DIR/contracts/TestContracts.sol -o $SOLIDITY_DIR/tmp
 solcjs --include-path $SOLIDITY_DIR/node_modules/ --base-path $SOLIDITY_DIR --bin $SOLIDITY_DIR/contracts/handlers/FeeHandlerRouter.sol -o $SOLIDITY_DIR/tmp
 solcjs --include-path $SOLIDITY_DIR/node_modules/ --base-path $SOLIDITY_DIR --bin $SOLIDITY_DIR/contracts/utils/AccessControlSegregator.sol -o $SOLIDITY_DIR/tmp
 
@@ -107,15 +107,15 @@ if [ $ABIGEN_EXISTS = false ]; then
   $E2E_TEST_DIR/abigen --bin=$SOLIDITY_DIR/tmp/contracts_handlers_ERC721Handler_sol_ERC721Handler.bin \
     --abi=$SOLIDITY_DIR/tmp/contracts_handlers_ERC721Handler_sol_ERC721Handler.abi \
     --pkg=ERC721Handler --out=$E2E_TEST_DIR/erc721Handler/ERC721Handler.go
-  $E2E_TEST_DIR/abigen --bin=$SOLIDITY_DIR/tmp/contracts_handlers_GenericHandler_sol_GenericHandler.bin \
-    --abi=$SOLIDITY_DIR/tmp/contracts_handlers_GenericHandler_sol_GenericHandler.abi \
-    --pkg=GenericHandler --out=$E2E_TEST_DIR/genericHandler/GenericHandler.go
+  $E2E_TEST_DIR/abigen --bin=$SOLIDITY_DIR/tmp/contracts_handlers_PermissionedGenericHandler_sol_PermissionedGenericHandler.bin \
+    --abi=$SOLIDITY_DIR/tmp/contracts_handlers_PermissionedGenericHandler_sol_PermissionedGenericHandler.abi \
+    --pkg=PermissionedGenericHandler --out=$E2E_TEST_DIR/permissionedGenericHandler/PermissionedGenericHandler.go
   $E2E_TEST_DIR/abigen --bin=$SOLIDITY_DIR/tmp/contracts_ERC721MinterBurnerPauser_sol_ERC721MinterBurnerPauser.bin \
     --abi=$SOLIDITY_DIR/tmp/contracts_ERC721MinterBurnerPauser_sol_ERC721MinterBurnerPauser.abi \
     --pkg=ERC721MinterBurnerPauser --out=$E2E_TEST_DIR/erc721MinterBurnerPauser/ERC721721MinterBurnerPauser.go
-  $E2E_TEST_DIR/abigen --bin=$SOLIDITY_DIR/tmp/contracts_CentrifugeAsset_sol_CentrifugeAsset.bin \
-    --abi=$SOLIDITY_DIR/tmp/contracts_CentrifugeAsset_sol_CentrifugeAsset.abi \
-    --pkg=CentrifugeAsset --out=$E2E_TEST_DIR/centrifugeAsset/CentrifugeAsset.go
+  $E2E_TEST_DIR/abigen --bin=$SOLIDITY_DIR/tmp/contracts_TestContracts_sol_TestStore.bin \
+    --abi=$SOLIDITY_DIR/tmp/contracts_TestContracts_sol_TestStore.abi \
+    --pkg=TestContracts --out=$E2E_TEST_DIR/testContracts/TestContracts.go
   $E2E_TEST_DIR/abigen --bin=$SOLIDITY_DIR/tmp/contracts_handlers_FeeHandlerRouter_sol_FeeHandlerRouter.bin \
     --abi=$SOLIDITY_DIR/tmp/contracts_handlers_FeeHandlerRouter_sol_FeeHandlerRouter.abi \
     --pkg=FeeHandlerRouter --out=$E2E_TEST_DIR/feeHandlerRouter/FeeHandlerRouter.go
@@ -141,15 +141,15 @@ else
   abigen --bin=$SOLIDITY_DIR/tmp/contracts_handlers_ERC721Handler_sol_ERC721Handler.bin \
     --abi=$SOLIDITY_DIR/tmp/contracts_handlers_ERC721Handler_sol_ERC721Handler.abi \
     --pkg=ERC721Handler --out=$E2E_TEST_DIR/erc721Handler/ERC721Handler.go
-  abigen --bin=$SOLIDITY_DIR/tmp/contracts_handlers_GenericHandler_sol_GenericHandler.bin \
-    --abi=$SOLIDITY_DIR/tmp/contracts_handlers_GenericHandler_sol_GenericHandler.abi \
-    --pkg=GenericHandler --out=$E2E_TEST_DIR/genericHandler/GenericHandler.go
+  abigen --bin=$SOLIDITY_DIR/tmp/contracts_handlers_PermissionedGenericHandler_sol_PermissionedGenericHandler.bin \
+    --abi=$SOLIDITY_DIR/tmp/contracts_handlers_PermissionedGenericHandler_sol_PermissionedGenericHandler.abi \
+    --pkg=PermissionedGenericHandler --out=$E2E_TEST_DIR/permissionedGenericHandler/PermissionedGenericHandler.go
   abigen --bin=$SOLIDITY_DIR/tmp/contracts_ERC721MinterBurnerPauser_sol_ERC721MinterBurnerPauser.bin \
     --abi=$SOLIDITY_DIR/tmp/contracts_ERC721MinterBurnerPauser_sol_ERC721MinterBurnerPauser.abi \
     --pkg=ERC721MinterBurnerPauser --out=$E2E_TEST_DIR/erc721MinterBurnerPauser/ERC721MinterBurnerPauser.go
-  abigen --bin=$SOLIDITY_DIR/tmp/contracts_CentrifugeAsset_sol_CentrifugeAsset.bin \
-    --abi=$SOLIDITY_DIR/tmp/contracts_CentrifugeAsset_sol_CentrifugeAsset.abi \
-    --pkg=CentrifugeAsset --out=$E2E_TEST_DIR/centrifugeAsset/CentrifugeAsset.go
+  abigen --bin=$SOLIDITY_DIR/tmp/contracts_TestContracts_sol_TestStore.bin \
+    --abi=$SOLIDITY_DIR/tmp/contracts_TestContracts_sol_TestStore.abi \
+    --pkg=TestContracts --out=$E2E_TEST_DIR/testContracts/TestContracts.go
   abigen --bin=$SOLIDITY_DIR/tmp/contracts_handlers_FeeHandlerRouter_sol_FeeHandlerRouter.bin \
     --abi=$SOLIDITY_DIR/tmp/contracts_handlers_FeeHandlerRouter_sol_FeeHandlerRouter.abi \
     --pkg=FeeHandlerRouter --out=$E2E_TEST_DIR/feeHandlerRouter/FeeHandlerRouter.go
