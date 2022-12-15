@@ -54,14 +54,3 @@ func Byte32Converter(b []byte) [32]byte {
 	copy(f[:], b)
 	return f
 }
-
-func MsgGasLimitChecker(msgGasLimitParam string) (*big.Int, error) {
-	msgGasLimit, err := Str2BigInt(msgGasLimitParam)
-	if err != nil {
-		return nil, err
-	}
-	if msgGasLimit.Cmp(big.NewInt(0)) == -1 {
-		return nil, errors.New("MsgGasLimit can't be negative number")
-	}
-	return msgGasLimit, nil
-}

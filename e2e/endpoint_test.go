@@ -86,7 +86,9 @@ func (s *SignatureVerificationTestSuite) TestSignatureVerification_CalculateFee(
 	finalResourceId, err := hex.DecodeString(response.Response.ResourceID[2:])
 	s.Nil(err)
 
-	finalMsgGasLimit := util.PaddingZero(response.Response.MsgGasLimit.Bytes(), 32)
+	finalMsgGasLimit := fmt.Sprintf("%064x", response.Response.MsgGasLimit)
+	finalMsgGasLimitBytes, err := hex.DecodeString(finalMsgGasLimit)
+	s.Nil(err)
 
 	_, err = s.contractSetup.BridgeInstance.AdminSetResource(setup.IncreaseNonce(s.contractSetup.Auth), s.contractSetup.ERC20HandlerAddress, util.Byte32Converter(finalResourceId), s.contractSetup.ERC20PresetMinterPauserAddress, emptySetResourceData)
 	s.Nil(err)
@@ -106,7 +108,7 @@ func (s *SignatureVerificationTestSuite) TestSignatureVerification_CalculateFee(
 	feeDataMessageByte.Write(finalFromDomainId)
 	feeDataMessageByte.Write(finalToDomainId)
 	feeDataMessageByte.Write(finalResourceId)
-	feeDataMessageByte.Write(finalMsgGasLimit)
+	feeDataMessageByte.Write(finalMsgGasLimitBytes)
 	finalFeeDataMessage := feeDataMessageByte.Bytes()
 
 	// prepare to sign
