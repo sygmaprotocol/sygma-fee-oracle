@@ -7,12 +7,12 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
-	"regexp"
 	"strconv"
 	"strings"
 	"time"
 
 	"github.com/ChainSafe/sygma-fee-oracle/types"
+	"github.com/ChainSafe/sygma-fee-oracle/util"
 
 	"github.com/ChainSafe/sygma-fee-oracle/config"
 
@@ -131,8 +131,8 @@ func (h *Handler) getRate(c *gin.Context) {
 	}
 
 	msgGasLimitParam := c.DefaultQuery("msgGasLimit", "0")
-	checkIntegerRegex := regexp.MustCompile(`^[0-9]+$`)
-	if !checkIntegerRegex.MatchString(msgGasLimitParam) {
+	validValue := util.CheckInteger(msgGasLimitParam)
+	if !validValue {
 		ginErrorReturn(c, http.StatusBadRequest, newReturnErrorResp(&config.ErrInvalidRequestInput, errors.New("invalid msgGasLimit")))
 		return
 	}

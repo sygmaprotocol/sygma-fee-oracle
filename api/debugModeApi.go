@@ -5,11 +5,11 @@ package api
 
 import (
 	"net/http"
-	"regexp"
 	"strconv"
 	"time"
 
 	"github.com/ChainSafe/sygma-fee-oracle/config"
+	"github.com/ChainSafe/sygma-fee-oracle/util"
 	"github.com/gin-gonic/gin"
 	"github.com/pkg/errors"
 )
@@ -35,8 +35,8 @@ func (h *Handler) debugGetRate(c *gin.Context) {
 	}
 
 	msgGasLimitParam := c.DefaultQuery("msgGasLimit", "0")
-	checkIntegerRegex := regexp.MustCompile(`^[0-9]+$`)
-	if !checkIntegerRegex.MatchString(msgGasLimitParam) {
+	validValue := util.CheckInteger(msgGasLimitParam)
+	if !validValue {
 		ginErrorReturn(c, http.StatusBadRequest, newReturnErrorResp(&config.ErrInvalidRequestInput, errors.New("invalid msgGasLimit")))
 		return
 	}
