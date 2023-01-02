@@ -27,7 +27,7 @@ jobs:
 
       - name: Build
         run: make install
-        
+
       - name: Unit tests
         run: make test
 
@@ -36,12 +36,12 @@ jobs:
           export PATH=$PATH:$(go env GOPATH)/bin
           go get github.com/securego/gosec/cmd/gosec
           make check
-      
+
       - name: Lint check
         uses: golangci/golangci-lint-action@v3
         with:
           version: latest
-          args: --skip-dirs e2e -v --timeout 300s
+          args: --skip-dirs e2e,.github -v --timeout 300s
 
       - name: License check
         run: make license-check
