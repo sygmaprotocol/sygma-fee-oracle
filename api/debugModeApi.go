@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/ChainSafe/sygma-fee-oracle/config"
+	"github.com/ChainSafe/sygma-fee-oracle/util"
 	"github.com/gin-gonic/gin"
 	"github.com/pkg/errors"
 )
@@ -32,6 +33,14 @@ func (h *Handler) debugGetRate(c *gin.Context) {
 			"sure you config token address under the corresponding resource in resource.json")))
 		return
 	}
+
+	msgGasLimitParam := c.DefaultQuery("msgGasLimit", "0")
+	validValue := util.CheckInteger(msgGasLimitParam)
+	if !validValue {
+		ginErrorReturn(c, http.StatusBadRequest, newReturnErrorResp(&config.ErrInvalidRequestInput, errors.New("invalid msgGasLimit")))
+		return
+	}
+
 	endpointRespData := &FetchRateResp{
 		BaseRate:                 "0.000445",
 		TokenRate:                "15.948864",
@@ -43,6 +52,7 @@ func (h *Handler) debugGetRate(c *gin.Context) {
 		ExpirationTimestamp:      h.dataExpirationManager(time.Now().Unix() + 100000000),
 		Debug:                    true,
 		ResourceID:               resourceID,
+		MsgGasLimit:              msgGasLimitParam,
 	}
 
 	endpointRespData.Signature, err = h.rateSignature(endpointRespData, fromDomainID, resourceID)

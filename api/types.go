@@ -49,6 +49,7 @@ type FetchRateResp struct {
 	FromDomainID             int    `json:"fromDomainID"`
 	ToDomainID               int    `json:"toDomainID"`
 	ResourceID               string `json:"resourceID"`
+	MsgGasLimit              string `json:"msgGasLimit"`
 	// DataTimestamp represents the timestamp that the data is fetched from external services
 	DataTimestamp int64 `json:"dataTimestamp"`
 	// SignatureTimestamp represents the timestamp that the endpoint responses with the signature

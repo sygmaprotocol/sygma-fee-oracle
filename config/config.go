@@ -33,9 +33,6 @@ var (
 
 	AppModeRelease AppMode = "release"
 	AppModeDebug   AppMode = "debug"
-
-	remoteParamDomainData   = "/chainbridge/fee-oracle/domainData"
-	remoteParamResourceData = "/chainbridge/fee-oracle/resourceData"
 )
 
 type Config struct {
@@ -80,6 +77,7 @@ type oracle struct {
 	Etherscan     etherscan     `mapstructure:"etherscan"`
 	Polygonscan   polygonscan   `mapstructure:"polygonscan"`
 	CoinMarketCap coinMarketCap `mapstructure:"coinmarketcap"`
+	Moonscan      coinMarketCap `mapstructure:"moonscan"`
 }
 
 type store struct {
@@ -205,6 +203,7 @@ func (c *Config) OracleConfig() oracle {
 	etherscanAPIKey := os.Getenv("ETHERSCAN_API_KEY")
 	polygonscanAPIKey := os.Getenv("POLYGONSCAN_API_KEY")
 	coinMarketCapAPIKey := os.Getenv("COINMARKETCAP_API_KEY")
+	moonscanAPIKey := os.Getenv("MOONSCAN_API_KEY")
 
 	if etherscanAPIKey != "" {
 		oracleConfig.Etherscan.ApiKey = etherscanAPIKey
@@ -214,6 +213,9 @@ func (c *Config) OracleConfig() oracle {
 	}
 	if coinMarketCapAPIKey != "" {
 		oracleConfig.CoinMarketCap.ApiKey = coinMarketCapAPIKey
+	}
+	if moonscanAPIKey != "" {
+		oracleConfig.Moonscan.ApiKey = moonscanAPIKey
 	}
 
 	return oracleConfig
@@ -353,6 +355,10 @@ func (c *Config) SetRemoteParams(operator remoteParam.RemoteParamOperator) {
 		return
 	}
 
+	remoteParamDomainData := os.Getenv("REMOTE_PARAM_DOMAIN_DATA")
+	if remoteParamDomainData == "" {
+		panic(errors.New("empty REMOTE_PARAM_DOMAIN_DATA from env param"))
+	}
 	domains, err := c.remoteParamsLoad(operator, remoteParamDomainData)
 	if err != nil {
 		panic(err)
@@ -361,6 +367,10 @@ func (c *Config) SetRemoteParams(operator remoteParam.RemoteParamOperator) {
 		c.setDomains(domains)
 	}
 
+	remoteParamResourceData := os.Getenv("REMOTE_PARAM_RESOURCE_DATA")
+	if remoteParamResourceData == "" {
+		panic(errors.New("empty REMOTE_PARAM_RESOURCE_DATA from env param"))
+	}
 	resources, err := c.remoteParamsLoad(operator, remoteParamResourceData)
 	if err != nil {
 		panic(err)

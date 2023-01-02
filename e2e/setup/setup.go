@@ -10,10 +10,11 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
-	AccessControlSegregator "github.com/ChainSafe/sygma-fee-oracle/scripts/e2e_test/accessControlSegregator"
-	FeeHandlerRouter "github.com/ChainSafe/sygma-fee-oracle/scripts/e2e_test/feeHandlerRouter"
 	"math/big"
 	"time"
+
+	AccessControlSegregator "github.com/ChainSafe/sygma-fee-oracle/scripts/e2e_test/accessControlSegregator"
+	FeeHandlerRouter "github.com/ChainSafe/sygma-fee-oracle/scripts/e2e_test/feeHandlerRouter"
 
 	"github.com/ChainSafe/sygma-fee-oracle/scripts/e2e_test/bridge"
 	ERC20Handler "github.com/ChainSafe/sygma-fee-oracle/scripts/e2e_test/erc20Handler"
@@ -59,7 +60,7 @@ func ContractsSetup() *ContractsSetupResp {
 	auth := getAccountAuth(client, FeeOracleHexPriKey)
 
 	// preparation - deploying contracts
-	adminSetResource, err := hex.DecodeString("cb10f215")
+	adminSetResource, err := hex.DecodeString("8a3234c7")
 	if err != nil {
 		panic(err)
 	}
