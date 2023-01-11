@@ -1,7 +1,7 @@
 # Copyright 2021 ChainSafe Systems
 # SPDX-License-Identifier: LGPL-3.0-only
 
-name: Deploy ECS
+name: sygma/deploy/stage
 
 on:
   push:
@@ -23,27 +23,28 @@ jobs:
       id-token: write
 
     steps:
-      - uses: actions/checkout@v2
-      - run: sleep 5
-      - name: Configure AWS Credentials
+      - name: checkout the source code
+        uses: actions/checkout@v2
+
+      - name: configure aws credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
           role-to-assume: arn:aws:iam::852551629426:role/github-actions-${{ env.ENVIRONMENT }}-chainbridge
           aws-region: ${{ env.AWS_REGION }}
           role-session-name: GithubActions
 
-      - name: Login to Amazon ECR
-        id: login-ecr
+      - name: login to ecr
+        id: ecr
         uses: aws-actions/amazon-ecr-login@v1
 
-      - name: Build, tag, and push image to Amazon ECR
+      - name: build / tag / push docker image into ecr
         env:
-          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REGISTRY: ${{ steps.ecr.outputs.registry }}
         run: |
           docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:${{ env.ENVIRONMENT }} .
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:${{ env.ENVIRONMENT }}
 
-      - name: Deploy to Amazon ECS
+      - name: deploy task definition
         uses: aws-actions/amazon-ecs-deploy-task-definition@v1
         with:
           task-definition: ecs/task_definition_${{ env.ENVIRONMENT }}.json
