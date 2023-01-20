@@ -45,14 +45,14 @@ jobs:
         with:
           context: .
           push: true
-          tags: ${{ env.REGISTRY }}/${{ github.repository }}:${{ env.TAG }}
+          tags: ${{ env.REGISTRY }}/${{ github.repository }}:${{ env.TAG }}    
 
       - name: checkout ecs repo
         uses: actions/checkout@v3
         with:
           repository: sygmaprotocol/devops
           token: ${{ secrets.GHCR_TOKEN }}
-          path: fee-oracle
+          working-directory: fee-oracle
 
       - name: configure aws credentials
         uses: aws-actions/configure-aws-credentials@v1
