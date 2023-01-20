@@ -17,7 +17,7 @@ env:
 
 jobs:
   push:
-    name: Deploy
+    name: push
     runs-on: ubuntu-latest
 
     permissions:
