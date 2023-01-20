@@ -16,8 +16,8 @@ env:
   TAG: 'latest'
 
 jobs:
-  deploy:
-    name: Deploy
+  push:
+    name: push
     runs-on: ubuntu-latest
 
     permissions:
@@ -45,14 +45,26 @@ jobs:
         with:
           context: .
           push: true
-          tags: ${{ env.REGISTRY }}/${{ github.repository }}:${{ env.TAG }}
+          tags: ${{ env.REGISTRY }}/${{ github.repository }}:${{ env.TAG }}   
+          
+  deploy:
+    needs: push
+    name: deploy
+    runs-on: ubuntu-latest
 
+    permissions:
+      contents: read
+      id-token: write
+
+    steps: 
+      - name: checkout the source code
+        uses: actions/checkout@v3
+        
       - name: checkout ecs repo
         uses: actions/checkout@v3
         with:
           repository: sygmaprotocol/devops
           token: ${{ secrets.GHCR_TOKEN }}
-          path: fee-oracle
 
       - name: configure aws credentials
         uses: aws-actions/configure-aws-credentials@v1
@@ -64,7 +76,7 @@ jobs:
       - name: deploy task definition
         uses: aws-actions/amazon-ecs-deploy-task-definition@v1
         with:
-          task-definition: ecs/task_definition_${{ env.ENVIRONMENT }}.json
-          service: fee-oracle-service-${{ env.ENVIRONMENT }}
-          cluster: fee-oracle-${{ env.ENVIRONMENT }}
+          task-definition: 'fee-oracle/ecs/task_definition_${{ env.ENVIRONMENT }}.json'
+          service: 'fee-oracle-service-${{ env.ENVIRONMENT }}'
+          cluster: 'fee-oracle-${{ env.ENVIRONMENT }}'
           wait-for-service-stability: true
