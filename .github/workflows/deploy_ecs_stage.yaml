@@ -65,7 +65,7 @@ jobs:
         with:
           repository: sygmaprotocol/devops
           token: ${{ secrets.GHCR_TOKEN }}
-          working-directory: fee-oracle
+          path: fee-oracle
 
       - name: configure aws credentials
         uses: aws-actions/configure-aws-credentials@v1
