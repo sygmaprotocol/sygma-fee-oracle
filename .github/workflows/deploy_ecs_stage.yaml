@@ -77,7 +77,7 @@ jobs:
       - name: deploy task definition
         uses: aws-actions/amazon-ecs-deploy-task-definition@v1
         with:
-          task-definition: ecs/task_definition_${{ env.ENVIRONMENT }}.json
-          service: fee-oracle-service-${{ env.ENVIRONMENT }}
-          cluster: fee-oracle-${{ env.ENVIRONMENT }}
+          task-definition: 'ecs/task_definition_${{ env.ENVIRONMENT }}.json'
+          service: 'fee-oracle-service-${{ env.ENVIRONMENT }}'
+          cluster: 'fee-oracle-${{ env.ENVIRONMENT }}'
           wait-for-service-stability: true
