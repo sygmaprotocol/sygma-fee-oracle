@@ -5,12 +5,9 @@ package base
 
 import (
 	"fmt"
-	"os"
 
 	"github.com/ChainSafe/sygma-fee-oracle/config"
 	"github.com/ChainSafe/sygma-fee-oracle/identity"
-	"github.com/ChainSafe/sygma-fee-oracle/remoteParam"
-	paramFetcherAws "github.com/ChainSafe/sygma-fee-oracle/remoteParam/aws"
 	"github.com/ChainSafe/sygma-fee-oracle/store"
 	"github.com/ChainSafe/sygma-fee-oracle/store/db"
 	"github.com/sirupsen/logrus"
@@ -23,13 +20,18 @@ type FeeOracleAppBase struct {
 	store          store.Store
 	oracleIdentity identity.Keypair
 
-	remoteParamOperator remoteParam.RemoteParamOperator
-
 	env config.AppEvm
 }
 
 func NewFeeOracleAppBase(configPath, domainConfigPath, resourceConfigPath, keyPath, keyType string) *FeeOracleAppBase {
-	conf, logger := config.LoadConfig(configPath, domainConfigPath, resourceConfigPath)
+	conf := config.LoadConfig(configPath, domainConfigPath, resourceConfigPath)
+
+	logger := logrus.New()
+	logLvl, err := conf.LogLevel()
+	if err != nil {
+		panic("invalid log level")
+	}
+	logger.SetLevel(logLvl)
 	logger.Infof("log level: %s", logger.Level)
 
 	base := &FeeOracleAppBase{
@@ -40,7 +42,6 @@ func NewFeeOracleAppBase(configPath, domainConfigPath, resourceConfigPath, keyPa
 
 	base.initKeyPair(keyPath, keyType)
 	base.initStore()
-	base.initRemoteParamStore()
 
 	base.verifyBase()
 	return base
@@ -78,23 +79,12 @@ func (a *FeeOracleAppBase) initKeyPair(keyPath, keyType string) {
 }
 
 func (a *FeeOracleAppBase) initStore() {
-	storeDB, err := db.NewLvlDB(a.GetConfig().StoreConfig().Path)
+	storeDB, err := db.NewLvlDB(a.GetConfig().Store.Path)
 	if err != nil {
 		panic(err)
 	}
 
 	a.store = storeDB
-}
-
-func (a *FeeOracleAppBase) initRemoteParamStore() {
-	remoteParamFlag := os.Getenv("REMOTE_PARAM_OPERATOR_ENABLE")
-	if remoteParamFlag != "true" {
-		a.log.Warn("remote param operator is disabled")
-		return
-	}
-
-	aws := paramFetcherAws.NewAWSClient()
-	a.remoteParamOperator = paramFetcherAws.NewSSMClient(*aws)
 }
 
 // verifyBase preforms all essential checks for the app base

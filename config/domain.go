@@ -10,7 +10,7 @@ import (
 	"strings"
 )
 
-type domainConfigFile struct {
+type domainConfig struct {
 	Domains []Domain `json:"domains"`
 }
 
@@ -32,21 +32,21 @@ func newDomain(id int, name, baseCurrencySymbol string, baseCurrencyDecimals int
 }
 
 // loadDomains registers and load all pre-defined domains
-func loadDomains(domainConfigPath string) (map[int]Domain, map[string]*Resource) {
+func loadDomains(domainConfigPath string) (map[int]Domain, map[string]*Resource, error) {
 	domainData, err := ioutil.ReadFile(filepath.Clean(domainConfigPath))
 	if err != nil {
-		panic(ErrLoadDomainConfig.Wrap(err))
+		return nil, nil, err
 	}
 
 	return parseDomains(domainData)
 }
 
-func parseDomains(domainData []byte) (map[int]Domain, map[string]*Resource) {
-	var content domainConfigFile
+func parseDomains(domainData []byte) (map[int]Domain, map[string]*Resource, error) {
+	var content domainConfig
 
 	err := json.Unmarshal(domainData, &content)
 	if err != nil {
-		panic(ErrLoadDomainConfig.Wrap(err))
+		return nil, nil, err
 	}
 
 	domains := make(map[int]Domain)
@@ -56,7 +56,7 @@ func parseDomains(domainData []byte) (map[int]Domain, map[string]*Resource) {
 		parseResources(resources, domain)
 	}
 
-	return domains, resources
+	return domains, resources, nil
 }
 
 func parseResources(resources map[string]*Resource, domain Domain) {

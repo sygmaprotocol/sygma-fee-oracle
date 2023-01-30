@@ -4,17 +4,14 @@
 package config
 
 import (
-	"encoding/hex"
 	"fmt"
 
 	"github.com/pkg/errors"
 
-	"io/ioutil"
 	"os"
 	"strconv"
 
-	"github.com/ChainSafe/sygma-fee-oracle/identity"
-	"github.com/ChainSafe/sygma-fee-oracle/identity/secp256k1"
+	oracleErrors "github.com/ChainSafe/sygma-fee-oracle/errors"
 
 	"path"
 	"path/filepath"
@@ -37,37 +34,21 @@ var (
 )
 
 type Config struct {
-	config configData
-}
+	logLevel logrus.Level `mapstructure:"log_level"`
 
-type configData struct {
-	AppMode string `mapstructure:"app_mode"`
-
-	Env string `mapstructure:"env"`
-
-	LogLevel logrus.Level `mapstructure:"log_level"`
-
-	HttpServer httpServerConfig `mapstructure:"http_server"`
-
-	FinishUpTime int64 `mapstructure:"finish_up_time"`
-
-	CronJob cronJobConfig `mapstructure:"cron_job"`
-
-	Store store `mapstructure:"store"`
-
-	Oracle oracle `mapstructure:"oracle"`
-
-	GasPriceDomains []string `mapstructure:"gas_price_domains"`
-
-	ConversionRatePairs []string `mapstructure:"conversion_rate_pairs"`
-
-	Strategy strategyConfig `mapstructure:"strategy"`
-
-	DataValidInterval int64 `mapstructure:"data_valid_interval"`
-
-	Domains map[int]Domain
-
-	Resources map[string]*Resource
+	AppMode             string           `mapstructure:"app_mode"`
+	Env                 string           `mapstructure:"env"`
+	HttpServer          httpServerConfig `mapstructure:"http_server"`
+	FinishUpTime        int64            `mapstructure:"finish_up_time"`
+	CronJob             cronJobConfig    `mapstructure:"cron_job"`
+	Store               store            `mapstructure:"store"`
+	Oracle              oracle           `mapstructure:"oracle"`
+	GasPriceDomains     []string         `mapstructure:"gas_price_domains"`
+	ConversionRatePairs []string         `mapstructure:"conversion_rate_pairs"`
+	Strategy            strategyConfig   `mapstructure:"strategy"`
+	DataValidInterval   int64            `mapstructure:"data_valid_interval"`
+	Domains             map[int]Domain
+	Resources           map[string]*Resource
 }
 
 type strategyConfig struct {
@@ -125,10 +106,10 @@ type apiUrls struct {
 	QueryRate      string `mapstructure:"query_rate"`
 }
 
-func (c *Config) logLevel() (logrus.Level, error) {
+func (c *Config) LogLevel() (logrus.Level, error) {
 	logLvl := os.Getenv("LOG_LEVEL")
 	if logLvl == "" {
-		return c.config.LogLevel, nil
+		return c.logLevel, nil
 	}
 
 	lvl, err := strconv.ParseUint(logLvl, 10, 64)
@@ -142,7 +123,7 @@ func (c *Config) logLevel() (logrus.Level, error) {
 func (c *Config) WorkingEnvConfig() AppEvm {
 	env := os.Getenv("WORKING_ENV")
 	if env == "" {
-		env = c.config.Env
+		env = c.Env
 	}
 
 	switch env {
@@ -158,7 +139,7 @@ func (c *Config) WorkingEnvConfig() AppEvm {
 func (c *Config) AppModeConfig() AppMode {
 	mode := os.Getenv("APP_MODE")
 	if mode == "" {
-		mode = c.config.AppMode
+		mode = c.AppMode
 	}
 
 	switch mode {
@@ -179,7 +160,7 @@ func (c *Config) PrepareHttpServer() *gin.Engine {
 }
 
 func (c *Config) HttpServerConfig() httpServerConfig {
-	httpConfig := c.config.HttpServer
+	httpConfig := c.HttpServer
 
 	serverMode := os.Getenv("HTTP_SERVER_MODE")
 	serverPort := os.Getenv("HTTP_SERVER_PORT")
@@ -194,12 +175,8 @@ func (c *Config) HttpServerConfig() httpServerConfig {
 	return httpConfig
 }
 
-func (c *Config) FinishUpTimeConfig() int64 {
-	return c.config.FinishUpTime
-}
-
 func (c *Config) OracleConfig() oracle {
-	oracleConfig := c.config.Oracle
+	oracleConfig := c.Oracle
 
 	etherscanAPIKey := os.Getenv("ETHERSCAN_API_KEY")
 	polygonscanAPIKey := os.Getenv("POLYGONSCAN_API_KEY")
@@ -223,7 +200,7 @@ func (c *Config) OracleConfig() oracle {
 }
 
 func (c *Config) CronJobConfig() cronJobConfig {
-	cronjobConfig := c.config.CronJob
+	cronjobConfig := c.CronJob
 
 	conversionRateJobFrequency := os.Getenv("CONVERSION_RATE_JOB_FREQUENCY")
 	gasPriceJobFrequency := os.Getenv("GAS_PRICE_JOB_FREQUENCY")
@@ -238,32 +215,16 @@ func (c *Config) CronJobConfig() cronJobConfig {
 	return cronjobConfig
 }
 
-func (c *Config) StoreConfig() store {
-	return c.config.Store
-}
-
-func (c *Config) GasPriceDomainsConfig() []string {
-	return c.config.GasPriceDomains
-}
-
-func (c *Config) setDomains(domainData string) {
-	c.config.Domains, _ = parseDomains([]byte(domainData))
-}
-
 func (c *Config) Domain(domainId int) (*Domain, error) {
-	d, ok := c.config.Domains[domainId]
+	d, ok := c.Domains[domainId]
 	if !ok {
 		return nil, fmt.Errorf("no domain registered")
 	}
 	return &d, nil
 }
 
-func (c *Config) setResources(resourceData string) {
-	// c.config.Resources = parseResources([]byte(resourceData))
-}
-
 func (c *Config) Resource(resourceId string) (*Resource, error) {
-	r, ok := c.config.Resources[strings.ToLower(resourceId)]
+	r, ok := c.Resources[strings.ToLower(resourceId)]
 	if !ok {
 		return nil, fmt.Errorf("no registered resource")
 	}
@@ -285,10 +246,10 @@ func (c *Config) ResourceDomainInfo(resourceId string, domainID int) (*DomainInf
 }
 
 func (c *Config) ConversionRatePairsChecker() error {
-	if len(c.config.ConversionRatePairs)%2 != 0 {
+	if len(c.ConversionRatePairs)%2 != 0 {
 		return errors.New("conversion_rate_pairs is invalid, must be pairs")
 	}
-	for _, e := range c.config.ConversionRatePairs {
+	for _, e := range c.ConversionRatePairs {
 		if e == "" {
 			return errors.New("conversion_rate_pairs is invalid, element of pair is empty")
 		}
@@ -297,17 +258,13 @@ func (c *Config) ConversionRatePairsChecker() error {
 	return nil
 }
 
-func (c *Config) StrategyConfig() strategyConfig {
-	return c.config.Strategy
-}
-
 func (c *Config) conversionRatePairsConfigLoad() []string {
 	conversionRatePairs := os.Getenv("CONVERSION_RATE_PAIRS")
 	if conversionRatePairs != "" {
 		return strings.Split(conversionRatePairs, ",")
 	}
 
-	return c.config.ConversionRatePairs
+	return c.ConversionRatePairs
 }
 
 func (c *Config) dataValidIntervalConfigLoad() int64 {
@@ -315,24 +272,20 @@ func (c *Config) dataValidIntervalConfigLoad() int64 {
 	if dataValidInterval != "" {
 		i, err := strconv.ParseUint(dataValidInterval, 10, 64)
 		if err != nil {
-			panic(ErrLoadConfig.Wrap(errors.Wrap(err, "invalid DATA_VALID_INTERVAL from env param")))
+			panic(oracleErrors.LoadConfig.Wrap(errors.Wrap(err, "invalid DATA_VALID_INTERVAL from env param")))
 		}
 		return int64(i)
 	}
-	return c.config.DataValidInterval
-}
-
-func (c *Config) DataValidIntervalConfig() int64 {
-	return c.config.DataValidInterval
+	return c.DataValidInterval
 }
 
 func (c *Config) ConversionRatePairsConfig() [][]string {
 	pricePairs := make([][]string, 0)
 
-	for i := 0; i < len(c.config.ConversionRatePairs); i++ {
+	for i := 0; i < len(c.ConversionRatePairs); i++ {
 		m := make([]string, 0)
-		m = append(m, c.config.ConversionRatePairs[i])
-		m = append(m, c.config.ConversionRatePairs[i+1])
+		m = append(m, c.ConversionRatePairs[i])
+		m = append(m, c.ConversionRatePairs[i+1])
 		pricePairs = append(pricePairs, m)
 		i++
 	}
@@ -355,71 +308,21 @@ func (c *Config) EssentialConfigCheck() error {
 	return nil
 }
 
-func LoadConfig(configPath, domainConfigPath, resourceConfigPath string) (*Config, *logrus.Logger) {
+func LoadConfig(configPath, domainConfigPath, resourceConfigPath string) *Config {
 	conf, err := newConfig(configPath)
 	if err != nil {
-		panic(ErrLoadConfig.Wrap(err))
+		panic(oracleErrors.LoadConfig.Wrap(err))
 	}
-	log := logrus.New()
-	logLvl, err := conf.logLevel()
+
+	conf.Domains, conf.Resources, err = loadDomains(domainConfigPath)
 	if err != nil {
-		panic(ErrLoadConfig.Wrap(err))
-	}
-	log.SetLevel(logLvl)
-
-	// load domains and resources
-	//	conf.config.Domains = loadDomains(domainConfigPath)
-	//	conf.config.Resources = loadResources(resourceConfigPath)
-
-	// load data valid interval
-	conf.config.DataValidInterval = conf.dataValidIntervalConfigLoad()
-	// load conversion price pair
-	conf.config.ConversionRatePairs = conf.conversionRatePairsConfigLoad()
-
-	return conf, log
-}
-
-func LoadOracleIdentityKeyFromFile(keyPath string) ([]byte, error) {
-	privBytes, err := ioutil.ReadFile(filepath.Clean(keyPath))
-	if err != nil {
-		return nil, err
+		panic(oracleErrors.LoadConfig.Wrap(err))
 	}
 
-	return privBytes, nil
-}
+	conf.DataValidInterval = conf.dataValidIntervalConfigLoad()
+	conf.ConversionRatePairs = conf.conversionRatePairsConfigLoad()
 
-func LoadOracleIdentityKeyFromEvn() (string, string) {
-	evnKey := os.Getenv("IDENTITY_KEY")
-	evnKeyType := os.Getenv("IDENTITY_KEY_TYPE")
-
-	return evnKey, evnKeyType
-}
-
-func LoadOracleIdentityKey(keyPath, keyType string) (identity.Keypair, error) {
-	var privBytes []byte
-	var err error
-
-	// load key from EVN params first, if not found, load from given key path
-	evnKey, envKeyType := LoadOracleIdentityKeyFromEvn()
-	if evnKey != "" && envKeyType != "" {
-		keyType = envKeyType
-		privBytes, err = hex.DecodeString(evnKey)
-		if err != nil {
-			return nil, err
-		}
-	} else {
-		privBytes, err = LoadOracleIdentityKeyFromFile(keyPath)
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	switch strings.ToLower(keyType) {
-	case identity.Secp256k1Type:
-		return secp256k1.NewKeypairFromPrivateKey(privBytes)
-	default:
-		return nil, errors.New("unsupported key type")
-	}
+	return conf
 }
 
 func newConfig(configPath string) (*Config, error) {
@@ -438,11 +341,11 @@ func newConfig(configPath string) (*Config, error) {
 		return nil, err
 	}
 
-	config := configData{}
-	err = viper.Unmarshal(&config)
+	config := &Config{}
+	err = viper.Unmarshal(config)
 	if err != nil {
 		return nil, err
 	}
 
-	return &Config{config: config}, nil
+	return config, nil
 }

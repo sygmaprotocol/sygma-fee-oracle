@@ -33,7 +33,7 @@ func (a *FeeOracleApp) preTerminationCheck() {
 	a.stopStore()
 
 	a.log.Info("pre-termination checking is done, preparing final termination...")
-	for i := a.base.GetConfig().FinishUpTimeConfig(); i >= 1; i-- { // give some time here to allow any internal jobs finish
+	for i := a.base.GetConfig().FinishUpTime; i >= 1; i-- { // give some time here to allow any internal jobs finish
 		if i <= 10 {
 			a.log.Warn("shutdown in ", i)
 		}

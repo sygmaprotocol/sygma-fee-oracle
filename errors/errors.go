@@ -1,7 +1,7 @@
 // The Licensed Work is (c) 2022 Sygma
 // SPDX-License-Identifier: BUSL-1.1
 
-package config
+package errors
 
 import (
 	"errors"
@@ -12,17 +12,13 @@ const (
 	loadConfigErrCode          = 10000
 	invalidRequestInputErrCode = 10001
 	parseRequestErrCode        = 10002
-	loadDomainConfigErrCode    = 10003
-	loadResourceConfigErrCode  = 10004
 )
 
 var (
-	ErrLoadConfig          = FeeOracleError{loadConfigErrCode, "failed to load app config", ""}
-	ErrLoadDomainConfig    = FeeOracleError{loadDomainConfigErrCode, "failed to load domain config", ""}
-	ErrLoadResourceConfig  = FeeOracleError{loadResourceConfigErrCode, "failed to load resource config", ""}
-	ErrParseRequest        = FeeOracleError{parseRequestErrCode, "failed to parse request data", ""}
-	ErrInvalidRequestInput = FeeOracleError{invalidRequestInputErrCode, "invalid request input", ""}
-	ErrInternalServerError = FeeOracleError{}
+	LoadConfig          = FeeOracleError{loadConfigErrCode, "failed to load app config", ""}
+	ParseRequest        = FeeOracleError{parseRequestErrCode, "failed to parse request data", ""}
+	InvalidRequestInput = FeeOracleError{invalidRequestInputErrCode, "invalid request input", ""}
+	InternalServerError = FeeOracleError{}
 )
 
 type FeeOracleError struct {

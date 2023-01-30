@@ -91,7 +91,7 @@ func (h *Handler) rateSignature(result *FetchRateResp, fromDomainID int, resourc
 
 // TODO: this is the placeholder for the algorithm of calculating the data expiration
 func (h *Handler) dataExpirationManager(baseTimestamp int64) int64 {
-	return baseTimestamp + h.conf.DataValidIntervalConfig()
+	return baseTimestamp + h.conf.DataValidInterval
 }
 
 func (h *Handler) parseDomains(fromID string, toID string) (from *config.Domain, to *config.Domain, err error) {

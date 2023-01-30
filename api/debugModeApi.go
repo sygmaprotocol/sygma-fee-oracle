@@ -8,7 +8,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/ChainSafe/sygma-fee-oracle/config"
+	oracleErrors "github.com/ChainSafe/sygma-fee-oracle/errors"
 	"github.com/ChainSafe/sygma-fee-oracle/util"
 	"github.com/gin-gonic/gin"
 	"github.com/pkg/errors"
@@ -17,12 +17,12 @@ import (
 func (h *Handler) debugGetRate(c *gin.Context) {
 	fromDomainID, err := strconv.Atoi(c.Param("fromDomainID"))
 	if err != nil {
-		ginErrorReturn(c, http.StatusBadRequest, newReturnErrorResp(&config.ErrInvalidRequestInput, errors.New("invalid fromDomainID")))
+		ginErrorReturn(c, http.StatusBadRequest, newReturnErrorResp(&oracleErrors.InvalidRequestInput, errors.New("invalid fromDomainID")))
 		return
 	}
 	toDomainID, err := strconv.Atoi(c.Param("toDomainID"))
 	if err != nil {
-		ginErrorReturn(c, http.StatusBadRequest, newReturnErrorResp(&config.ErrInvalidRequestInput, errors.New("invalid toDomainID")))
+		ginErrorReturn(c, http.StatusBadRequest, newReturnErrorResp(&oracleErrors.InvalidRequestInput, errors.New("invalid toDomainID")))
 		return
 	}
 	resourceID := c.Param("resourceID")
@@ -30,7 +30,7 @@ func (h *Handler) debugGetRate(c *gin.Context) {
 	msgGasLimitParam := c.DefaultQuery("msgGasLimit", "0")
 	validValue := util.CheckInteger(msgGasLimitParam)
 	if !validValue {
-		ginErrorReturn(c, http.StatusBadRequest, newReturnErrorResp(&config.ErrInvalidRequestInput, errors.New("invalid msgGasLimit")))
+		ginErrorReturn(c, http.StatusBadRequest, newReturnErrorResp(&oracleErrors.InvalidRequestInput, errors.New("invalid msgGasLimit")))
 		return
 	}
 
@@ -50,7 +50,7 @@ func (h *Handler) debugGetRate(c *gin.Context) {
 
 	endpointRespData.Signature, err = h.rateSignature(endpointRespData, fromDomainID, resourceID)
 	if err != nil {
-		ginErrorReturn(c, http.StatusInternalServerError, newReturnErrorResp(&config.ErrInternalServerError, err))
+		ginErrorReturn(c, http.StatusInternalServerError, newReturnErrorResp(&oracleErrors.InternalServerError, err))
 		return
 	}
 

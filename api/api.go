@@ -12,6 +12,7 @@ import (
 	"github.com/ChainSafe/sygma-fee-oracle/util"
 
 	"github.com/ChainSafe/sygma-fee-oracle/config"
+	oracleErrors "github.com/ChainSafe/sygma-fee-oracle/errors"
 
 	"github.com/ChainSafe/sygma-fee-oracle/consensus"
 	"github.com/ChainSafe/sygma-fee-oracle/identity"
@@ -50,24 +51,24 @@ func AddRouterPathsV1(v1RouterGroups map[string]*gin.RouterGroup, apiHandler *Ha
 func (h *Handler) getRate(c *gin.Context) {
 	fromDomain, toDomain, err := h.parseDomains(c.Param("fromDomainID"), c.Param("toDomainID"))
 	if err != nil {
-		ginErrorReturn(c, http.StatusBadRequest, newReturnErrorResp(&config.ErrInvalidRequestInput, errors.New("invalid resourceID")))
+		ginErrorReturn(c, http.StatusBadRequest, newReturnErrorResp(&oracleErrors.InvalidRequestInput, errors.New("invalid resourceID")))
 	}
 
 	resource, err := h.parseResource(c.Param("resourceID"))
 	if err != nil {
-		ginErrorReturn(c, http.StatusBadRequest, newReturnErrorResp(&config.ErrInvalidRequestInput, errors.New("invalid resourceID")))
+		ginErrorReturn(c, http.StatusBadRequest, newReturnErrorResp(&oracleErrors.InvalidRequestInput, errors.New("invalid resourceID")))
 	}
 	h.log.Debugf("new request with params fromDomainID: %d, toDomainID: %d, resourceID: %s\n", fromDomain.ID, toDomain.ID, resource.ID)
 
 	msgGasLimitParam := c.DefaultQuery("msgGasLimit", "0")
 	if util.CheckInteger(msgGasLimitParam) {
-		ginErrorReturn(c, http.StatusBadRequest, newReturnErrorResp(&config.ErrInvalidRequestInput, errors.New("invalid msgGasLimit")))
+		ginErrorReturn(c, http.StatusBadRequest, newReturnErrorResp(&oracleErrors.InvalidRequestInput, errors.New("invalid msgGasLimit")))
 		return
 	}
 
 	gp, err := h.consensus.FilterLocalGasPriceData(h.gasPriceStore, toDomain.Name)
 	if err != nil {
-		ginErrorReturn(c, http.StatusInternalServerError, newReturnErrorResp(&config.ErrInternalServerError, err))
+		ginErrorReturn(c, http.StatusInternalServerError, newReturnErrorResp(&oracleErrors.InternalServerError, err))
 		return
 	}
 	h.log.Debugf("aggregatedGasPriceData: %v\n", gp)
@@ -77,14 +78,14 @@ func (h *Handler) getRate(c *gin.Context) {
 		toDomain.BaseCurrencySymbol,
 		fromDomain.BaseCurrencySymbol)
 	if err != nil {
-		ginErrorReturn(c, http.StatusInternalServerError, newReturnErrorResp(&config.ErrInternalServerError, err))
+		ginErrorReturn(c, http.StatusInternalServerError, newReturnErrorResp(&oracleErrors.InternalServerError, err))
 		return
 	}
 	h.log.Debugf("base rate calculation: to: %s, from: %s\n", toDomain.BaseCurrencySymbol, fromDomain.BaseCurrencySymbol)
 
 	ter, err := h.calculateTokenRate(resource, ber, fromDomain, toDomain)
 	if err != nil {
-		ginErrorReturn(c, http.StatusInternalServerError, newReturnErrorResp(&config.ErrInternalServerError, err))
+		ginErrorReturn(c, http.StatusInternalServerError, newReturnErrorResp(&oracleErrors.InternalServerError, err))
 		return
 	}
 	h.log.Debugf("token rate calculation: to: %s, from: %s\n", toDomain.BaseCurrencySymbol, resource.Symbol)
@@ -104,7 +105,7 @@ func (h *Handler) getRate(c *gin.Context) {
 	}
 	endpointRespData.Signature, err = h.rateSignature(endpointRespData, fromDomain.ID, resource.ID)
 	if err != nil {
-		ginErrorReturn(c, http.StatusInternalServerError, newReturnErrorResp(&config.ErrInternalServerError, err))
+		ginErrorReturn(c, http.StatusInternalServerError, newReturnErrorResp(&oracleErrors.InternalServerError, err))
 		return
 	}
 
