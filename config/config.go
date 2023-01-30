@@ -251,12 +251,12 @@ func (c *Config) setDomains(domainData string) {
 	c.config.Domains, _ = parseDomains([]byte(domainData))
 }
 
-func (c *Config) GetRegisteredDomains(domainId int) *Domain {
+func (c *Config) Domain(domainId int) (*Domain, error) {
 	d, ok := c.config.Domains[domainId]
 	if !ok {
-		return nil
+		return nil, fmt.Errorf("no domain registered")
 	}
-	return &d
+	return &d, nil
 }
 
 func (c *Config) setResources(resourceData string) {

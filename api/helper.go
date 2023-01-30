@@ -8,7 +8,6 @@ import (
 	"encoding/hex"
 	"fmt"
 	"strconv"
-	"strings"
 
 	"github.com/ChainSafe/sygma-fee-oracle/config"
 	"github.com/ChainSafe/sygma-fee-oracle/types"
@@ -108,26 +107,22 @@ func (h *Handler) parseDomains(fromID string, toID string) (from *config.Domain,
 		return from, to, fmt.Errorf("from and to domain equal")
 	}
 
-	toDomain := h.conf.GetRegisteredDomains(toDomainID)
-	if toDomain == nil {
-		return from, to, fmt.Errorf("to domain not registered")
+	from, err = h.conf.Domain(toDomainID)
+	if err != nil {
+		return from, to, err
 	}
-	fromDomain := h.conf.GetRegisteredDomains(fromDomainID)
-	if fromDomain == nil {
-		return from, to, fmt.Errorf("from domain not registered")
+	to, err = h.conf.Domain(fromDomainID)
+	if err != nil {
+		return from, to, err
 	}
 
 	return from, to, nil
 }
 
 func (h *Handler) parseResource(resourceID string) (*config.Resource, error) {
-	if !strings.HasPrefix(resourceID, "0x") || len(resourceID) != 66 {
-		return &config.Resource{}, fmt.Errorf("resource invalid")
-	}
-
-	resource := h.conf.GetRegisteredResources(resourceID)
-	if resource == nil {
-		return &config.Resource{}, fmt.Errorf("resource not registerred")
+	resource, err := h.conf.Resource(resourceID)
+	if err != nil {
+		return &config.Resource{}, err
 	}
 
 	return resource, nil
