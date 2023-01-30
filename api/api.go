@@ -57,7 +57,7 @@ func (h *Handler) getRate(c *gin.Context) {
 	if err != nil {
 		ginErrorReturn(c, http.StatusBadRequest, newReturnErrorResp(&config.ErrInvalidRequestInput, errors.New("invalid resourceID")))
 	}
-	h.log.Debugf("new request with params fromDomainID: %d, toDomainID: %d, resourceID: %s\n", fromDomain.ID, toDomain.ID, resourceID)
+	h.log.Debugf("new request with params fromDomainID: %d, toDomainID: %d, resourceID: %s\n", fromDomain.ID, toDomain.ID, resource.ID)
 
 	msgGasLimitParam := c.DefaultQuery("msgGasLimit", "0")
 	if util.CheckInteger(msgGasLimitParam) {
