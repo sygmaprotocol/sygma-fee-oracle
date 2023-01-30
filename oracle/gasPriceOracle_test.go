@@ -51,7 +51,7 @@ func (s *GasPriceOracleTestSuite) TearDownSuite() {
 func (s *GasPriceOracleTestSuite) SetupTest() {
 	gomockController := gomock.NewController(s.T())
 	s.oracle = mockOracle.NewMockGasPriceOracle(gomockController)
-	s.appBase = base.NewFeeOracleAppBase("../config/config.template.yaml", "../domain.json", "../resource.json", "./keyfile.priv", "secp256k1")
+	s.appBase = base.NewFeeOracleAppBase("../config/config.template.yaml", "../domain.json", "./keyfile.priv", "secp256k1")
 	s.gasPriceOperator = oracle.NewGasPriceOracleOperator(s.appBase.GetLogger(), s.oracle)
 	s.testdata = &types.GasPrices{
 		SafeGasPrice:    "1",

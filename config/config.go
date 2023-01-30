@@ -308,8 +308,8 @@ func (c *Config) EssentialConfigCheck() error {
 	return nil
 }
 
-func LoadConfig(configPath, domainConfigPath, resourceConfigPath string) *Config {
-	conf, err := newConfig(configPath)
+func LoadConfig(configPath, domainConfigPath string) *Config {
+	conf, err := loadConfigFromFile(configPath)
 	if err != nil {
 		panic(oracleErrors.LoadConfig.Wrap(err))
 	}
@@ -325,7 +325,7 @@ func LoadConfig(configPath, domainConfigPath, resourceConfigPath string) *Config
 	return conf
 }
 
-func newConfig(configPath string) (*Config, error) {
+func loadConfigFromFile(configPath string) (*Config, error) {
 	dir, file := path.Split(configPath)
 	ext := filepath.Ext(file)[1:]
 	fileName := strings.TrimSuffix(file, "."+ext)

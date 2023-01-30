@@ -23,8 +23,8 @@ type FeeOracleAppBase struct {
 	env config.AppEvm
 }
 
-func NewFeeOracleAppBase(configPath, domainConfigPath, resourceConfigPath, keyPath, keyType string) *FeeOracleAppBase {
-	conf := config.LoadConfig(configPath, domainConfigPath, resourceConfigPath)
+func NewFeeOracleAppBase(configPath, domainConfigPath, keyPath, keyType string) *FeeOracleAppBase {
+	conf := config.LoadConfig(configPath, domainConfigPath)
 
 	logger := logrus.New()
 	logLvl, err := conf.LogLevel()
