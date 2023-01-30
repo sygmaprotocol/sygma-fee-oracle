@@ -5,6 +5,7 @@ package config
 
 import (
 	"encoding/hex"
+	"fmt"
 
 	"github.com/ChainSafe/sygma-fee-oracle/remoteParam"
 	"github.com/pkg/errors"
@@ -247,7 +248,7 @@ func (c *Config) GasPriceDomainsConfig() []string {
 }
 
 func (c *Config) setDomains(domainData string) {
-	c.config.Domains = parseDomains([]byte(domainData))
+	c.config.Domains, _ = parseDomains([]byte(domainData))
 }
 
 func (c *Config) GetRegisteredDomains(domainId int) *Domain {
@@ -262,26 +263,26 @@ func (c *Config) setResources(resourceData string) {
 	c.config.Resources = parseResources([]byte(resourceData))
 }
 
-func (c *Config) GetRegisteredResources(resourceId string) *Resource {
+func (c *Config) Resource(resourceId string) (*Resource, error) {
 	r, ok := c.config.Resources[strings.ToLower(resourceId)]
 	if !ok {
-		return nil
+		return nil, fmt.Errorf("no registered resource")
 	}
-	return &r
+	return &r, nil
 }
 
-func (c *Config) GetRegisteredResourceDomainInfo(resourceId string, domainId int) *resourceDomainInfo {
-	r := c.GetRegisteredResources(resourceId)
-	if r == nil {
-		return nil
+func (c *Config) ResourceDomainInfo(resourceId string, domainID int) (*DomainInfo, error) {
+	r, err := c.Resource(resourceId)
+	if err == nil {
+		return nil, err
 	}
 
-	for _, d := range r.Domains {
-		if d.DomainId == domainId {
-			return &d
-		}
+	di, ok := r.DomainInfo[domainID]
+	if !ok {
+		return nil, fmt.Errorf("no domain info")
 	}
-	return nil
+
+	return di, nil
 }
 
 func (c *Config) ConversionRatePairsChecker() error {
@@ -409,8 +410,8 @@ func LoadConfig(configPath, domainConfigPath, resourceConfigPath string) (*Confi
 	log.SetLevel(logLvl)
 
 	// load domains and resources
-	conf.config.Domains = loadDomains(domainConfigPath)
-	conf.config.Resources = loadResources(resourceConfigPath)
+	//	conf.config.Domains = loadDomains(domainConfigPath)
+	//	conf.config.Resources = loadResources(resourceConfigPath)
 
 	// load data valid interval
 	conf.config.DataValidInterval = conf.dataValidIntervalConfigLoad()

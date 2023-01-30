@@ -6,8 +6,6 @@ package config
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
-	"path/filepath"
 	"strings"
 )
 
@@ -19,33 +17,21 @@ type resourceConfigFile struct {
 	Resources []Resource `json:"resources"`
 }
 
-type resourceDomainInfo struct {
-	DomainId int `json:"domainId"`
-	Decimal  int `json:"decimal"`
+type DomainInfo struct {
+	Decimals int `json:"decimals"`
 }
 
 type Resource struct {
-	ID      string               `json:"id"`
-	Symbol  string               `json:"symbol"`
-	Domains []resourceDomainInfo `json:"domains"`
+	ID         string `json:"id"`
+	Symbol     string `json:"symbol"`
+	DomainInfo map[int]*DomainInfo
 }
 
-func newResource(resourceID string, symbol string, domains []resourceDomainInfo) *Resource {
+func newResource(resourceID string, symbol string) *Resource {
 	return &Resource{
-		ID:      resourceID,
-		Symbol:  symbol,
-		Domains: domains,
+		ID:     resourceID,
+		Symbol: symbol,
 	}
-}
-
-// loadResources registers and load all pre-defined resources
-func loadResources(resourceConfigPath string) map[string]Resource {
-	resourceData, err := ioutil.ReadFile(filepath.Clean(resourceConfigPath))
-	if err != nil {
-		panic(ErrLoadResourceConfig.Wrap(err))
-	}
-
-	return parseResources(resourceData)
 }
 
 // ResourceIDBuilder builds the resourceID according to fee handler contract
@@ -63,7 +49,7 @@ func parseResources(resourceData []byte) map[string]Resource {
 	resources := make(map[string]Resource, 0)
 	for _, resource := range content.Resources {
 		resources[strings.ToLower(resource.ID)] =
-			*newResource(resource.ID, resource.Symbol, resource.Domains)
+			*newResource(resource.ID, resource.Symbol)
 	}
 
 	return resources
