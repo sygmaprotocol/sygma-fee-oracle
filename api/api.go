@@ -7,11 +7,8 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
-	"strconv"
-	"strings"
 	"time"
 
-	"github.com/ChainSafe/sygma-fee-oracle/types"
 	"github.com/ChainSafe/sygma-fee-oracle/util"
 
 	"github.com/ChainSafe/sygma-fee-oracle/config"
@@ -113,62 +110,4 @@ func (h *Handler) getRate(c *gin.Context) {
 
 	endpointRespData.ResourceID = resource.ID
 	ginSuccessReturn(c, http.StatusOK, endpointRespData)
-}
-
-func (h *Handler) parseDomains(fromID string, toID string) (from *config.Domain, to *config.Domain, err error) {
-	fromDomainID, err := strconv.Atoi(fromID)
-	if err != nil {
-		return from, to, err
-	}
-	toDomainID, err := strconv.Atoi(toID)
-	if err != nil {
-		return from, to, err
-	}
-	if fromDomainID == toDomainID {
-		return from, to, fmt.Errorf("from and to domain equal")
-	}
-
-	toDomain := h.conf.GetRegisteredDomains(toDomainID)
-	if toDomain == nil {
-		return from, to, fmt.Errorf("to domain not registered")
-	}
-	fromDomain := h.conf.GetRegisteredDomains(fromDomainID)
-	if fromDomain == nil {
-		return from, to, fmt.Errorf("from domain not registered")
-	}
-
-	return from, to, nil
-}
-
-func (h *Handler) parseResource(resourceID string) (*config.Resource, error) {
-	if !strings.HasPrefix(resourceID, "0x") || len(resourceID) != 66 {
-		return &config.Resource{}, fmt.Errorf("resource invalid")
-	}
-
-	resource := h.conf.GetRegisteredResources(resourceID)
-	if resource == nil {
-		return &config.Resource{}, fmt.Errorf("resource not registerred")
-	}
-
-	return resource, nil
-}
-
-func (h *Handler) calculateTokenRate(resource *config.Resource, ber *types.ConversionRate, from *config.Domain, to *config.Domain) (*types.ConversionRate, error) {
-	ter := &types.ConversionRate{}
-	// if resource is the base currency of the fromDomain
-	if resource.Symbol == from.BaseCurrencySymbol {
-		ter = ber
-	} else {
-
-		if resource.Symbol == to.BaseCurrencySymbol {
-			ter.Rate = 1.0
-		} else {
-			ter, err := h.consensus.FilterLocalConversionRateData(h.conversionRateStore, to.BaseCurrencySymbol, resource.Symbol)
-			if err != nil {
-				return ter, err
-			}
-		}
-	}
-
-	return ter, nil
 }

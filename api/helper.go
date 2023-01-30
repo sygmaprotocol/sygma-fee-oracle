@@ -7,8 +7,11 @@ import (
 	"bytes"
 	"encoding/hex"
 	"fmt"
+	"strconv"
+	"strings"
 
 	"github.com/ChainSafe/sygma-fee-oracle/config"
+	"github.com/ChainSafe/sygma-fee-oracle/types"
 	"github.com/ChainSafe/sygma-fee-oracle/util"
 	"github.com/pkg/errors"
 )
@@ -50,7 +53,7 @@ func (h *Handler) rateSignature(result *FetchRateResp, fromDomainID int, resourc
 	finalFromDomainId := util.PaddingZero([]byte{uint8(result.FromDomainID)}, 32)
 	finalToDomainId := util.PaddingZero([]byte{uint8(result.ToDomainID)}, 32)
 
-	finalResourceId, err := hex.DecodeString(resourceID[len(h.conf.GetRegisteredDomains(fromDomainID).AddressPrefix):])
+	finalResourceId, err := hex.DecodeString(resourceID[2:])
 	if err != nil {
 		return "", errors.Wrap(err, "failed to decode resourceID")
 	}
@@ -90,4 +93,62 @@ func (h *Handler) rateSignature(result *FetchRateResp, fromDomainID int, resourc
 // TODO: this is the placeholder for the algorithm of calculating the data expiration
 func (h *Handler) dataExpirationManager(baseTimestamp int64) int64 {
 	return baseTimestamp + h.conf.DataValidIntervalConfig()
+}
+
+func (h *Handler) parseDomains(fromID string, toID string) (from *config.Domain, to *config.Domain, err error) {
+	fromDomainID, err := strconv.Atoi(fromID)
+	if err != nil {
+		return from, to, err
+	}
+	toDomainID, err := strconv.Atoi(toID)
+	if err != nil {
+		return from, to, err
+	}
+	if fromDomainID == toDomainID {
+		return from, to, fmt.Errorf("from and to domain equal")
+	}
+
+	toDomain := h.conf.GetRegisteredDomains(toDomainID)
+	if toDomain == nil {
+		return from, to, fmt.Errorf("to domain not registered")
+	}
+	fromDomain := h.conf.GetRegisteredDomains(fromDomainID)
+	if fromDomain == nil {
+		return from, to, fmt.Errorf("from domain not registered")
+	}
+
+	return from, to, nil
+}
+
+func (h *Handler) parseResource(resourceID string) (*config.Resource, error) {
+	if !strings.HasPrefix(resourceID, "0x") || len(resourceID) != 66 {
+		return &config.Resource{}, fmt.Errorf("resource invalid")
+	}
+
+	resource := h.conf.GetRegisteredResources(resourceID)
+	if resource == nil {
+		return &config.Resource{}, fmt.Errorf("resource not registerred")
+	}
+
+	return resource, nil
+}
+
+func (h *Handler) calculateTokenRate(resource *config.Resource, ber *types.ConversionRate, from *config.Domain, to *config.Domain) (*types.ConversionRate, error) {
+	ter := &types.ConversionRate{}
+	// if resource is the base currency of the fromDomain
+	if resource.Symbol == from.BaseCurrencySymbol {
+		ter = ber
+	} else {
+
+		if resource.Symbol == to.BaseCurrencySymbol {
+			ter.Rate = 1.0
+		} else {
+			ter, err := h.consensus.FilterLocalConversionRateData(h.conversionRateStore, to.BaseCurrencySymbol, resource.Symbol)
+			if err != nil {
+				return ter, err
+			}
+		}
+	}
+
+	return ter, nil
 }
