@@ -42,8 +42,6 @@ func NewFeeOracleAppBase(configPath, domainConfigPath, resourceConfigPath, keyPa
 	base.initStore()
 	base.initRemoteParamStore()
 
-	base.conf.SetRemoteParams(base.remoteParamOperator)
-
 	base.verifyBase()
 	return base
 }

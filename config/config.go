@@ -7,7 +7,6 @@ import (
 	"encoding/hex"
 	"fmt"
 
-	"github.com/ChainSafe/sygma-fee-oracle/remoteParam"
 	"github.com/pkg/errors"
 
 	"io/ioutil"
@@ -68,7 +67,7 @@ type configData struct {
 
 	Domains map[int]Domain
 
-	Resources map[string]Resource
+	Resources map[string]*Resource
 }
 
 type strategyConfig struct {
@@ -260,7 +259,7 @@ func (c *Config) Domain(domainId int) (*Domain, error) {
 }
 
 func (c *Config) setResources(resourceData string) {
-	c.config.Resources = parseResources([]byte(resourceData))
+	// c.config.Resources = parseResources([]byte(resourceData))
 }
 
 func (c *Config) Resource(resourceId string) (*Resource, error) {
@@ -268,7 +267,7 @@ func (c *Config) Resource(resourceId string) (*Resource, error) {
 	if !ok {
 		return nil, fmt.Errorf("no registered resource")
 	}
-	return &r, nil
+	return r, nil
 }
 
 func (c *Config) ResourceDomainInfo(resourceId string, domainID int) (*DomainInfo, error) {
@@ -339,47 +338,6 @@ func (c *Config) ConversionRatePairsConfig() [][]string {
 	}
 
 	return pricePairs
-}
-
-func (c *Config) remoteParamsLoad(operator remoteParam.RemoteParamOperator, paramName string) (string, error) {
-	out, err := operator.LoadParameter(paramName)
-	if err != nil {
-		return "", errors.Wrapf(err, "failed to load given param: %s", paramName)
-	}
-
-	return out.Value, nil
-}
-
-// SetRemoteParams fetches the remote params and override the local ones
-// only call this func when init app base
-func (c *Config) SetRemoteParams(operator remoteParam.RemoteParamOperator) {
-	if operator == nil {
-		return
-	}
-
-	remoteParamDomainData := os.Getenv("REMOTE_PARAM_DOMAIN_DATA")
-	if remoteParamDomainData == "" {
-		panic(errors.New("empty REMOTE_PARAM_DOMAIN_DATA from env param"))
-	}
-	domains, err := c.remoteParamsLoad(operator, remoteParamDomainData)
-	if err != nil {
-		panic(err)
-	}
-	if domains != "" {
-		c.setDomains(domains)
-	}
-
-	remoteParamResourceData := os.Getenv("REMOTE_PARAM_RESOURCE_DATA")
-	if remoteParamResourceData == "" {
-		panic(errors.New("empty REMOTE_PARAM_RESOURCE_DATA from env param"))
-	}
-	resources, err := c.remoteParamsLoad(operator, remoteParamResourceData)
-	if err != nil {
-		panic(err)
-	}
-	if resources != "" {
-		c.setResources(resources)
-	}
 }
 
 func (c *Config) EssentialConfigCheck() error {
