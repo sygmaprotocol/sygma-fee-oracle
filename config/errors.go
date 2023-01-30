@@ -12,11 +12,8 @@ const (
 	loadConfigErrCode          = 10000
 	invalidRequestInputErrCode = 10001
 	parseRequestErrCode        = 10002
-	dbFailErrCode              = 10003
-	consensusFailErrCode       = 10004
-	identityStampFailErrCode   = 10005
-	loadDomainConfigErrCode    = 10006
-	loadResourceConfigErrCode  = 10007
+	loadDomainConfigErrCode    = 10003
+	loadResourceConfigErrCode  = 10004
 )
 
 var (
@@ -25,9 +22,7 @@ var (
 	ErrLoadResourceConfig  = FeeOracleError{loadResourceConfigErrCode, "failed to load resource config", ""}
 	ErrParseRequest        = FeeOracleError{parseRequestErrCode, "failed to parse request data", ""}
 	ErrInvalidRequestInput = FeeOracleError{invalidRequestInputErrCode, "invalid request input", ""}
-	ErrDBFail              = FeeOracleError{dbFailErrCode, "failed to get data from db", ""}
-	ErrConsensusFail       = FeeOracleError{consensusFailErrCode, "failed to make data consensus on the strategy", ""}
-	ErrIdentityStampFail   = FeeOracleError{identityStampFailErrCode, "failed to stamp oracle identity", ""}
+	ErrInternalServerError = FeeOracleError{}
 )
 
 type FeeOracleError struct {

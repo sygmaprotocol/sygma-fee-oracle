@@ -57,7 +57,7 @@ func (h *Handler) debugGetRate(c *gin.Context) {
 
 	endpointRespData.Signature, err = h.rateSignature(endpointRespData, fromDomainID, resourceID)
 	if err != nil {
-		ginErrorReturn(c, http.StatusInternalServerError, newReturnErrorResp(&config.ErrIdentityStampFail, err))
+		ginErrorReturn(c, http.StatusInternalServerError, newReturnErrorResp(&config.ErrInternalServerError, err))
 		return
 	}
 

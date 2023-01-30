@@ -10,10 +10,10 @@ import (
 )
 
 type domainConfigFile struct {
-	Domains []domain `json:"domains"`
+	Domains []Domain `json:"domains"`
 }
 
-type domain struct {
+type Domain struct {
 	ID                   int    `json:"id"`
 	Name                 string `json:"name"`
 	BaseCurrencyFullName string `json:"baseCurrencyFullName"`
@@ -21,8 +21,8 @@ type domain struct {
 	AddressPrefix        string `json:"addressPrefix"`
 }
 
-func newDomain(id int, name, baseCurrencyFullName, baseCurrencySymbol, addressPrefix string) *domain {
-	return &domain{
+func newDomain(id int, name, baseCurrencyFullName, baseCurrencySymbol, addressPrefix string) *Domain {
+	return &Domain{
 		ID:                   id,
 		Name:                 name,
 		BaseCurrencyFullName: baseCurrencyFullName,
@@ -32,7 +32,7 @@ func newDomain(id int, name, baseCurrencyFullName, baseCurrencySymbol, addressPr
 }
 
 // loadDomains registers and load all pre-defined domains
-func loadDomains(domainConfigPath string) map[int]domain {
+func loadDomains(domainConfigPath string) map[int]Domain {
 	domainData, err := ioutil.ReadFile(filepath.Clean(domainConfigPath))
 	if err != nil {
 		panic(ErrLoadDomainConfig.Wrap(err))
@@ -41,7 +41,7 @@ func loadDomains(domainConfigPath string) map[int]domain {
 	return parseDomains(domainData)
 }
 
-func parseDomains(domainData []byte) map[int]domain {
+func parseDomains(domainData []byte) map[int]Domain {
 	var content domainConfigFile
 
 	err := json.Unmarshal(domainData, &content)
@@ -49,7 +49,7 @@ func parseDomains(domainData []byte) map[int]domain {
 		panic(ErrLoadDomainConfig.Wrap(err))
 	}
 
-	domains := make(map[int]domain, 0)
+	domains := make(map[int]Domain, 0)
 	for _, domain := range content.Domains {
 		domains[domain.ID] = *newDomain(domain.ID, domain.Name, domain.BaseCurrencyFullName, domain.BaseCurrencySymbol, domain.AddressPrefix)
 	}

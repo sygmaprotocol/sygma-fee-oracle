@@ -16,7 +16,7 @@ const (
 )
 
 type resourceConfigFile struct {
-	Resources []resource `json:"resources"`
+	Resources []Resource `json:"resources"`
 }
 
 type resourceDomainInfo struct {
@@ -24,14 +24,14 @@ type resourceDomainInfo struct {
 	Decimal  int `json:"decimal"`
 }
 
-type resource struct {
+type Resource struct {
 	ID      string               `json:"id"`
 	Symbol  string               `json:"symbol"`
 	Domains []resourceDomainInfo `json:"domains"`
 }
 
-func newResource(resourceID string, symbol string, domains []resourceDomainInfo) *resource {
-	return &resource{
+func newResource(resourceID string, symbol string, domains []resourceDomainInfo) *Resource {
+	return &Resource{
 		ID:      resourceID,
 		Symbol:  symbol,
 		Domains: domains,
@@ -39,7 +39,7 @@ func newResource(resourceID string, symbol string, domains []resourceDomainInfo)
 }
 
 // loadResources registers and load all pre-defined resources
-func loadResources(resourceConfigPath string) map[string]resource {
+func loadResources(resourceConfigPath string) map[string]Resource {
 	resourceData, err := ioutil.ReadFile(filepath.Clean(resourceConfigPath))
 	if err != nil {
 		panic(ErrLoadResourceConfig.Wrap(err))
@@ -53,14 +53,14 @@ func ResourceIDBuilder(tokenAddress string, domainId int) string {
 	return fmt.Sprintf("%s%d", strings.ToLower(tokenAddress), domainId)
 }
 
-func parseResources(resourceData []byte) map[string]resource {
+func parseResources(resourceData []byte) map[string]Resource {
 	var content resourceConfigFile
 	err := json.Unmarshal(resourceData, &content)
 	if err != nil {
 		panic(ErrLoadResourceConfig.Wrap(err))
 	}
 
-	resources := make(map[string]resource, 0)
+	resources := make(map[string]Resource, 0)
 	for _, resource := range content.Resources {
 		resources[strings.ToLower(resource.ID)] =
 			*newResource(resource.ID, resource.Symbol, resource.Domains)

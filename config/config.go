@@ -5,6 +5,7 @@ package config
 
 import (
 	"encoding/hex"
+
 	"github.com/ChainSafe/sygma-fee-oracle/remoteParam"
 	"github.com/pkg/errors"
 
@@ -64,9 +65,9 @@ type configData struct {
 
 	DataValidInterval int64 `mapstructure:"data_valid_interval"`
 
-	Domains map[int]domain
+	Domains map[int]Domain
 
-	Resources map[string]resource
+	Resources map[string]Resource
 }
 
 type strategyConfig struct {
@@ -249,7 +250,7 @@ func (c *Config) setDomains(domainData string) {
 	c.config.Domains = parseDomains([]byte(domainData))
 }
 
-func (c *Config) GetRegisteredDomains(domainId int) *domain {
+func (c *Config) GetRegisteredDomains(domainId int) *Domain {
 	d, ok := c.config.Domains[domainId]
 	if !ok {
 		return nil
@@ -261,7 +262,7 @@ func (c *Config) setResources(resourceData string) {
 	c.config.Resources = parseResources([]byte(resourceData))
 }
 
-func (c *Config) GetRegisteredResources(resourceId string) *resource {
+func (c *Config) GetRegisteredResources(resourceId string) *Resource {
 	r, ok := c.config.Resources[strings.ToLower(resourceId)]
 	if !ok {
 		return nil
