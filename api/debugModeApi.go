@@ -27,13 +27,6 @@ func (h *Handler) debugGetRate(c *gin.Context) {
 	}
 	resourceID := c.Param("resourceID")
 
-	resource := h.conf.GetRegisteredResources(resourceID)
-	if resource == nil {
-		ginErrorReturn(c, http.StatusBadRequest, newReturnErrorResp(&config.ErrInvalidRequestInput, errors.New("invalid resourceID, make "+
-			"sure you config token address under the corresponding resource in resource.json")))
-		return
-	}
-
 	msgGasLimitParam := c.DefaultQuery("msgGasLimit", "0")
 	validValue := util.CheckInteger(msgGasLimitParam)
 	if !validValue {
