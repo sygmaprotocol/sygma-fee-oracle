@@ -75,7 +75,7 @@ func (h *Handler) getRate(c *gin.Context) {
 	}
 	h.log.Debugf("aggregatedGasPriceData: %v\n", gp)
 
-	ter, err := h.consensus.FilterLocalConversionRateData(
+	ber, err := h.consensus.FilterLocalConversionRateData(
 		h.conversionRateStore,
 		toDomain.BaseCurrencySymbol,
 		fromDomain.BaseCurrencySymbol)
@@ -85,7 +85,7 @@ func (h *Handler) getRate(c *gin.Context) {
 	}
 	h.log.Debugf("base rate calculation: to: %s, from: %s\n", toDomain.BaseCurrencySymbol, fromDomain.BaseCurrencySymbol)
 
-	aggregatedTokenRateData, err := h.calculateTokenRate(resource, ter, fromDomain, toDomain)
+	ter, err := h.calculateTokenRate(resource, ber, fromDomain, toDomain)
 	if err != nil {
 		ginErrorReturn(c, http.StatusInternalServerError, newReturnErrorResp(&config.ErrInternalServerError, err))
 		return
@@ -95,8 +95,8 @@ func (h *Handler) getRate(c *gin.Context) {
 	dataTime := ter.Time
 	signedTime := time.Now().Unix()
 	endpointRespData := &FetchRateResp{
-		BaseRate:                 fmt.Sprintf("%f", ter.Rate),
-		TokenRate:                fmt.Sprintf("%f", aggregatedTokenRateData.Rate),
+		BaseRate:                 fmt.Sprintf("%f", ber.Rate),
+		TokenRate:                fmt.Sprintf("%f", ter.Rate),
 		DestinationChainGasPrice: gp.SafeGasPrice,
 		FromDomainID:             fromDomain.ID,
 		ToDomainID:               toDomain.ID,
