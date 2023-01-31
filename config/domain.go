@@ -44,7 +44,7 @@ func loadDomainsFromFile(domainConfigPath string) (map[int]Domain, map[string]*R
 
 // loadDomainsFromNetwork registers and load all pre-defined domains from config stored on IPFS
 func loadDomainsFromNetwork(url string) (map[int]Domain, map[string]*Resource, error) {
-	resp, err := http.Get(url)
+	resp, err := http.Get(url) // #nosec G107
 	if err != nil {
 		return nil, nil, err
 	}
