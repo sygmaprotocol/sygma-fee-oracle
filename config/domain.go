@@ -72,6 +72,7 @@ func parseResources(resources map[string]*Resource, domain Domain) {
 			resources[strings.ToLower(resource.ID)] = resource
 		} else {
 			storedResource.DomainInfo[domain.ID] = &domainInfo
+			resources[strings.ToLower(resource.ID)] = storedResource
 		}
 	}
 
