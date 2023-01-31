@@ -20,7 +20,7 @@
       "nativeTokenSymbol": "matic",
       "resources": [
         {
-          "resourceId": "0x00000000000000000000000000000000000000000",
+          "resourceId": "0x0000000000000000000000000000000000000000000000000000000000000001",
           "decimals": 18,
           "symbol": "usdt"
         }
@@ -33,7 +33,7 @@
       "nativeTokenSymbol": "glmr",
       "resources": [
         {
-          "resourceId": "0x00000000000000000000000000000000000000000",
+          "resourceId": "0x0000000000000000000000000000000000000000000000000000000000000001",
           "decimals": 18,
           "symbol": "usdt"
         }
