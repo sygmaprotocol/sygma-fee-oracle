@@ -51,7 +51,7 @@ func AddRouterPathsV1(v1RouterGroups map[string]*gin.RouterGroup, apiHandler *Ha
 func (h *Handler) getRate(c *gin.Context) {
 	fromDomain, toDomain, err := h.parseDomains(c.Param("fromDomainID"), c.Param("toDomainID"))
 	if err != nil {
-		ginErrorReturn(c, http.StatusBadRequest, newReturnErrorResp(&oracleErrors.InvalidRequestInput, errors.New("invalid resourceID")))
+		ginErrorReturn(c, http.StatusBadRequest, newReturnErrorResp(&oracleErrors.InvalidRequestInput, errors.New("invalid domainID")))
 	}
 
 	resource, err := h.parseResource(c.Param("resourceID"))
