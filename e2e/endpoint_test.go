@@ -57,6 +57,8 @@ func (s *SignatureVerificationTestSuite) TestSignatureVerification_CalculateFee(
 	resp, err := http.Get("http://127.0.0.1:8091/v1/rate/from/0/to/1/resourceid/0x0000000000000000000000000000000000000000000000000000000000000001")
 	s.Nil(err)
 
+	fmt.Println(resp.Body)
+
 	body, err := ioutil.ReadAll(resp.Body)
 	s.Nil(err)
 
