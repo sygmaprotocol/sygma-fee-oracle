@@ -27,7 +27,7 @@ func (a *Average) GasPrice(store *store.GasPriceStore, domainName string) (*type
 		return nil, err
 	}
 	if len(re) == 0 {
-		return nil, errors.New("no data found")
+		return nil, errors.New("no gas price data found")
 	}
 
 	fast, propose, safe := float64(0), float64(0), float64(0)
@@ -66,7 +66,7 @@ func (a *Average) ConversionRate(store *store.ConversionRateStore, base, foreign
 		return nil, err
 	}
 	if len(re) == 0 {
-		return nil, errors.New("no data found")
+		return nil, errors.New("no conversion rate data found")
 	}
 
 	rate := float64(0)

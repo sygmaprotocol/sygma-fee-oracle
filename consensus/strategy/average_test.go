@@ -60,7 +60,7 @@ func (a *AverageStrategyTestSuite) TestConversionRate_Without_Data() {
 
 	re, err := a.strategy.ConversionRate(a.conversionRateStore, "eth", "matic")
 	a.Nil(re)
-	a.EqualError(err, "no data found")
+	a.EqualError(err, "no conversion rate data found")
 }
 
 func (a *AverageStrategyTestSuite) TestConversionRate_With_Data() {
@@ -110,7 +110,7 @@ func (a *AverageStrategyTestSuite) TestGasPrice_Without_Data() {
 
 	re, err := a.strategy.GasPrice(a.gasPriceStore, "ethereum")
 	a.Nil(re)
-	a.EqualError(err, "no data found")
+	a.EqualError(err, "no gas price data found")
 }
 
 func (a *AverageStrategyTestSuite) TestGasPrice_With_Data() {
