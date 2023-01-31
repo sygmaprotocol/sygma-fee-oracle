@@ -62,6 +62,8 @@ func (s *SignatureVerificationTestSuite) TestSignatureVerification_CalculateFee(
 	body, err := ioutil.ReadAll(resp.Body)
 	s.Nil(err)
 
+	fmt.Println(string(body))
+
 	var response *apiRespGeneral
 	err = json.Unmarshal(body, &response)
 	s.Nil(err)
