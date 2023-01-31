@@ -68,6 +68,9 @@ func (h *Handler) getRate(c *gin.Context) {
 		return
 	}
 
+	fmt.Println(toDomain.Name)
+	fmt.Println(fromDomain.Name)
+
 	gp, err := h.consensus.FilterLocalGasPriceData(h.gasPriceStore, toDomain.Name)
 	if err != nil {
 		ginErrorReturn(c, http.StatusInternalServerError, newReturnErrorResp(&oracleErrors.InternalServerError, err))
