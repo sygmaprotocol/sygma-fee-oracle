@@ -11,12 +11,12 @@ There are three main parts in fee oracle codebase in an abstract way: `App base`
 3. Data provider: This is the combination of `store`, `api`, `consensus`, `identity` packages. Data provider queries the store based on the request from the endpoint, refines the data based on the configured `strategy`, then returns the data along with the signature of the fee oracle identity key.
 
 # Installation & Build
-**Make sure `Go1.17` has been installed.**  
+**Make sure `Go1.17` has been installed.**
 
 This will clone the main branch of fee oracle codebase to your `workplace` dir and compile the binary into your
 `$GOPATH/bin`
 ```
-$ mkdir workplace && cd workplace  
+$ mkdir workplace && cd workplace
 $ git clone https://github.com/ChainSafe/Sygma-fee-oracle.git
 $ make install
 ```
@@ -25,14 +25,15 @@ $ make install
 Fee oracle needs three config files in the `./` dir of the codebase:
 1. `config.yaml`: this is the fee oracle application config file.
 2. `domain.json`: this is the domain config file.
-3. `resource.json`: this is the resource config file.
 
 ### Application config file `config.yaml`
 Template of the config.yaml can be found in `./config/config.template.yaml`.
 
 ### Domain config file `domain.json`
-This file indicates all the domains the fee oracle needs to fetch data for. Details need to be matched with 
+This file indicates all the domains and resources the fee oracle needs to fetch data for. Details need to be matched with
 Sygma core configuration, such as `id`.
+
+Sygma currently does not support bridging the native currency, such as Ether on Ethereum, Matic on Polygon, however, the `id` is constructed with zero address and its native `domainId` and is used in baseRate calculation internally.
 
 Example:
 ```json
@@ -41,60 +42,39 @@ Example:
     {
       "id": 0,
       "name": "ethereum",
-      "baseCurrencyFullName": "ether",
-      "baseCurrencySymbol": "eth",
-      "addressPrefix": "0x"
+      "nativeTokenDecimals": 18,
+      "nativeTokenSymbol": "eth",
+      "resources": [
+        {
+          "resourceId": "0x0000000000000000000000000000000000000000000000000000000000000001",
+          "decimals": 18,
+          "symbol": "usdt"
+        }
+      ]
     },
     {
       "id": 1,
       "name": "polygon",
-      "baseCurrencyFullName": "matic",
-      "baseCurrencySymbol": "matic",
-      "addressPrefix": "0x"
-    }
-  ]
-}
-```
-
-### Resource config file `resource.json`
-`resource` stands for the asset that can be bridged in Sygma. This `resource.json` file indicates all the resources the fee oracle needs to fetch data for.
-Each resource has one unique `id` across all supported domains(networks), and it also has `domains` subsection to address some special domain related information each as `decimal`.
-Sygma currently does not support bridging the native currency, such as Ether on Ethereum, Matic on Polygon, however, the `id` is constructed with zero address and its native `domainId` and is used in baseRate calculation internally.
-
-```json
-{
-  "resources": [
-    {
-      "id": "0x00000000000000000000000000000000000000000",
-      "symbol": "eth",
-      "domains": [
+      "nativeTokenDecimals": 18,
+      "nativeTokenSymbol": "matic",
+      "resources": [
         {
-          "domainId": 0,
-          "decimal": 18
+          "resourceId": "0x0000000000000000000000000000000000000000000000000000000000000001",
+          "decimals": 18,
+          "symbol": "usdt"
         }
       ]
     },
     {
-      "id": "0x00000000000000000000000000000000000000001",
-      "symbol": "matic",
-      "domains": [
+      "id": 2,
+      "name": "moonbeam",
+      "nativeTokenDecimals": 18,
+      "nativeTokenSymbol": "glmr",
+      "resources": [
         {
-          "domainId": 1,
-          "decimal": 18
-        }
-      ]
-    },
-    {
-      "id": "0x0000000000000000000000000000000000000000000000000000000000000001",
-      "symbol": "usdt",
-      "domains": [
-        {
-          "domainId": 0,
-          "decimal": 18
-        },
-        {
-          "domainId": 1,
-          "decimal": 18
+          "resourceId": "0x0000000000000000000000000000000000000000000000000000000000000001",
+          "decimals": 18,
+          "symbol": "usdt"
         }
       ]
     }
@@ -104,19 +84,19 @@ Sygma currently does not support bridging the native currency, such as Ether on 
 
 # Fee Oracle Identity
 Each fee oracle server associates with a private key, which is used to sign the endpoint response data.
-There should be a `keyfile.priv` keyfile in the root dir of the fee oracle codebase, or you can specify which keyfile to use in CLI. 
+There should be a `keyfile.priv` keyfile in the root dir of the fee oracle codebase, or you can specify which keyfile to use in CLI.
 
 **Fee oracle provides [key generation CLI](#keycli), keyfile needs to be generated separately.**
 
 # Quick Start
 To quickly start from makefile, make sure `config.yaml`, `domain.json`, `resource.json` and `keyfile.priv` are ready in the root dir of the codebase, then execute:
-  
+
 `$ make start`
 
 # Command Line
-Fee oracle provides CLI.  
+Fee oracle provides CLI.
 
-For general help:`$ sygma-fee-oracle -h`  
+For general help:`$ sygma-fee-oracle -h`
 
 #### `$ sygma-fee-oracle server`
 ```
@@ -126,11 +106,11 @@ Usage:
   sygma-fee-oracle server [flags]
 
 Flags:
-  -c, --config_path string            
-  -d, --domain_config_path string     
+  -c, --config_path string
+  -d, --domain_config_path string
   -h, --help                          help for server
   -t, --key_type string               Support: secp256k1
-  -k, --keyfile_path string           
+  -k, --keyfile_path string
   -r, --resource_config_path string
 ```
 
@@ -157,7 +137,7 @@ Flags:
 `$ make lint`
 
 # Using Docker
-Fee oracle provides a Dockerfile to containerize the codebase.  
+Fee oracle provides a Dockerfile to containerize the codebase.
 To build docker image:
 ```
 $ docker build -t fee_oracle .
@@ -172,15 +152,13 @@ $ docker run -p 8091:8091 -it fee_oracle
 if no keyfile exists in `./` dir, fee oracle will auto generate a `secp256k1` keyfile to use.
 
 # End to End Test
-This will start fee oracle service, ganache-cli locally, install `solcjs`, `abigen` and generate contract go binding code, deploy fee handler contracts to local ganache.  
+This will start fee oracle service, ganache-cli locally, install `solcjs`, `abigen` and generate contract go binding code, deploy fee handler contracts to local ganache.
 `$ make e2e-test`
 
 # EVN Params
-Fee oracle loads important configs and prikey from files in CLI flags; however, the following EVN params will suppress CLI flags if provided.  
-Note: if `REMOTE_PARAM_OPERATOR_ENABLE` is set to `true`, valid credentials of the remote service must be setup. In addition `REMOTE_PARAM_DOMAIN_DATA` and `REMOTE_PARAM_RESOURCE_DATA` variables need to be set.
 ```text
 APP_MODE=release                                             // app mode: debug or release. app mode is used for internal testing only.
-IDENTITY_KEY=                                                // fee oracle prikey in hex, without 0x prefix 
+IDENTITY_KEY=                                                // fee oracle prikey in hex, without 0x prefix
 IDENTITY_KEY_TYPE=secp256k1                                  // fee oracle prikey type, only support secp256k1 for now
 WORKING_ENV=production                                       // fee oracle app running mode: dev or production
 LOG_LEVEL=4                                                  // log level, 4 is info, 5 is debug, using 4 on production
@@ -194,9 +172,6 @@ COINMARKETCAP_API_KEY=                                       // api key of coinm
 MOONSCAN_API_KEY=                                            // api key of moonscan
 DATA_VALID_INTERVAL=3600                                     // Time of valid fee oracle response data in seconds
 CONVERSION_RATE_PAIRS=eth,usdt,matic,usdt                    // conversion rate pairs that enabled for price fetching. Must be paired
-REMOTE_PARAM_OPERATOR_ENABLE=true                            // enable remote param operator, only enable this when deploying to remote environment like staging or prod
-REMOTE_PARAM_DOMAIN_DATA="domainData/param/name"             // domain data remote parameter name 
-REMOTE_PARAM_RESOURCE_DATA="resourceData/param/name"         // resource data remote parameter name
 ```
 
 # API Documentation
