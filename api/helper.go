@@ -89,7 +89,6 @@ func (h *Handler) rateSignature(result *FetchRateResp, fromDomainID int, resourc
 	return hex.EncodeToString(signature), nil
 }
 
-// TODO: this is the placeholder for the algorithm of calculating the data expiration
 func (h *Handler) dataExpirationManager(baseTimestamp int64) int64 {
 	return baseTimestamp + h.conf.DataValidInterval
 }
