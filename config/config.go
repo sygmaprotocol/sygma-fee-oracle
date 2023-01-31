@@ -239,6 +239,10 @@ func (c *Config) ResourceDomainInfo(resourceId string, domainID int) (*DomainInf
 
 	di, ok := r.DomainInfo[domainID]
 	if !ok {
+		fmt.Println(resourceId)
+		fmt.Println(domainID)
+		fmt.Println(r.DomainInfo)
+		fmt.Println(r)
 		return nil, fmt.Errorf("no domain info")
 	}
 
