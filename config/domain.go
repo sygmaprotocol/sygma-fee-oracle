@@ -6,6 +6,7 @@ package config
 import (
 	"encoding/json"
 	"io/ioutil"
+	"net/http"
 	"path/filepath"
 	"strings"
 )
@@ -31,9 +32,24 @@ func newDomain(id int, name, baseCurrencySymbol string, baseCurrencyDecimals int
 	}
 }
 
-// loadDomains registers and load all pre-defined domains
-func loadDomains(domainConfigPath string) (map[int]Domain, map[string]*Resource, error) {
+// loadDomainsFromFile registers and load all pre-defined domains from file
+func loadDomainsFromFile(domainConfigPath string) (map[int]Domain, map[string]*Resource, error) {
 	domainData, err := ioutil.ReadFile(filepath.Clean(domainConfigPath))
+	if err != nil {
+		return nil, nil, err
+	}
+
+	return parseDomains(domainData)
+}
+
+// loadDomainsFromNetwork registers and load all pre-defined domains from config stored on IPFS
+func loadDomainsFromNetwork(url string) (map[int]Domain, map[string]*Resource, error) {
+	resp, err := http.Get(url)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	domainData, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return nil, nil, err
 	}

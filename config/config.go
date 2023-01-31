@@ -314,9 +314,16 @@ func LoadConfig(configPath, domainConfigPath string) *Config {
 		panic(oracleErrors.LoadConfig.Wrap(err))
 	}
 
-	conf.Domains, conf.Resources, err = loadDomains(domainConfigPath)
-	if err != nil {
-		panic(oracleErrors.LoadConfig.Wrap(err))
+	if strings.HasPrefix(domainConfigPath, "http") {
+		conf.Domains, conf.Resources, err = loadDomainsFromNetwork(domainConfigPath)
+		if err != nil {
+			panic(oracleErrors.LoadConfig.Wrap(err))
+		}
+	} else {
+		conf.Domains, conf.Resources, err = loadDomainsFromFile(domainConfigPath)
+		if err != nil {
+			panic(oracleErrors.LoadConfig.Wrap(err))
+		}
 	}
 
 	conf.DataValidInterval = conf.dataValidIntervalConfigLoad()
