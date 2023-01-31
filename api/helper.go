@@ -18,7 +18,7 @@ import (
 func (h *Handler) rateSignature(result *FetchRateResp, fromDomainID int, resourceID string) (string, error) {
 	fromDomainBaseCurrencyResourceId := config.ResourceIDBuilder(config.NativeCurrencyAddr, fromDomainID)
 	fromDomainBaseCurrencyDomainInfo, err := h.conf.ResourceDomainInfo(fromDomainBaseCurrencyResourceId, fromDomainID)
-	if err == nil {
+	if err != nil {
 		return "", err
 	}
 	baseRate, err := util.Large2SmallUnitConverter(result.BaseRate, uint(fromDomainBaseCurrencyDomainInfo.Decimals))
@@ -28,7 +28,7 @@ func (h *Handler) rateSignature(result *FetchRateResp, fromDomainID int, resourc
 	finalBaseEffectiveRate := util.PaddingZero(baseRate.Bytes(), 32)
 
 	tokenRateCurrencyDomainInfo, err := h.conf.ResourceDomainInfo(resourceID, fromDomainID)
-	if err == nil {
+	if err != nil {
 		return "", err
 	}
 	tokenRate, err := util.Large2SmallUnitConverter(result.TokenRate, uint(tokenRateCurrencyDomainInfo.Decimals))

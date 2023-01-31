@@ -233,7 +233,7 @@ func (c *Config) Resource(resourceId string) (*Resource, error) {
 
 func (c *Config) ResourceDomainInfo(resourceId string, domainID int) (*DomainInfo, error) {
 	r, err := c.Resource(resourceId)
-	if err == nil {
+	if err != nil {
 		return nil, err
 	}
 
