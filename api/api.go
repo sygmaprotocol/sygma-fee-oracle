@@ -52,16 +52,18 @@ func (h *Handler) getRate(c *gin.Context) {
 	fromDomain, toDomain, err := h.parseDomains(c.Param("fromDomainID"), c.Param("toDomainID"))
 	if err != nil {
 		ginErrorReturn(c, http.StatusBadRequest, newReturnErrorResp(&oracleErrors.InvalidRequestInput, errors.New("invalid domainID")))
+		return
 	}
 
 	resource, err := h.parseResource(c.Param("resourceID"))
 	if err != nil {
 		ginErrorReturn(c, http.StatusBadRequest, newReturnErrorResp(&oracleErrors.InvalidRequestInput, errors.New("invalid resourceID")))
+		return
 	}
 	h.log.Debugf("new request with params fromDomainID: %d, toDomainID: %d, resourceID: %s\n", fromDomain.ID, toDomain.ID, resource.ID)
 
 	msgGasLimitParam := c.DefaultQuery("msgGasLimit", "0")
-	if util.CheckInteger(msgGasLimitParam) {
+	if !util.CheckInteger(msgGasLimitParam) {
 		ginErrorReturn(c, http.StatusBadRequest, newReturnErrorResp(&oracleErrors.InvalidRequestInput, errors.New("invalid msgGasLimit")))
 		return
 	}
