@@ -106,11 +106,11 @@ func (h *Handler) parseDomains(fromID string, toID string) (from *config.Domain,
 		return from, to, fmt.Errorf("from and to domain equal")
 	}
 
-	from, err = h.conf.Domain(toDomainID)
+	from, err = h.conf.Domain(fromDomainID)
 	if err != nil {
 		return from, to, err
 	}
-	to, err = h.conf.Domain(fromDomainID)
+	to, err = h.conf.Domain(toDomainID)
 	if err != nil {
 		return from, to, err
 	}
