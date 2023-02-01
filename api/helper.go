@@ -129,7 +129,6 @@ func (h *Handler) parseResource(resourceID string) (*config.Resource, error) {
 
 func (h *Handler) calculateTokenRate(resource *config.Resource, ber *types.ConversionRate, from *config.Domain, to *config.Domain) (*types.ConversionRate, error) {
 	ter := &types.ConversionRate{}
-	// if resource is the base currency of the fromDomain
 	if resource.Symbol == from.BaseCurrencySymbol {
 		ter = ber
 	} else {
