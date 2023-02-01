@@ -133,7 +133,6 @@ func (h *Handler) calculateTokenRate(resource *config.Resource, ber *types.Conve
 	if resource.Symbol == from.BaseCurrencySymbol {
 		ter = ber
 	} else {
-
 		if resource.Symbol == to.BaseCurrencySymbol {
 			ter.Rate = 1.0
 		} else {
@@ -141,6 +140,8 @@ func (h *Handler) calculateTokenRate(resource *config.Resource, ber *types.Conve
 			if err != nil {
 				return ter, err
 			}
+
+			return ter, nil
 		}
 	}
 
