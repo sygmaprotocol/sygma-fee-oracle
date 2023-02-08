@@ -85,15 +85,15 @@ func parseResources(resources map[string]*Resource, domain Domain) {
 
 		storedResource, ok := resources[strings.ToLower(resource.ID)]
 		if !ok {
-			var resource *Resource
+			var r *Resource
 			if resource.Symbol == TEST_SYMBOL {
-				resource = newResource(resource.ID, resource.Symbol)
+				r = newResource(resource.ID, "usdt")
 			} else {
-				resource = newResource(resource.ID, "usdt")
+				r = newResource(resource.ID, resource.Symbol)
 			}
 
-			resource.DomainInfo[domain.ID] = &domainInfo
-			resources[strings.ToLower(resource.ID)] = resource
+			r.DomainInfo[domain.ID] = &domainInfo
+			resources[strings.ToLower(resource.ID)] = r
 		} else {
 			storedResource.DomainInfo[domain.ID] = &domainInfo
 		}
