@@ -11,6 +11,8 @@ import (
 	"strings"
 )
 
+const TEST_SYMBOL = "ERC20TST"
+
 type domainConfig struct {
 	Domains []Domain `json:"domains"`
 }
@@ -83,7 +85,13 @@ func parseResources(resources map[string]*Resource, domain Domain) {
 
 		storedResource, ok := resources[strings.ToLower(resource.ID)]
 		if !ok {
-			resource := newResource(resource.ID, resource.Symbol)
+			var resource *Resource
+			if resource.Symbol == TEST_SYMBOL {
+				resource = newResource(resource.ID, resource.Symbol)
+			} else {
+				resource = newResource(resource.ID, "usdt")
+			}
+
 			resource.DomainInfo[domain.ID] = &domainInfo
 			resources[strings.ToLower(resource.ID)] = resource
 		} else {
