@@ -28,13 +28,12 @@ var oserver oracleServer
 func init() {
 	oracleServerCmd.Flags().StringVarP(&oserver.ConfigPath, "config_path", "c", "", "")
 	oracleServerCmd.Flags().StringVarP(&oserver.DomainConfigPath, "domain_config_path", "d", "", "")
-	oracleServerCmd.Flags().StringVarP(&oserver.ResourceConfigPath, "resource_config_path", "r", "", "")
 	oracleServerCmd.Flags().StringVarP(&oserver.KeyFilePath, "keyfile_path", "k", "", "")
 	oracleServerCmd.Flags().StringVarP(&oserver.KeyType, "key_type", "t", "", "Support: secp256k1")
 }
 
 func startServer(_ *cobra.Command, _ []string) error {
-	appBase := base.NewFeeOracleAppBase(oserver.ConfigPath, oserver.DomainConfigPath, oserver.ResourceConfigPath, oserver.KeyFilePath, oserver.KeyType)
+	appBase := base.NewFeeOracleAppBase(oserver.ConfigPath, oserver.DomainConfigPath, oserver.KeyFilePath, oserver.KeyType)
 
 	app.NewFeeOracleApp(appBase).Start()
 

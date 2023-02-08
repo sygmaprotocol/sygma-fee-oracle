@@ -84,7 +84,7 @@ func NewFeeOracleApp(appBase *base.FeeOracleAppBase) *FeeOracleApp {
 		conversionRateStore:   conversionRateStore,
 		gasPriceStore:         gasPriceStore,
 		identity:              oracleIdentity,
-		consensus:             consensus.NewConsensus(config.GetStrategy(appBase.GetConfig().StrategyConfig()), appBase.GetLogger()),
+		consensus:             consensus.NewConsensus(config.GetStrategy(appBase.GetConfig().Strategy), appBase.GetLogger()),
 		cronJobServer: cronjob.NewCronJobs(appBase, conversionRateOracles, gasPriceOracles, conversionRateStore,
 			gasPriceStore, appBase.GetLogger()),
 		appTerminationChecker: sync.WaitGroup{},

@@ -7,14 +7,12 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
-	"strconv"
-	"strings"
 	"time"
 
-	"github.com/ChainSafe/sygma-fee-oracle/types"
 	"github.com/ChainSafe/sygma-fee-oracle/util"
 
 	"github.com/ChainSafe/sygma-fee-oracle/config"
+	oracleErrors "github.com/ChainSafe/sygma-fee-oracle/errors"
 
 	"github.com/ChainSafe/sygma-fee-oracle/consensus"
 	"github.com/ChainSafe/sygma-fee-oracle/identity"
@@ -51,114 +49,68 @@ func AddRouterPathsV1(v1RouterGroups map[string]*gin.RouterGroup, apiHandler *Ha
 // calculation of transferring native resource: from ethereum to polygon transfer eth    => ber = matic / eth, ter = matic / eth, gas price is from polygon
 // calculation of transferring standard token : from ethereum to polygon transfer usdt   => ber = matic / eth, ter = matic / usdt, gas price is from polygon
 func (h *Handler) getRate(c *gin.Context) {
-	fromDomainID, err := strconv.Atoi(c.Param("fromDomainID"))
+	fromDomain, toDomain, err := h.parseDomains(c.Param("fromDomainID"), c.Param("toDomainID"))
 	if err != nil {
-		ginErrorReturn(c, http.StatusBadRequest, newReturnErrorResp(&config.ErrInvalidRequestInput, errors.New("invalid fromDomainID")))
+		ginErrorReturn(c, http.StatusBadRequest, newReturnErrorResp(&oracleErrors.InvalidRequestInput, errors.New("invalid domainID")))
 		return
 	}
-	toDomainID, err := strconv.Atoi(c.Param("toDomainID"))
+
+	resource, err := h.parseResource(c.Param("resourceID"))
 	if err != nil {
-		ginErrorReturn(c, http.StatusBadRequest, newReturnErrorResp(&config.ErrInvalidRequestInput, errors.New("invalid toDomainID")))
+		ginErrorReturn(c, http.StatusBadRequest, newReturnErrorResp(&oracleErrors.InvalidRequestInput, errors.New("invalid resourceID")))
 		return
 	}
-	if fromDomainID == toDomainID {
-		ginErrorReturn(c, http.StatusBadRequest, newReturnErrorResp(&config.ErrInvalidRequestInput, errors.New("fromDomainID cannot be the same as toDomainID")))
-		return
-	}
-	resourceID := c.Param("resourceID")
-	if !strings.HasPrefix(resourceID, "0x") || len(resourceID) != 66 {
-		ginErrorReturn(c, http.StatusBadRequest, newReturnErrorResp(&config.ErrInvalidRequestInput, errors.New("invalid resourceID")))
-		return
-	}
-	h.log.Debugf("new request with params fromDomainID: %d, toDomainID: %d, resourceID: %s\n", fromDomainID, toDomainID, resourceID)
-
-	toDomain := h.conf.GetRegisteredDomains(toDomainID)
-	if toDomain == nil {
-		ginErrorReturn(c, http.StatusBadRequest, newReturnErrorResp(&config.ErrInvalidRequestInput, errors.New("toDomainID not registered")))
-		return
-	}
-	fromDomain := h.conf.GetRegisteredDomains(fromDomainID)
-	if fromDomain == nil {
-		ginErrorReturn(c, http.StatusBadRequest, newReturnErrorResp(&config.ErrInvalidRequestInput, errors.New("fromDomain not registered")))
-		return
-	}
-
-	resource := h.conf.GetRegisteredResources(resourceID)
-	if resource == nil {
-		ginErrorReturn(c, http.StatusBadRequest, newReturnErrorResp(&config.ErrInvalidRequestInput, errors.New("resourceID not registered")))
-		return
-	}
-
-	aggregatedGasPriceData, err := h.consensus.FilterLocalGasPriceData(h.gasPriceStore, toDomain.Name)
-	if err != nil {
-		ginErrorReturn(c, http.StatusInternalServerError, newReturnErrorResp(&config.ErrConsensusFail, err))
-		return
-	}
-	h.log.Debugf("aggregatedGasPriceData: %v\n", aggregatedGasPriceData)
-
-	baseSymbol := toDomain.BaseCurrencySymbol
-	foreignSymbol := fromDomain.BaseCurrencySymbol
-	h.log.Debugf("base rate calculation: base: %s, foreign: %s\n", baseSymbol, foreignSymbol)
-
-	aggregatedBaseRateData, err := h.consensus.FilterLocalConversionRateData(h.conversionRateStore, baseSymbol, foreignSymbol)
-	if err != nil {
-		ginErrorReturn(c, http.StatusInternalServerError, newReturnErrorResp(&config.ErrConsensusFail, err))
-		return
-	}
-
-	// if resourceID is the base currency of the fromDomain
-	aggregatedTokenRateData := aggregatedBaseRateData
-	if resource.Symbol != foreignSymbol {
-		fromDomainResource := h.conf.GetRegisteredResources(resource.ID)
-		if fromDomainResource == nil {
-			ginErrorReturn(c, http.StatusBadRequest, newReturnErrorResp(&config.ErrInvalidRequestInput,
-				errors.New("no resource registered with given the fromDomainID")))
-			return
-		}
-
-		h.log.Debugf("token rate calculation: base: %s, foreign: %s\n", baseSymbol, fromDomainResource.Symbol)
-
-		aggregatedTokenRateData = &types.ConversionRate{}
-		if fromDomainResource.Symbol == baseSymbol {
-			aggregatedTokenRateData.Rate = 1.0
-		} else {
-			aggregatedTokenRateData, err = h.consensus.FilterLocalConversionRateData(h.conversionRateStore, baseSymbol, fromDomainResource.Symbol)
-			if err != nil {
-				ginErrorReturn(c, http.StatusInternalServerError, newReturnErrorResp(&config.ErrConsensusFail, err))
-				return
-			}
-		}
-	}
+	h.log.Debugf("new request with params fromDomainID: %d, toDomainID: %d, resourceID: %s\n", fromDomain.ID, toDomain.ID, resource.ID)
 
 	msgGasLimitParam := c.DefaultQuery("msgGasLimit", "0")
-	validValue := util.CheckInteger(msgGasLimitParam)
-	if !validValue {
-		ginErrorReturn(c, http.StatusBadRequest, newReturnErrorResp(&config.ErrInvalidRequestInput, errors.New("invalid msgGasLimit")))
+	if !util.CheckInteger(msgGasLimitParam) {
+		ginErrorReturn(c, http.StatusBadRequest, newReturnErrorResp(&oracleErrors.InvalidRequestInput, errors.New("invalid msgGasLimit")))
 		return
 	}
 
-	dataTime := aggregatedBaseRateData.Time
-	signedTime := time.Now().Unix()
+	gp, err := h.consensus.FilterLocalGasPriceData(h.gasPriceStore, toDomain.Name)
+	if err != nil {
+		ginErrorReturn(c, http.StatusInternalServerError, newReturnErrorResp(&oracleErrors.InternalServerError, err))
+		return
+	}
+	h.log.Debugf("aggregatedGasPriceData: %v\n", gp)
 
+	ber, err := h.consensus.FilterLocalConversionRateData(
+		h.conversionRateStore,
+		toDomain.BaseCurrencySymbol,
+		fromDomain.BaseCurrencySymbol)
+	if err != nil {
+		ginErrorReturn(c, http.StatusInternalServerError, newReturnErrorResp(&oracleErrors.InternalServerError, err))
+		return
+	}
+	h.log.Debugf("base rate calculation: to: %s, from: %s\n", toDomain.BaseCurrencySymbol, fromDomain.BaseCurrencySymbol)
+
+	ter, err := h.calculateTokenRate(resource, ber, fromDomain, toDomain)
+	if err != nil {
+		ginErrorReturn(c, http.StatusInternalServerError, newReturnErrorResp(&oracleErrors.InternalServerError, err))
+		return
+	}
+	h.log.Debugf("token rate calculation: to: %s, from: %s\n", toDomain.BaseCurrencySymbol, resource.Symbol)
+
+	dataTime := ter.Time
+	signedTime := time.Now().Unix()
 	endpointRespData := &FetchRateResp{
-		BaseRate:                 fmt.Sprintf("%f", aggregatedBaseRateData.Rate),
-		TokenRate:                fmt.Sprintf("%f", aggregatedTokenRateData.Rate),
-		DestinationChainGasPrice: aggregatedGasPriceData.SafeGasPrice,
-		FromDomainID:             fromDomainID,
-		ToDomainID:               toDomainID,
+		BaseRate:                 fmt.Sprintf("%f", ber.Rate),
+		TokenRate:                fmt.Sprintf("%f", ter.Rate),
+		DestinationChainGasPrice: gp.SafeGasPrice,
+		FromDomainID:             fromDomain.ID,
+		ToDomainID:               toDomain.ID,
 		MsgGasLimit:              msgGasLimitParam,
 		DataTimestamp:            dataTime,
 		SignatureTimestamp:       signedTime,
 		ExpirationTimestamp:      h.dataExpirationManager(dataTime),
 	}
-
-	endpointRespData.Signature, err = h.rateSignature(endpointRespData, fromDomainID, resource.ID)
+	endpointRespData.Signature, err = h.rateSignature(endpointRespData, fromDomain.ID, resource.ID)
 	if err != nil {
-		ginErrorReturn(c, http.StatusInternalServerError, newReturnErrorResp(&config.ErrIdentityStampFail, err))
+		ginErrorReturn(c, http.StatusInternalServerError, newReturnErrorResp(&oracleErrors.InternalServerError, err))
 		return
 	}
 
 	endpointRespData.ResourceID = resource.ID
-
 	ginSuccessReturn(c, http.StatusOK, endpointRespData)
 }

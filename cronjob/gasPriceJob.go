@@ -17,7 +17,7 @@ func GasPriceJobOperation(c *Job) func() {
 			if !oracleOperator.IsOracleEnabled() {
 				continue
 			}
-			for _, domain := range c.cronBase.base.GetConfig().GasPriceDomainsConfig() {
+			for _, domain := range c.cronBase.base.GetConfig().GasPriceDomains {
 				gasPriceData, err := oracleOperator.Run(domain)
 				if err != nil || gasPriceData == nil {
 					if err != oracle.ErrNotSupported {

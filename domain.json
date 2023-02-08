@@ -3,23 +3,41 @@
     {
       "id": 0,
       "name": "ethereum",
-      "baseCurrencyFullName": "ether",
-      "baseCurrencySymbol": "eth",
-      "addressPrefix": "0x"
+      "nativeTokenDecimals": 18,
+      "nativeTokenSymbol": "eth",
+      "resources": [
+        {
+          "resourceId": "0x0000000000000000000000000000000000000000000000000000000000000001",
+          "decimals": 18,
+          "symbol": "usdt"
+        }
+      ]
     },
     {
       "id": 1,
       "name": "polygon",
-      "baseCurrencyFullName": "matic",
-      "baseCurrencySymbol": "matic",
-      "addressPrefix": "0x"
+      "nativeTokenDecimals": 18,
+      "nativeTokenSymbol": "matic",
+      "resources": [
+        {
+          "resourceId": "0x0000000000000000000000000000000000000000000000000000000000000001",
+          "decimals": 18,
+          "symbol": "usdt"
+        }
+      ]
     },
     {
       "id": 2,
       "name": "moonbeam",
-      "baseCurrencyFullName": "glimmer",
-      "baseCurrencySymbol": "glmr",
-      "addressPrefix": "0x"
+      "nativeTokenDecimals": 18,
+      "nativeTokenSymbol": "glmr",
+      "resources": [
+        {
+          "resourceId": "0x0000000000000000000000000000000000000000000000000000000000000001",
+          "decimals": 18,
+          "symbol": "usdt"
+        }
+      ]
     }
   ]
 }

@@ -10,4 +10,4 @@ RUN go mod download
 RUN go build -o feeOracle ./
 EXPOSE 8091 8091
 RUN ["./feeOracle", "key-generate"]
-CMD ["./feeOracle", "server", "-c", "./config.yaml", "-d", "./domain.json", "-r", "./resource.json", "-k", "./keyfile.priv", "-t", "secp256k1"]
+CMD ["./feeOracle", "server", "-c", "./config.yaml", "-d", "./domain.json", "-k", "./keyfile.priv", "-t", "secp256k1"]

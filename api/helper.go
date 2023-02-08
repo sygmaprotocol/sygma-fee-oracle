@@ -7,29 +7,31 @@ import (
 	"bytes"
 	"encoding/hex"
 	"fmt"
+	"strconv"
 
 	"github.com/ChainSafe/sygma-fee-oracle/config"
+	"github.com/ChainSafe/sygma-fee-oracle/types"
 	"github.com/ChainSafe/sygma-fee-oracle/util"
 	"github.com/pkg/errors"
 )
 
 func (h *Handler) rateSignature(result *FetchRateResp, fromDomainID int, resourceID string) (string, error) {
 	fromDomainBaseCurrencyResourceId := config.ResourceIDBuilder(config.NativeCurrencyAddr, fromDomainID)
-	fromDomainBaseCurrencyDomainInfo := h.conf.GetRegisteredResourceDomainInfo(fromDomainBaseCurrencyResourceId, fromDomainID)
-	if fromDomainBaseCurrencyDomainInfo == nil {
-		return "", errors.New("failed to find the registered resource domain info for native currency of from domain")
+	fromDomainBaseCurrencyDomainInfo, err := h.conf.ResourceDomainInfo(fromDomainBaseCurrencyResourceId, fromDomainID)
+	if err != nil {
+		return "", err
 	}
-	baseRate, err := util.Large2SmallUnitConverter(result.BaseRate, uint(fromDomainBaseCurrencyDomainInfo.Decimal))
+	baseRate, err := util.Large2SmallUnitConverter(result.BaseRate, uint(fromDomainBaseCurrencyDomainInfo.Decimals))
 	if err != nil {
 		return "", errors.Wrap(err, "failed to convert BaseRate")
 	}
 	finalBaseEffectiveRate := util.PaddingZero(baseRate.Bytes(), 32)
 
-	tokenRateCurrencyDomainInfo := h.conf.GetRegisteredResourceDomainInfo(resourceID, fromDomainID)
-	if tokenRateCurrencyDomainInfo == nil {
-		return "", errors.New("failed to find the registered resource domain info for given resourceID")
+	tokenRateCurrencyDomainInfo, err := h.conf.ResourceDomainInfo(resourceID, fromDomainID)
+	if err != nil {
+		return "", err
 	}
-	tokenRate, err := util.Large2SmallUnitConverter(result.TokenRate, uint(tokenRateCurrencyDomainInfo.Decimal))
+	tokenRate, err := util.Large2SmallUnitConverter(result.TokenRate, uint(tokenRateCurrencyDomainInfo.Decimals))
 	if err != nil {
 		return "", errors.Wrap(err, "failed to convert TokenRate")
 	}
@@ -50,7 +52,7 @@ func (h *Handler) rateSignature(result *FetchRateResp, fromDomainID int, resourc
 	finalFromDomainId := util.PaddingZero([]byte{uint8(result.FromDomainID)}, 32)
 	finalToDomainId := util.PaddingZero([]byte{uint8(result.ToDomainID)}, 32)
 
-	finalResourceId, err := hex.DecodeString(resourceID[len(h.conf.GetRegisteredDomains(fromDomainID).AddressPrefix):])
+	finalResourceId, err := hex.DecodeString(resourceID[2:])
 	if err != nil {
 		return "", errors.Wrap(err, "failed to decode resourceID")
 	}
@@ -87,7 +89,60 @@ func (h *Handler) rateSignature(result *FetchRateResp, fromDomainID int, resourc
 	return hex.EncodeToString(signature), nil
 }
 
-// TODO: this is the placeholder for the algorithm of calculating the data expiration
 func (h *Handler) dataExpirationManager(baseTimestamp int64) int64 {
-	return baseTimestamp + h.conf.DataValidIntervalConfig()
+	return baseTimestamp + h.conf.DataValidInterval
+}
+
+func (h *Handler) parseDomains(fromID string, toID string) (from *config.Domain, to *config.Domain, err error) {
+	fromDomainID, err := strconv.Atoi(fromID)
+	if err != nil {
+		return from, to, err
+	}
+	toDomainID, err := strconv.Atoi(toID)
+	if err != nil {
+		return from, to, err
+	}
+	if fromDomainID == toDomainID {
+		return from, to, fmt.Errorf("from and to domain equal")
+	}
+
+	from, err = h.conf.Domain(fromDomainID)
+	if err != nil {
+		return from, to, err
+	}
+	to, err = h.conf.Domain(toDomainID)
+	if err != nil {
+		return from, to, err
+	}
+
+	return from, to, nil
+}
+
+func (h *Handler) parseResource(resourceID string) (*config.Resource, error) {
+	resource, err := h.conf.Resource(resourceID)
+	if err != nil {
+		return &config.Resource{}, err
+	}
+
+	return resource, nil
+}
+
+func (h *Handler) calculateTokenRate(resource *config.Resource, ber *types.ConversionRate, from *config.Domain, to *config.Domain) (*types.ConversionRate, error) {
+	ter := &types.ConversionRate{}
+	if resource.Symbol == from.BaseCurrencySymbol {
+		ter = ber
+	} else {
+		if resource.Symbol == to.BaseCurrencySymbol {
+			ter.Rate = 1.0
+		} else {
+			ter, err := h.consensus.FilterLocalConversionRateData(h.conversionRateStore, to.BaseCurrencySymbol, resource.Symbol)
+			if err != nil {
+				return ter, err
+			}
+
+			return ter, nil
+		}
+	}
+
+	return ter, nil
 }

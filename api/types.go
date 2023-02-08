@@ -6,7 +6,7 @@ package api
 import (
 	"errors"
 
-	"github.com/ChainSafe/sygma-fee-oracle/config"
+	oracleErrors "github.com/ChainSafe/sygma-fee-oracle/errors"
 	"github.com/gin-gonic/gin"
 )
 
@@ -18,7 +18,7 @@ type ReturnErrorResponse struct {
 
 type ReturnSuccessResponse interface{}
 
-func newReturnErrorResp(fe *config.FeeOracleError, err error) *ReturnErrorResponse {
+func newReturnErrorResp(fe *oracleErrors.FeeOracleError, err error) *ReturnErrorResponse {
 	if err == nil {
 		err = errors.New("")
 	}

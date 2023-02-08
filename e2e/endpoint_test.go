@@ -76,7 +76,8 @@ func (s *SignatureVerificationTestSuite) TestSignatureVerification_CalculateFee(
 	s.Nil(err)
 
 	finalGasPrice := util.PaddingZero(gasPrice.Bytes(), 32)
-	finalTimestamp := fmt.Sprintf("%064x", response.Response.ExpirationTimestamp)
+	finalTimestamp := fmt.Sprintf("%064x", response.Response.ExpirationTimestamp+1000000000)
+
 	finalTimestampBytes, err := hex.DecodeString(finalTimestamp)
 	s.Nil(err)
 
