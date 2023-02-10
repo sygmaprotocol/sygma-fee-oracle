@@ -105,9 +105,9 @@ func (e *Etherscan) InquiryGasPrice(domainName string) (*types.GasPrices, error)
 	}
 
 	return &types.GasPrices{
-		SafeGasPrice:    new(big.Int).Mul(safeGasPriceValue, big.NewInt(types.GWei)).String(),
-		ProposeGasPrice: new(big.Int).Mul(proposeGasPriceValue, big.NewInt(types.GWei)).String(),
-		FastGasPrice:    new(big.Int).Mul(fastGasPriceValue, big.NewInt(types.GWei)).String(),
+		SafeGasPrice:    new(big.Int).Mul(safeGasPriceValue, big.NewInt(types.Wei)).String(),
+		ProposeGasPrice: new(big.Int).Mul(proposeGasPriceValue, big.NewInt(types.Wei)).String(),
+		FastGasPrice:    new(big.Int).Mul(fastGasPriceValue, big.NewInt(types.Wei)).String(),
 		OracleName:      e.name,
 		DomainName:      domainName,
 		Time:            time.Now().Unix(),
