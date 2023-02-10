@@ -2,11 +2,7 @@
 # SPDX-License-Identifier: LGPL-3.0-only
 
 on:
-  pull_request:
-    types: [opened, synchronize, reopened]
-  push:
-    branches:
-      - main
+  - push
 
 name: CI Checks
 jobs:
