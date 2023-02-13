@@ -8,12 +8,13 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/gin-gonic/gin"
+	"github.com/pkg/errors"
+
 	oracleErrors "github.com/ChainSafe/sygma-fee-oracle/errors"
 	"github.com/ChainSafe/sygma-fee-oracle/signature"
 	"github.com/ChainSafe/sygma-fee-oracle/types"
 	"github.com/ChainSafe/sygma-fee-oracle/util"
-	"github.com/gin-gonic/gin"
-	"github.com/pkg/errors"
 )
 
 func (h *Handler) debugGetRate(c *gin.Context) {

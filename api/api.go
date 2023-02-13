@@ -9,18 +9,17 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/ChainSafe/sygma-fee-oracle/signature"
-	"github.com/ChainSafe/sygma-fee-oracle/types"
-	"github.com/ChainSafe/sygma-fee-oracle/util"
-
-	"github.com/ChainSafe/sygma-fee-oracle/config"
-	oracleErrors "github.com/ChainSafe/sygma-fee-oracle/errors"
-
-	"github.com/ChainSafe/sygma-fee-oracle/consensus"
-	"github.com/ChainSafe/sygma-fee-oracle/identity"
-	"github.com/ChainSafe/sygma-fee-oracle/store"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
+
+	"github.com/ChainSafe/sygma-fee-oracle/config"
+	"github.com/ChainSafe/sygma-fee-oracle/consensus"
+	oracleErrors "github.com/ChainSafe/sygma-fee-oracle/errors"
+	"github.com/ChainSafe/sygma-fee-oracle/identity"
+	"github.com/ChainSafe/sygma-fee-oracle/signature"
+	"github.com/ChainSafe/sygma-fee-oracle/store"
+	"github.com/ChainSafe/sygma-fee-oracle/types"
+	"github.com/ChainSafe/sygma-fee-oracle/util"
 )
 
 type Handler struct {
