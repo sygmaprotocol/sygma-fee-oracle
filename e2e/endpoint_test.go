@@ -11,6 +11,7 @@ import (
 	"io/ioutil"
 	"math/big"
 	"net/http"
+	"strconv"
 	"testing"
 
 	"github.com/ChainSafe/sygma-fee-oracle/identity/secp256k1"
@@ -87,7 +88,8 @@ func (s *SignatureVerificationTestSuite) TestSignatureVerification_CalculateFee(
 	finalResourceId, err := hex.DecodeString(response.Response.ResourceID[2:])
 	s.Nil(err)
 
-	finalMsgGasLimit := fmt.Sprintf("%064x", response.Response.MsgGasLimit)
+	gasLimit, _ := strconv.ParseUint(response.Response.MsgGasLimit, 10, 64)
+	finalMsgGasLimit := fmt.Sprintf("%064x", gasLimit)
 	finalMsgGasLimitBytes, err := hex.DecodeString(finalMsgGasLimit)
 	s.Nil(err)
 
