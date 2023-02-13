@@ -17,10 +17,6 @@ func (o *OracleIdentityOperator) Sign(data []byte) ([]byte, error) {
 	return o.identity.Sign(data)
 }
 
-func (o *OracleIdentityOperator) GetOracleIdentityAlgoName() string {
-	return o.identity.Type()
-}
-
-func (o *OracleIdentityOperator) GetOracleIdentityAddress() string {
+func (o *OracleIdentityOperator) IdentityAddress() string {
 	return o.identity.Address()
 }
