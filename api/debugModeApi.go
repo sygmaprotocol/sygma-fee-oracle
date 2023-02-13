@@ -8,10 +8,13 @@ import (
 	"strconv"
 	"time"
 
-	oracleErrors "github.com/ChainSafe/sygma-fee-oracle/errors"
-	"github.com/ChainSafe/sygma-fee-oracle/util"
 	"github.com/gin-gonic/gin"
 	"github.com/pkg/errors"
+
+	oracleErrors "github.com/ChainSafe/sygma-fee-oracle/errors"
+	"github.com/ChainSafe/sygma-fee-oracle/signature"
+	"github.com/ChainSafe/sygma-fee-oracle/types"
+	"github.com/ChainSafe/sygma-fee-oracle/util"
 )
 
 func (h *Handler) debugGetRate(c *gin.Context) {
@@ -34,7 +37,7 @@ func (h *Handler) debugGetRate(c *gin.Context) {
 		return
 	}
 
-	endpointRespData := &FetchRateResp{
+	rate := &types.Rate{
 		BaseRate:                 "0.000445",
 		TokenRate:                "15.948864",
 		DestinationChainGasPrice: "2000000000",
@@ -48,11 +51,11 @@ func (h *Handler) debugGetRate(c *gin.Context) {
 		MsgGasLimit:              msgGasLimitParam,
 	}
 
-	endpointRespData.Signature, err = h.rateSignature(endpointRespData, fromDomainID, resourceID)
+	rate.Signature, err = signature.RateSignature(h.conf, rate, h.identity, fromDomainID, resourceID)
 	if err != nil {
 		ginErrorReturn(c, http.StatusInternalServerError, newReturnErrorResp(&oracleErrors.InternalServerError, err))
 		return
 	}
 
-	ginSuccessReturn(c, http.StatusOK, endpointRespData)
+	ginSuccessReturn(c, http.StatusOK, rate)
 }
