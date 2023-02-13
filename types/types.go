@@ -28,3 +28,22 @@ type ConversionRate struct {
 	OracleName string  `json:"oracleName" mapstructure:"oracleName"`
 	Time       int64   `json:"time" mapstructure:"time"`
 }
+
+type Rate struct {
+	BaseRate                 string `json:"baseEffectiveRate"`
+	TokenRate                string `json:"tokenEffectiveRate"`
+	DestinationChainGasPrice string `json:"dstGasPrice"`
+	Signature                string `json:"signature"`
+	FromDomainID             int    `json:"fromDomainID"`
+	ToDomainID               int    `json:"toDomainID"`
+	ResourceID               string `json:"resourceID"`
+	MsgGasLimit              string `json:"msgGasLimit"`
+	// DataTimestamp represents the timestamp that the data is fetched from external services
+	DataTimestamp int64 `json:"dataTimestamp"`
+	// SignatureTimestamp represents the timestamp that the endpoint responses with the signature
+	SignatureTimestamp int64 `json:"signatureTimestamp"`
+	// ExpirationTimestamp represents the timestamp that the response data expires on the fee handler contract
+	ExpirationTimestamp int64 `json:"expirationTimestamp"`
+	// Indicator if the app is running in debug mode
+	Debug bool `json:"debug"`
+}

@@ -9,16 +9,17 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/ChainSafe/sygma-fee-oracle/util"
-
-	"github.com/ChainSafe/sygma-fee-oracle/config"
-	oracleErrors "github.com/ChainSafe/sygma-fee-oracle/errors"
-
-	"github.com/ChainSafe/sygma-fee-oracle/consensus"
-	"github.com/ChainSafe/sygma-fee-oracle/identity"
-	"github.com/ChainSafe/sygma-fee-oracle/store"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
+
+	"github.com/ChainSafe/sygma-fee-oracle/config"
+	"github.com/ChainSafe/sygma-fee-oracle/consensus"
+	oracleErrors "github.com/ChainSafe/sygma-fee-oracle/errors"
+	"github.com/ChainSafe/sygma-fee-oracle/identity"
+	"github.com/ChainSafe/sygma-fee-oracle/signature"
+	"github.com/ChainSafe/sygma-fee-oracle/store"
+	"github.com/ChainSafe/sygma-fee-oracle/types"
+	"github.com/ChainSafe/sygma-fee-oracle/util"
 )
 
 type Handler struct {
@@ -94,7 +95,7 @@ func (h *Handler) getRate(c *gin.Context) {
 
 	dataTime := ter.Time
 	signedTime := time.Now().Unix()
-	endpointRespData := &FetchRateResp{
+	rate := &types.Rate{
 		BaseRate:                 fmt.Sprintf("%f", ber.Rate),
 		TokenRate:                fmt.Sprintf("%f", ter.Rate),
 		DestinationChainGasPrice: gp.SafeGasPrice,
@@ -105,12 +106,12 @@ func (h *Handler) getRate(c *gin.Context) {
 		SignatureTimestamp:       signedTime,
 		ExpirationTimestamp:      h.dataExpirationManager(dataTime),
 	}
-	endpointRespData.Signature, err = h.rateSignature(endpointRespData, fromDomain.ID, resource.ID)
+	rate.Signature, err = signature.RateSignature(h.conf, rate, h.identity, fromDomain.ID, resource.ID)
 	if err != nil {
 		ginErrorReturn(c, http.StatusInternalServerError, newReturnErrorResp(&oracleErrors.InternalServerError, err))
 		return
 	}
 
-	endpointRespData.ResourceID = resource.ID
-	ginSuccessReturn(c, http.StatusOK, endpointRespData)
+	rate.ResourceID = resource.ID
+	ginSuccessReturn(c, http.StatusOK, rate)
 }
