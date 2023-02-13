@@ -15,9 +15,9 @@ import (
 	"testing"
 
 	"github.com/ChainSafe/sygma-fee-oracle/identity/secp256k1"
+	"github.com/ChainSafe/sygma-fee-oracle/types"
 	"github.com/ethereum/go-ethereum/crypto"
 
-	"github.com/ChainSafe/sygma-fee-oracle/api"
 	"github.com/ChainSafe/sygma-fee-oracle/e2e/setup"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/stretchr/testify/suite"
@@ -26,7 +26,7 @@ import (
 )
 
 type apiRespGeneral struct {
-	Response api.FetchRateResp `json:"response"`
+	Response types.Rate `json:"response"`
 }
 
 type SignatureVerificationTestSuite struct {
