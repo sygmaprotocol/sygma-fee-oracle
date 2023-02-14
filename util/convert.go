@@ -33,7 +33,7 @@ func Large2SmallUnitConverter(large string, decimal uint) (*big.Int, error) {
 
 	b, ok := new(big.Int).SetString(a[0], 10)
 	if !ok {
-		return nil, fmt.Errorf("Error")
+		return nil, fmt.Errorf("failed to convert string to big int")
 	}
 
 	return b, nil
