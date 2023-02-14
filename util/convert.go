@@ -8,6 +8,7 @@ import (
 	"errors"
 	"fmt"
 	"math/big"
+	"strings"
 )
 
 // Str2BigInt converts from string to big.Int
@@ -21,15 +22,21 @@ func Str2BigInt(small string) (*big.Int, error) {
 }
 
 func Large2SmallUnitConverter(large string, decimal uint) (*big.Int, error) {
-	bf, ok := new(big.Float).SetString(large)
-	if !ok {
-		return nil, fmt.Errorf("failed conversion from string to big float")
+	a := strings.Split(large, ".")
+	for i := 0; i < int(decimal); i++ {
+		if len(a) > 1 && len(a[1]) > i {
+			a[0] += string(a[1][i])
+		} else {
+			a[0] += "0"
+		}
 	}
-	exp := new(big.Int).Exp(big.NewInt(10), new(big.Int).SetUint64(uint64(decimal)), nil)
-	fexp, _ := new(big.Float).SetString(exp.String())
-	bf = bf.Mul(bf, fexp)
-	bi, _ := bf.Int(nil)
-	return bi, nil
+
+	b, ok := new(big.Int).SetString(a[0], 10)
+	if !ok {
+		return nil, fmt.Errorf("Error")
+	}
+
+	return b, nil
 }
 
 func PaddingZero(data []byte, length int) []byte {

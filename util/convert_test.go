@@ -119,8 +119,15 @@ func TestLarge2SmallUnitConverter(t *testing.T) {
 	testcases = append(testcases, large2SmallUnitConverterTest{
 		name:      "large exponent",
 		input1:    "0.000000000000000012512521",
-		input2:    22,
-		output:    big.NewInt(125125),
+		input2:    32,
+		output:    big.NewInt(1251252100000000),
+		outputErr: nil,
+	})
+	testcases = append(testcases, large2SmallUnitConverterTest{
+		name:      "huge exponent",
+		input1:    "0.0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000012512521",
+		input2:    128,
+		output:    big.NewInt(125125210000000000),
 		outputErr: nil,
 	})
 
