@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.1](https://github.com/sygmaprotocol/sygma-fee-oracle/compare/v1.1.0...v1.1.1) (2023-02-14)
+
+
+### Bug Fixes
+
+* large floating point wei conversion ([#32](https://github.com/sygmaprotocol/sygma-fee-oracle/issues/32)) ([741da0e](https://github.com/sygmaprotocol/sygma-fee-oracle/commit/741da0ec53129884dfb6c6c498fe6c2bba84cb60))
+
 ## [1.1.0](https://github.com/sygmaprotocol/sygma-fee-oracle/compare/v1.0.1...v1.1.0) (2023-02-13)
 
 
