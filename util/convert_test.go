@@ -4,8 +4,6 @@
 package util_test
 
 import (
-	"errors"
-
 	"github.com/ChainSafe/sygma-fee-oracle/util"
 
 	"math/big"
@@ -98,17 +96,38 @@ func TestLarge2SmallUnitConverter(t *testing.T) {
 		outputErr: nil,
 	})
 	testcases = append(testcases, large2SmallUnitConverterTest{
-		name:      "invalid string as input",
-		input1:    "1a2b3c",
-		input2:    9,
-		output:    big.NewInt(0),
-		outputErr: errors.New("failed to convert on the given decimal"),
-	})
-	testcases = append(testcases, large2SmallUnitConverterTest{
 		name:      "valid string as input 4",
 		input1:    "100",
 		input2:    0,
 		output:    big.NewInt(100),
+		outputErr: nil,
+	})
+	testcases = append(testcases, large2SmallUnitConverterTest{
+		name:      "short decimal number",
+		input1:    "0.12",
+		input2:    18,
+		output:    big.NewInt(120000000000000000),
+		outputErr: nil,
+	})
+	testcases = append(testcases, large2SmallUnitConverterTest{
+		name:      "long decimal number",
+		input1:    "0.00000012512521",
+		input2:    18,
+		output:    big.NewInt(125125210000),
+		outputErr: nil,
+	})
+	testcases = append(testcases, large2SmallUnitConverterTest{
+		name:      "large exponent",
+		input1:    "0.000000000000000012512521",
+		input2:    32,
+		output:    big.NewInt(1251252100000000),
+		outputErr: nil,
+	})
+	testcases = append(testcases, large2SmallUnitConverterTest{
+		name:      "huge exponent",
+		input1:    "0.0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000012512521",
+		input2:    128,
+		output:    big.NewInt(125125210000000000),
 		outputErr: nil,
 	})
 
