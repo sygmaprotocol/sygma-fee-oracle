@@ -1,7 +1,7 @@
 # Fee Oracle technical documentation
 
 Fee Oracle service
-facilitates [Sygmas Dynamic fee strategy](https://github.com/sygmaprotocol/sygma-relayer/wiki/General#dynamic-fee-strategy),
+facilitates [Sygmas Dynamic fee strategy](https://github.com/sygmaprotocol/sygma-relayer/blob/main/docs/general/Fees.md),
 allowing users to request a **signed fee estimate** through its API.
 
 To request a fee estimate, users must provide the following parameters:
