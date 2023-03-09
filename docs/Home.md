@@ -10,9 +10,15 @@ To request a fee estimate, users must provide the following parameters:
 - **toDomainID** - the identifier of the destination domain (chain)
 - **resourceID** - the identifier of the cross-chain resource
 
-When requesting a fee estimate for a generic message, users must also provide the following parameter:
+When requesting a fee estimate for a generic message, depending on the destination domain (network), users must also provide the following query parameter:
 
-- **msgGasLimit** - the maximum amount of gas units that can be used for execution
+**EVM**
+
+- **msgGasLimit** - the maximum amount of gas units that can be used on execution
+
+**Substrate**
+
+- **lengthFee** - destination extrinsic length (check out [substrate documentation](https://docs.substrate.io/build/tx-weights-fees/#a-closer-look-at-the-inclusion-fee) for more details)
 
 For more information on the FeeOracle API, please refer to
 the [Swagger documentation](https://app.swaggerhub.com/apis-docs/cb-fee-oracle/fee-oracle).
