@@ -30,9 +30,9 @@ Fee oracle needs three config files in the `./` dir of the codebase:
 Template of the config.yaml can be found in `./config/config.template.yaml`.
 
 ### Domain config
-For domain configuration, it is posible to use local file, or the [shared configuration]file that is uploaded to some remote service (eg. ipfs). Depending on what value is provided to the flag `domain_config_path`, the aplication will load the domain configuration from local file or from the remote service.
+For domain configuration, it is posible to use local file, or the [shared configuration](https://github.com/sygmaprotocol/sygma-shared-configuration) file that is uploaded to some remote service (eg. ipfs). Depending on what value is provided to the flag `domain_config_path`, the aplication will use the domain configuration from local file or from the remote service.
 This file indicates all the domains and resources the fee oracle needs to fetch data for. Details need to be matched with
-Sygma core configuration, such as `id`. For this reason, the prefered 
+Sygma core configuration, such as `id`.
 
 Sygma currently does not support bridging the native currency, such as Ether on Ethereum, Matic on Polygon, however, the `id` is constructed with zero address and its native `domainId` and is used in baseRate calculation internally.
 
