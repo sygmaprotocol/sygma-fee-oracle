@@ -37,7 +37,7 @@ npm i --prefix $SOLIDITY_DIR
 npm i -g solc@0.8.11
 
 # generate abi
-solcjs --include-path $SOLIDITY_DIR/node_modules/ --base-path $SOLIDITY_DIR --abi $CONTRACT_DIR/DynamicERC20FeeHandlerEVM.sol.sol -o $SOLIDITY_DIR/tmp
+solcjs --include-path $SOLIDITY_DIR/node_modules/ --base-path $SOLIDITY_DIR --abi $CONTRACT_DIR/DynamicERC20FeeHandlerEVM.sol -o $SOLIDITY_DIR/tmp
 solcjs --include-path $SOLIDITY_DIR/node_modules/ --base-path $SOLIDITY_DIR --abi $SOLIDITY_DIR/contracts/Bridge.sol -o $SOLIDITY_DIR/tmp
 solcjs --include-path $SOLIDITY_DIR/node_modules/ --base-path $SOLIDITY_DIR --abi $SOLIDITY_DIR/node_modules/@openzeppelin/contracts/token/ERC20/presets/ERC20PresetMinterPauser.sol -o $SOLIDITY_DIR/tmp
 solcjs --include-path $SOLIDITY_DIR/node_modules/ --base-path $SOLIDITY_DIR --abi $SOLIDITY_DIR/contracts/handlers/ERC20Handler.sol -o $SOLIDITY_DIR/tmp
@@ -50,7 +50,7 @@ solcjs --include-path $SOLIDITY_DIR/node_modules/ --base-path $SOLIDITY_DIR --ab
 solcjs --include-path $SOLIDITY_DIR/node_modules/ --base-path $SOLIDITY_DIR --abi $SOLIDITY_DIR/contracts/utils/AccessControlSegregator.sol -o $SOLIDITY_DIR/tmp
 
 # generate bin
-solcjs --include-path $SOLIDITY_DIR/node_modules/ --base-path $SOLIDITY_DIR --bin $CONTRACT_DIR/DynamicERC20FeeHandlerEVM.sol.sol -o $SOLIDITY_DIR/tmp
+solcjs --include-path $SOLIDITY_DIR/node_modules/ --base-path $SOLIDITY_DIR --bin $CONTRACT_DIR/DynamicERC20FeeHandlerEVM.sol -o $SOLIDITY_DIR/tmp
 solcjs --include-path $SOLIDITY_DIR/node_modules/ --base-path $SOLIDITY_DIR --bin $SOLIDITY_DIR/contracts/Bridge.sol -o $SOLIDITY_DIR/tmp
 solcjs --include-path $SOLIDITY_DIR/node_modules/ --base-path $SOLIDITY_DIR --bin $SOLIDITY_DIR/node_modules/@openzeppelin/contracts/token/ERC20/presets/ERC20PresetMinterPauser.sol -o $SOLIDITY_DIR/tmp
 solcjs --include-path $SOLIDITY_DIR/node_modules/ --base-path $SOLIDITY_DIR --bin $SOLIDITY_DIR/contracts/handlers/ERC20Handler.sol -o $SOLIDITY_DIR/tmp
