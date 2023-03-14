@@ -37,7 +37,7 @@ npm i --prefix $SOLIDITY_DIR
 npm i -g solc@0.8.11
 
 # generate abi
-solcjs --include-path $SOLIDITY_DIR/node_modules/ --base-path $SOLIDITY_DIR --abi $CONTRACT_DIR/FeeHandlerWithOracle.sol -o $SOLIDITY_DIR/tmp
+solcjs --include-path $SOLIDITY_DIR/node_modules/ --base-path $SOLIDITY_DIR --abi $CONTRACT_DIR/DynamicERC20FeeHandlerEVM.sol.sol -o $SOLIDITY_DIR/tmp
 solcjs --include-path $SOLIDITY_DIR/node_modules/ --base-path $SOLIDITY_DIR --abi $SOLIDITY_DIR/contracts/Bridge.sol -o $SOLIDITY_DIR/tmp
 solcjs --include-path $SOLIDITY_DIR/node_modules/ --base-path $SOLIDITY_DIR --abi $SOLIDITY_DIR/node_modules/@openzeppelin/contracts/token/ERC20/presets/ERC20PresetMinterPauser.sol -o $SOLIDITY_DIR/tmp
 solcjs --include-path $SOLIDITY_DIR/node_modules/ --base-path $SOLIDITY_DIR --abi $SOLIDITY_DIR/contracts/handlers/ERC20Handler.sol -o $SOLIDITY_DIR/tmp
@@ -50,7 +50,7 @@ solcjs --include-path $SOLIDITY_DIR/node_modules/ --base-path $SOLIDITY_DIR --ab
 solcjs --include-path $SOLIDITY_DIR/node_modules/ --base-path $SOLIDITY_DIR --abi $SOLIDITY_DIR/contracts/utils/AccessControlSegregator.sol -o $SOLIDITY_DIR/tmp
 
 # generate bin
-solcjs --include-path $SOLIDITY_DIR/node_modules/ --base-path $SOLIDITY_DIR --bin $CONTRACT_DIR/FeeHandlerWithOracle.sol -o $SOLIDITY_DIR/tmp
+solcjs --include-path $SOLIDITY_DIR/node_modules/ --base-path $SOLIDITY_DIR --bin $CONTRACT_DIR/DynamicERC20FeeHandlerEVM.sol.sol -o $SOLIDITY_DIR/tmp
 solcjs --include-path $SOLIDITY_DIR/node_modules/ --base-path $SOLIDITY_DIR --bin $SOLIDITY_DIR/contracts/Bridge.sol -o $SOLIDITY_DIR/tmp
 solcjs --include-path $SOLIDITY_DIR/node_modules/ --base-path $SOLIDITY_DIR --bin $SOLIDITY_DIR/node_modules/@openzeppelin/contracts/token/ERC20/presets/ERC20PresetMinterPauser.sol -o $SOLIDITY_DIR/tmp
 solcjs --include-path $SOLIDITY_DIR/node_modules/ --base-path $SOLIDITY_DIR --bin $SOLIDITY_DIR/contracts/handlers/ERC20Handler.sol -o $SOLIDITY_DIR/tmp
@@ -89,8 +89,8 @@ fi
 
 # generate go binding files
 if [ $ABIGEN_EXISTS = false ]; then
-  $E2E_TEST_DIR/abigen --bin=$SOLIDITY_DIR/tmp/contracts_handlers_fee_FeeHandlerWithOracle_sol_FeeHandlerWithOracle.bin \
-    --abi=$SOLIDITY_DIR/tmp/contracts_handlers_fee_FeeHandlerWithOracle_sol_FeeHandlerWithOracle.abi \
+  $E2E_TEST_DIR/abigen --bin=$SOLIDITY_DIR/tmp/contracts_handlers_fee_DynamicERC20FeeHandlerEVM_sol_DynamicERC20FeeHandlerEVM.bin \
+    --abi=$SOLIDITY_DIR/tmp/contracts_handlers_fee_DynamicERC20FeeHandlerEVM_sol_DynamicERC20FeeHandlerEVM.abi \
     --pkg=feeHandler --out=$E2E_TEST_DIR/feeHandler/feeHandler.go
   $E2E_TEST_DIR/abigen --bin=$SOLIDITY_DIR/tmp/contracts_handlers_fee_BasicFeeHandler_sol_BasicFeeHandler.bin \
     --abi=$SOLIDITY_DIR/tmp/contracts_handlers_fee_BasicFeeHandler_sol_BasicFeeHandler.abi \
@@ -123,8 +123,8 @@ if [ $ABIGEN_EXISTS = false ]; then
     --abi=$SOLIDITY_DIR/tmp/contracts_utils_AccessControlSegregator_sol_AccessControlSegregator.abi \
     --pkg=AccessControlSegregator --out=$E2E_TEST_DIR/accessControlSegregator/AccessControlSegregator.go
 else
-  abigen --bin=$SOLIDITY_DIR/tmp/contracts_handlers_fee_FeeHandlerWithOracle_sol_FeeHandlerWithOracle.bin \
-    --abi=$SOLIDITY_DIR/tmp/contracts_handlers_fee_FeeHandlerWithOracle_sol_FeeHandlerWithOracle.abi \
+  abigen --bin=$SOLIDITY_DIR/tmp/contracts_handlers_fee_DynamicERC20FeeHandlerEVM_sol_DynamicERC20FeeHandlerEVM.bin \
+    --abi=$SOLIDITY_DIR/tmp/contracts_handlers_fee_DynamicERC20FeeHandlerEVM_sol_DynamicERC20FeeHandlerEVM.abi \
     --pkg=feeHandler --out=$E2E_TEST_DIR/feeHandler/feeHandler.go
   abigen --bin=$SOLIDITY_DIR/tmp/contracts_handlers_fee_BasicFeeHandler_sol_BasicFeeHandler.bin \
     --abi=$SOLIDITY_DIR/tmp/contracts_handlers_fee_BasicFeeHandler_sol_BasicFeeHandler.abi \
