@@ -99,7 +99,7 @@ func ContractsSetup() *ContractsSetupResp {
 	if err != nil {
 		panic(err)
 	}
-	erc20HandlerAddress, _, _, err := ERC20Handler.DeployERC20Handler(IncreaseNonce(auth), client, bridgeAddress)
+	erc20HandlerAddress, _, erc20HandlerInstance, err := ERC20Handler.DeployERC20Handler(IncreaseNonce(auth), client, bridgeAddress)
 	if err != nil {
 		panic(err)
 	}
@@ -156,6 +156,7 @@ func ContractsSetup() *ContractsSetupResp {
 		BasicFeeHandlerAddress:         basicFeeHandlerAddress,
 		ERC20PresetMinterPauserAddress: resourceTokenAddress,
 		ERC20HandlerAddress:            erc20HandlerAddress,
+		ERC20HandlerInstance:           erc20HandlerInstance,
 		FeeHandlerRouterInstance:       feeHandlerRouterInstance,
 		FeeHandlerRouterAddress:        feeHandlerRouterAddress,
 	}
