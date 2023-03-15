@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.1.2](https://github.com/sygmaprotocol/sygma-fee-oracle/compare/v1.1.1...v1.1.2) (2023-03-15)
+
+
+### Bug Fixes
+
+* handle fetching conversion rate for same token ([#38](https://github.com/sygmaprotocol/sygma-fee-oracle/issues/38)) ([4029375](https://github.com/sygmaprotocol/sygma-fee-oracle/commit/40293759b65ece80693624c0eaff16ff9d580d23))
+
+
+### Miscellaneous
+
+* update documentation ([#37](https://github.com/sygmaprotocol/sygma-fee-oracle/issues/37)) ([0ec622a](https://github.com/sygmaprotocol/sygma-fee-oracle/commit/0ec622ac030d4a67279575cd8e6e004b0079e5f8))
+
 ## [1.1.1](https://github.com/sygmaprotocol/sygma-fee-oracle/compare/v1.1.0...v1.1.1) (2023-02-14)
 
 
