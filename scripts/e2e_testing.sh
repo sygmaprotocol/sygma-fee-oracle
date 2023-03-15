@@ -19,7 +19,7 @@ mkdir -p $E2E_TEST_DIR/bridge
 mkdir -p $E2E_TEST_DIR/erc20Handler
 mkdir -p $E2E_TEST_DIR/feeHandlerRouter
 mkdir -p $E2E_TEST_DIR/erc20PresetMinterPauser
-mkdir -p $E2E_TEST_DIR/feeHandler
+mkdir -p $E2E_TEST_DIR/dynamicFeeHandler
 mkdir -p $E2E_TEST_DIR/basicFeeHandler
 mkdir -p $E2E_TEST_DIR/testContracts
 mkdir -p $E2E_TEST_DIR/erc721Handler
@@ -31,13 +31,13 @@ mkdir -p $E2E_TEST_DIR/accessControlSegregator
 git clone --branch $solidity_branch https://github.com/sygmaprotocol/sygma-solidity.git $E2E_TEST_DIR/sygma-solidity
 
 # install sygma-solidity
-npm i --prefix $SOLIDITY_DIR
+CI=true npm i --prefix $SOLIDITY_DIR
 
 # install solc with correct version
 npm i -g solc@0.8.11
 
 # generate abi
-solcjs --include-path $SOLIDITY_DIR/node_modules/ --base-path $SOLIDITY_DIR --abi $CONTRACT_DIR/FeeHandlerWithOracle.sol -o $SOLIDITY_DIR/tmp
+solcjs --include-path $SOLIDITY_DIR/node_modules/ --base-path $SOLIDITY_DIR --abi $CONTRACT_DIR/DynamicERC20FeeHandlerEVM.sol -o $SOLIDITY_DIR/tmp
 solcjs --include-path $SOLIDITY_DIR/node_modules/ --base-path $SOLIDITY_DIR --abi $SOLIDITY_DIR/contracts/Bridge.sol -o $SOLIDITY_DIR/tmp
 solcjs --include-path $SOLIDITY_DIR/node_modules/ --base-path $SOLIDITY_DIR --abi $SOLIDITY_DIR/node_modules/@openzeppelin/contracts/token/ERC20/presets/ERC20PresetMinterPauser.sol -o $SOLIDITY_DIR/tmp
 solcjs --include-path $SOLIDITY_DIR/node_modules/ --base-path $SOLIDITY_DIR --abi $SOLIDITY_DIR/contracts/handlers/ERC20Handler.sol -o $SOLIDITY_DIR/tmp
@@ -50,7 +50,7 @@ solcjs --include-path $SOLIDITY_DIR/node_modules/ --base-path $SOLIDITY_DIR --ab
 solcjs --include-path $SOLIDITY_DIR/node_modules/ --base-path $SOLIDITY_DIR --abi $SOLIDITY_DIR/contracts/utils/AccessControlSegregator.sol -o $SOLIDITY_DIR/tmp
 
 # generate bin
-solcjs --include-path $SOLIDITY_DIR/node_modules/ --base-path $SOLIDITY_DIR --bin $CONTRACT_DIR/FeeHandlerWithOracle.sol -o $SOLIDITY_DIR/tmp
+solcjs --include-path $SOLIDITY_DIR/node_modules/ --base-path $SOLIDITY_DIR --bin $CONTRACT_DIR/DynamicERC20FeeHandlerEVM.sol -o $SOLIDITY_DIR/tmp
 solcjs --include-path $SOLIDITY_DIR/node_modules/ --base-path $SOLIDITY_DIR --bin $SOLIDITY_DIR/contracts/Bridge.sol -o $SOLIDITY_DIR/tmp
 solcjs --include-path $SOLIDITY_DIR/node_modules/ --base-path $SOLIDITY_DIR --bin $SOLIDITY_DIR/node_modules/@openzeppelin/contracts/token/ERC20/presets/ERC20PresetMinterPauser.sol -o $SOLIDITY_DIR/tmp
 solcjs --include-path $SOLIDITY_DIR/node_modules/ --base-path $SOLIDITY_DIR --bin $SOLIDITY_DIR/contracts/handlers/ERC20Handler.sol -o $SOLIDITY_DIR/tmp
@@ -89,9 +89,9 @@ fi
 
 # generate go binding files
 if [ $ABIGEN_EXISTS = false ]; then
-  $E2E_TEST_DIR/abigen --bin=$SOLIDITY_DIR/tmp/contracts_handlers_fee_FeeHandlerWithOracle_sol_FeeHandlerWithOracle.bin \
-    --abi=$SOLIDITY_DIR/tmp/contracts_handlers_fee_FeeHandlerWithOracle_sol_FeeHandlerWithOracle.abi \
-    --pkg=feeHandler --out=$E2E_TEST_DIR/feeHandler/feeHandler.go
+  $E2E_TEST_DIR/abigen --bin=$SOLIDITY_DIR/tmp/contracts_handlers_fee_DynamicERC20FeeHandlerEVM_sol_DynamicERC20FeeHandlerEVM.bin \
+    --abi=$SOLIDITY_DIR/tmp/contracts_handlers_fee_DynamicERC20FeeHandlerEVM_sol_DynamicERC20FeeHandlerEVM.abi \
+    --pkg=dynamicFeeHandler --out=$E2E_TEST_DIR/dynamicFeeHandler/dynamicFeeHandler.go
   $E2E_TEST_DIR/abigen --bin=$SOLIDITY_DIR/tmp/contracts_handlers_fee_BasicFeeHandler_sol_BasicFeeHandler.bin \
     --abi=$SOLIDITY_DIR/tmp/contracts_handlers_fee_BasicFeeHandler_sol_BasicFeeHandler.abi \
     --pkg=basicFeeHandler --out=$E2E_TEST_DIR/basicFeeHandler/basicFeeHandler.go
@@ -123,9 +123,9 @@ if [ $ABIGEN_EXISTS = false ]; then
     --abi=$SOLIDITY_DIR/tmp/contracts_utils_AccessControlSegregator_sol_AccessControlSegregator.abi \
     --pkg=AccessControlSegregator --out=$E2E_TEST_DIR/accessControlSegregator/AccessControlSegregator.go
 else
-  abigen --bin=$SOLIDITY_DIR/tmp/contracts_handlers_fee_FeeHandlerWithOracle_sol_FeeHandlerWithOracle.bin \
-    --abi=$SOLIDITY_DIR/tmp/contracts_handlers_fee_FeeHandlerWithOracle_sol_FeeHandlerWithOracle.abi \
-    --pkg=feeHandler --out=$E2E_TEST_DIR/feeHandler/feeHandler.go
+  abigen --bin=$SOLIDITY_DIR/tmp/contracts_handlers_fee_DynamicERC20FeeHandlerEVM_sol_DynamicERC20FeeHandlerEVM.bin \
+    --abi=$SOLIDITY_DIR/tmp/contracts_handlers_fee_DynamicERC20FeeHandlerEVM_sol_DynamicERC20FeeHandlerEVM.abi \
+    --pkg=dynamicFeeHandler --out=$E2E_TEST_DIR/dynamicFeeHandler/dynamicFeeHandler.go
   abigen --bin=$SOLIDITY_DIR/tmp/contracts_handlers_fee_BasicFeeHandler_sol_BasicFeeHandler.bin \
     --abi=$SOLIDITY_DIR/tmp/contracts_handlers_fee_BasicFeeHandler_sol_BasicFeeHandler.abi \
     --pkg=basicFeeHandler --out=$E2E_TEST_DIR/basicFeeHandler/basicFeeHandler.go

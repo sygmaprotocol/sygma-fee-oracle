@@ -38,7 +38,7 @@ fee-oracle-1.0.0-swagger.yaml
 playground.go
 
 # e2e tests
-scripts/e2e_test/
+scripts/e2e_test/sygma-solidity
 
 # generated log files
 *.log
