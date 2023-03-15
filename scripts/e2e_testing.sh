@@ -19,7 +19,7 @@ mkdir -p $E2E_TEST_DIR/bridge
 mkdir -p $E2E_TEST_DIR/erc20Handler
 mkdir -p $E2E_TEST_DIR/feeHandlerRouter
 mkdir -p $E2E_TEST_DIR/erc20PresetMinterPauser
-mkdir -p $E2E_TEST_DIR/feeHandler
+mkdir -p $E2E_TEST_DIR/dynamicFeeHandler
 mkdir -p $E2E_TEST_DIR/basicFeeHandler
 mkdir -p $E2E_TEST_DIR/testContracts
 mkdir -p $E2E_TEST_DIR/erc721Handler
@@ -31,7 +31,7 @@ mkdir -p $E2E_TEST_DIR/accessControlSegregator
 git clone --branch $solidity_branch https://github.com/sygmaprotocol/sygma-solidity.git $E2E_TEST_DIR/sygma-solidity
 
 # install sygma-solidity
-npm i --prefix $SOLIDITY_DIR
+CI=true npm i --prefix $SOLIDITY_DIR
 
 # install solc with correct version
 npm i -g solc@0.8.11
@@ -91,7 +91,7 @@ fi
 if [ $ABIGEN_EXISTS = false ]; then
   $E2E_TEST_DIR/abigen --bin=$SOLIDITY_DIR/tmp/contracts_handlers_fee_DynamicERC20FeeHandlerEVM_sol_DynamicERC20FeeHandlerEVM.bin \
     --abi=$SOLIDITY_DIR/tmp/contracts_handlers_fee_DynamicERC20FeeHandlerEVM_sol_DynamicERC20FeeHandlerEVM.abi \
-    --pkg=feeHandler --out=$E2E_TEST_DIR/feeHandler/feeHandler.go
+    --pkg=dynamicFeeHandler --out=$E2E_TEST_DIR/dynamicFeeHandler/dynamicFeeHandler.go
   $E2E_TEST_DIR/abigen --bin=$SOLIDITY_DIR/tmp/contracts_handlers_fee_BasicFeeHandler_sol_BasicFeeHandler.bin \
     --abi=$SOLIDITY_DIR/tmp/contracts_handlers_fee_BasicFeeHandler_sol_BasicFeeHandler.abi \
     --pkg=basicFeeHandler --out=$E2E_TEST_DIR/basicFeeHandler/basicFeeHandler.go
@@ -125,7 +125,7 @@ if [ $ABIGEN_EXISTS = false ]; then
 else
   abigen --bin=$SOLIDITY_DIR/tmp/contracts_handlers_fee_DynamicERC20FeeHandlerEVM_sol_DynamicERC20FeeHandlerEVM.bin \
     --abi=$SOLIDITY_DIR/tmp/contracts_handlers_fee_DynamicERC20FeeHandlerEVM_sol_DynamicERC20FeeHandlerEVM.abi \
-    --pkg=feeHandler --out=$E2E_TEST_DIR/feeHandler/feeHandler.go
+    --pkg=dynamicFeeHandler --out=$E2E_TEST_DIR/dynamicFeeHandler/dynamicFeeHandler.go
   abigen --bin=$SOLIDITY_DIR/tmp/contracts_handlers_fee_BasicFeeHandler_sol_BasicFeeHandler.bin \
     --abi=$SOLIDITY_DIR/tmp/contracts_handlers_fee_BasicFeeHandler_sol_BasicFeeHandler.abi \
     --pkg=basicFeeHandler --out=$E2E_TEST_DIR/basicFeeHandler/basicFeeHandler.go
