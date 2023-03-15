@@ -10,6 +10,8 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"github.com/ChainSafe/sygma-fee-oracle/scripts/e2e_test/basicFeeHandler"
+	"github.com/ChainSafe/sygma-fee-oracle/scripts/e2e_test/dynamicFeeHandler"
 	"math/big"
 	"time"
 
@@ -19,7 +21,6 @@ import (
 	"github.com/ChainSafe/sygma-fee-oracle/scripts/e2e_test/bridge"
 	ERC20Handler "github.com/ChainSafe/sygma-fee-oracle/scripts/e2e_test/erc20Handler"
 	ERC20PresetMinterPauser "github.com/ChainSafe/sygma-fee-oracle/scripts/e2e_test/erc20PresetMinterPauser"
-	"github.com/ChainSafe/sygma-fee-oracle/scripts/e2e_test/feeHandler"
 	"github.com/ChainSafe/sygma-fee-oracle/store/db"
 	"github.com/ChainSafe/sygma-fee-oracle/types"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
@@ -42,8 +43,10 @@ type ContractsSetupResp struct {
 	Auth                            *bind.TransactOpts
 	BridgeInstance                  *bridge.Bridge
 	BridgeAddress                   common.Address
-	FeeHandlerInstance              *feeHandler.FeeHandler
-	FeeHandlerAddress               common.Address
+	DynamicFeeHandlerInstance       *dynamicFeeHandler.DynamicFeeHandler
+	DynamicFeeHandlerAddress        common.Address
+	BasicFeeHandlerInstance         *basicFeeHandler.BasicFeeHandler
+	BasicFeeHandlerAddress          common.Address
 	ERC20PresetMinterPauserInstance *ERC20PresetMinterPauser.ERC20PresetMinterPauser
 	ERC20PresetMinterPauserAddress  common.Address
 	ERC20HandlerInstance            *ERC20Handler.ERC20Handler
@@ -96,7 +99,7 @@ func ContractsSetup() *ContractsSetupResp {
 	if err != nil {
 		panic(err)
 	}
-	erc20HandlerAddress, _, _, err := ERC20Handler.DeployERC20Handler(IncreaseNonce(auth), client, bridgeAddress)
+	erc20HandlerAddress, _, erc20HandlerInstance, err := ERC20Handler.DeployERC20Handler(IncreaseNonce(auth), client, bridgeAddress)
 	if err != nil {
 		panic(err)
 	}
@@ -104,28 +107,41 @@ func ContractsSetup() *ContractsSetupResp {
 	if err != nil {
 		panic(err)
 	}
-	feeHandlerAddress, _, feeHandlerInstance, err := feeHandler.DeployFeeHandler(IncreaseNonce(auth), client, bridgeAddress, feeHandlerRouterAddress)
+	dynamicFeeHandlerAddress, _, dynamicFeeHandlerInstance, err := dynamicFeeHandler.DeployDynamicFeeHandler(IncreaseNonce(auth), client, bridgeAddress, feeHandlerRouterAddress)
 	if err != nil {
 		panic(err)
 	}
-	_, err = feeHandlerInstance.SetFeeOracle(IncreaseNonce(auth), FeeOracleAddress)
+	basicFeeHandlerAddress, _, basicFeeHandlerInstance, err := basicFeeHandler.DeployBasicFeeHandler(IncreaseNonce(auth), client, bridgeAddress, feeHandlerRouterAddress)
 	if err != nil {
 		panic(err)
 	}
-	registeredFeeOracle, err := feeHandlerInstance.OracleAddress(&bind.CallOpts{From: auth.From})
+	_, err = bridgeInstance.AdminChangeFeeHandler(IncreaseNonce(auth), feeHandlerRouterAddress)
+	if err != nil {
+		panic(err)
+	}
+	_, err = dynamicFeeHandlerInstance.SetFeeOracle(IncreaseNonce(auth), FeeOracleAddress)
+	if err != nil {
+		panic(err)
+	}
+	registeredFeeOracle, err := dynamicFeeHandlerInstance.OracleAddress(&bind.CallOpts{From: auth.From})
 	if err != nil {
 		panic(err)
 	}
 	if registeredFeeOracle != FeeOracleAddress {
 		panic("fee oracle address does not match with contract")
 	}
-	_, err = feeHandlerInstance.SetFeeProperties(IncreaseNonce(auth), uint32(gasUsed), uint16(feePercent))
+	_, err = dynamicFeeHandlerInstance.SetFeeProperties(IncreaseNonce(auth), uint32(gasUsed), uint16(feePercent))
+	if err != nil {
+		panic(err)
+	}
+	_, err = basicFeeHandlerInstance.ChangeFee(IncreaseNonce(auth), big.NewInt(1000000000000000))
 	if err != nil {
 		panic(err)
 	}
 
 	fmt.Println("bridgeAddress:", bridgeAddress.String())
-	fmt.Println("feeHandlerAddress:", feeHandlerAddress.String())
+	fmt.Println("dynamicFeeHandlerAddress:", dynamicFeeHandlerAddress.String())
+	fmt.Println("basicFeeHandlerAddress:", basicFeeHandlerAddress.String())
 	fmt.Println("feeHandlerRouterAddress:", feeHandlerRouterAddress.String())
 	fmt.Println("resourceTokenAddress:", resourceTokenAddress.String())
 	fmt.Println("erc20HandlerAddress:", erc20HandlerAddress.String())
@@ -134,10 +150,13 @@ func ContractsSetup() *ContractsSetupResp {
 		Auth:                           auth,
 		BridgeInstance:                 bridgeInstance,
 		BridgeAddress:                  bridgeAddress,
-		FeeHandlerInstance:             feeHandlerInstance,
-		FeeHandlerAddress:              feeHandlerAddress,
+		DynamicFeeHandlerInstance:      dynamicFeeHandlerInstance,
+		DynamicFeeHandlerAddress:       dynamicFeeHandlerAddress,
+		BasicFeeHandlerInstance:        basicFeeHandlerInstance,
+		BasicFeeHandlerAddress:         basicFeeHandlerAddress,
 		ERC20PresetMinterPauserAddress: resourceTokenAddress,
 		ERC20HandlerAddress:            erc20HandlerAddress,
+		ERC20HandlerInstance:           erc20HandlerInstance,
 		FeeHandlerRouterInstance:       feeHandlerRouterInstance,
 		FeeHandlerRouterAddress:        feeHandlerRouterAddress,
 	}

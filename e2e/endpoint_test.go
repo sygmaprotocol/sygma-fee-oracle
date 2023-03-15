@@ -8,6 +8,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"io/ioutil"
 	"math/big"
 	"net/http"
@@ -19,7 +20,6 @@ import (
 	"github.com/ethereum/go-ethereum/crypto"
 
 	"github.com/ChainSafe/sygma-fee-oracle/e2e/setup"
-	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/stretchr/testify/suite"
 
 	"github.com/ChainSafe/sygma-fee-oracle/util"
@@ -96,10 +96,7 @@ func (s *SignatureVerificationTestSuite) TestSignatureVerification_CalculateFee(
 	_, err = s.contractSetup.BridgeInstance.AdminSetResource(setup.IncreaseNonce(s.contractSetup.Auth), s.contractSetup.ERC20HandlerAddress, util.Byte32Converter(finalResourceId), s.contractSetup.ERC20PresetMinterPauserAddress, emptySetResourceData)
 	s.Nil(err)
 
-	_, err = s.contractSetup.BridgeInstance.AdminChangeFeeHandler(setup.IncreaseNonce(s.contractSetup.Auth), s.contractSetup.FeeHandlerRouterAddress)
-	s.Nil(err)
-
-	_, err = s.contractSetup.FeeHandlerRouterInstance.AdminSetResourceHandler(setup.IncreaseNonce(s.contractSetup.Auth), uint8(setup.FromDomainId), util.Byte32Converter(finalResourceId), s.contractSetup.FeeHandlerAddress)
+	_, err = s.contractSetup.FeeHandlerRouterInstance.AdminSetResourceHandler(setup.IncreaseNonce(s.contractSetup.Auth), uint8(setup.FromDomainId), util.Byte32Converter(finalResourceId), s.contractSetup.DynamicFeeHandlerAddress)
 	s.Nil(err)
 
 	// assembly data
@@ -138,12 +135,16 @@ func (s *SignatureVerificationTestSuite) TestSignatureVerification_CalculateFee(
 	feeData := bytes.Buffer{}
 	feeData.Write(finalFeeDataMessage)
 	feeData.Write(sig)
-	feeData.Write(finalAmount)
+	feeData.Write(finalAmount) // not used in feeData, moved to depositData
 	s.EqualValues(353, feeData.Len(), "invalid feeData")
 
 	s.True(bytes.Equal(feeData.Bytes()[:256], finalFeeDataMessage))
 	s.True(bytes.Equal(feeData.Bytes()[256:321], sig))
 	s.True(bytes.Equal(feeData.Bytes()[321:], finalAmount))
+
+	// deposit data
+	depositData := bytes.Buffer{}
+	depositData.Write(finalAmount)
 
 	// ecrecover verify signer
 	signer, err := crypto.Ecrecover(crypto.Keccak256(finalFeeDataMessage), originalSig)
@@ -159,7 +160,7 @@ func (s *SignatureVerificationTestSuite) TestSignatureVerification_CalculateFee(
 	}
 
 	// calling actual test: CalculateFee in Fee handler contract
-	result, err := s.contractSetup.FeeHandlerInstance.CalculateFee(&bind.CallOpts{From: s.contractSetup.Auth.From}, setup.SenderAddress, uint8(setup.FromDomainId), uint8(setup.ToDomainID), util.Byte32Converter(finalResourceId), []byte(""), feeData.Bytes())
+	result, err := s.contractSetup.DynamicFeeHandlerInstance.CalculateFee(&bind.CallOpts{From: s.contractSetup.Auth.From}, setup.SenderAddress, uint8(setup.FromDomainId), uint8(setup.ToDomainID), util.Byte32Converter(finalResourceId), depositData.Bytes(), feeData.Bytes())
 	s.Nil(err)
 
 	// test result verification
