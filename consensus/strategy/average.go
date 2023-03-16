@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"math"
 	"strconv"
+	"time"
 
 	"github.com/ChainSafe/sygma-fee-oracle/store"
 	"github.com/ChainSafe/sygma-fee-oracle/types"
@@ -61,6 +62,15 @@ func (a *Average) GasPrice(store *store.GasPriceStore, domainName string) (*type
 }
 
 func (a *Average) ConversionRate(store *store.ConversionRateStore, base, foreign string) (*types.ConversionRate, error) {
+	if base == foreign {
+		return &types.ConversionRate{
+			Base:    base,
+			Foreign: foreign,
+			Rate:    1,
+			Time:    time.Now().Unix(),
+		}, nil
+	}
+
 	re, err := store.GetConversionRatesByCurrencyPair(base, foreign)
 	if err != nil {
 		return nil, err

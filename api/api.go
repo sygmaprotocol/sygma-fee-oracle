@@ -71,6 +71,7 @@ func (h *Handler) getRate(c *gin.Context) {
 
 	gp, err := h.consensus.FilterLocalGasPriceData(h.gasPriceStore, toDomain.Name)
 	if err != nil {
+		h.log.Errorf("get gasprice process failed: %v", err)
 		ginErrorReturn(c, http.StatusInternalServerError, newReturnErrorResp(&oracleErrors.InternalServerError, err))
 		return
 	}
@@ -81,6 +82,7 @@ func (h *Handler) getRate(c *gin.Context) {
 		toDomain.BaseCurrencySymbol,
 		fromDomain.BaseCurrencySymbol)
 	if err != nil {
+		h.log.Errorf("calculate ber process failed: %v", err)
 		ginErrorReturn(c, http.StatusInternalServerError, newReturnErrorResp(&oracleErrors.InternalServerError, err))
 		return
 	}
@@ -88,6 +90,7 @@ func (h *Handler) getRate(c *gin.Context) {
 
 	ter, err := h.calculateTokenRate(resource, ber, fromDomain, toDomain)
 	if err != nil {
+		h.log.Errorf("calculate ter process failed: %v", err)
 		ginErrorReturn(c, http.StatusInternalServerError, newReturnErrorResp(&oracleErrors.InternalServerError, err))
 		return
 	}
@@ -108,6 +111,7 @@ func (h *Handler) getRate(c *gin.Context) {
 	}
 	rate.Signature, err = signature.RateSignature(h.conf, rate, h.identity, fromDomain.ID, resource.ID)
 	if err != nil {
+		h.log.Errorf("signature process failed: %v", err)
 		ginErrorReturn(c, http.StatusInternalServerError, newReturnErrorResp(&oracleErrors.InternalServerError, err))
 		return
 	}
