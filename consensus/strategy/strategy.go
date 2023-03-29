@@ -10,6 +10,6 @@ import (
 
 type Strategy interface {
 	Name() string
-	GasPrice(*store.GasPriceStore, string) (*types.GasPrices, error)
+	GasPrice(*store.GasPriceStore, int) (*types.GasPrices, error)
 	ConversionRate(*store.ConversionRateStore, string, string) (*types.ConversionRate, error)
 }

@@ -35,7 +35,7 @@ func (m *MockGasPriceOracle) EXPECT() *MockGasPriceOracleMockRecorder {
 }
 
 // InquiryGasPrice mocks base method.
-func (m *MockGasPriceOracle) InquiryGasPrice(arg0 string) (*types.GasPrices, error) {
+func (m *MockGasPriceOracle) InquiryGasPrice(arg0 int) (*types.GasPrices, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "InquiryGasPrice", arg0)
 	ret0, _ := ret[0].(*types.GasPrices)
@@ -75,6 +75,20 @@ func (m *MockGasPriceOracle) Name() string {
 func (mr *MockGasPriceOracleMockRecorder) Name() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Name", reflect.TypeOf((*MockGasPriceOracle)(nil).Name))
+}
+
+// SupportedGasPriceDomainIds mocks base method.
+func (m *MockGasPriceOracle) SupportedGasPriceDomainIds() []int {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "SupportedGasPriceDomainIds")
+	ret0, _ := ret[0].([]int)
+	return ret0
+}
+
+// SupportedGasPriceDomainIds indicates an expected call of SupportedGasPriceDomainIds.
+func (mr *MockGasPriceOracleMockRecorder) SupportedGasPriceDomainIds() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SupportedGasPriceDomainIds", reflect.TypeOf((*MockGasPriceOracle)(nil).SupportedGasPriceDomainIds))
 }
 
 // MockConversionRateOracle is a mock of ConversionRateOracle interface.

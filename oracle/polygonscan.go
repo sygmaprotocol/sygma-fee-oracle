@@ -7,7 +7,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"strings"
 	"time"
 
 	"github.com/ChainSafe/sygma-fee-oracle/config"
@@ -24,10 +23,11 @@ var _ GasPriceOracle = (*Polygonscan)(nil)
 type Polygonscan struct {
 	log *logrus.Entry
 
-	name   string
-	apiKey string
-	enable bool
-	apis   PolygonscanApis
+	name              string
+	apiKey            string
+	enable            bool
+	apis              PolygonscanApis
+	gasPriceDomainIDs []int
 }
 
 type PolygonscanApis struct {
@@ -58,14 +58,11 @@ func NewPolygonscan(conf *config.Config, log *logrus.Entry) *Polygonscan {
 		apis: PolygonscanApis{
 			GasPriceRequest: fmt.Sprintf("%s%s", conf.OracleConfig().Polygonscan.Apis.GasPriceApiUrl, conf.OracleConfig().Polygonscan.ApiKey),
 		},
+		gasPriceDomainIDs: conf.OracleConfig().Polygonscan.GasPriceDomainIds,
 	}
 }
 
-func (p *Polygonscan) InquiryGasPrice(domainName string) (*types.GasPrices, error) {
-	if strings.ToLower(domainName) != "polygon" {
-		return nil, ErrNotSupported
-	}
-
+func (p *Polygonscan) InquiryGasPrice(domainID int) (*types.GasPrices, error) {
 	statusCode, body, err := client.NewHttpRequestMessage(http.MethodGet, p.apis.GasPriceRequest,
 		nil, nil, p.log).Request()
 	if err != nil || statusCode != http.StatusOK {
@@ -108,7 +105,7 @@ func (p *Polygonscan) InquiryGasPrice(domainName string) (*types.GasPrices, erro
 		ProposeGasPrice: proposeGasPriceValue.String(),
 		FastGasPrice:    fastGasPriceValue.String(),
 		OracleName:      p.name,
-		DomainName:      domainName,
+		DomainID:        domainID,
 		Time:            time.Now().Unix(),
 	}, nil
 }
@@ -119,6 +116,10 @@ func (p *Polygonscan) Name() string {
 
 func (p *Polygonscan) IsEnabled() bool {
 	return p.enable
+}
+
+func (p *Polygonscan) SupportedGasPriceDomainIds() []int {
+	return p.gasPriceDomainIDs
 }
 
 func (pr *PolygonscanResp) parsePolygonscanResp(body []byte) (PolygonscanResp, error) {

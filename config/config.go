@@ -43,7 +43,6 @@ type Config struct {
 	CronJob             cronJobConfig    `mapstructure:"cron_job"`
 	Store               store            `mapstructure:"store"`
 	Oracle              oracle           `mapstructure:"oracle"`
-	GasPriceDomains     []string         `mapstructure:"gas_price_domains"`
 	ConversionRatePairs []string         `mapstructure:"conversion_rate_pairs"`
 	Strategy            strategyConfig   `mapstructure:"strategy"`
 	DataValidInterval   int64            `mapstructure:"data_valid_interval"`
@@ -56,10 +55,10 @@ type strategyConfig struct {
 }
 
 type oracle struct {
-	Etherscan     etherscan     `mapstructure:"etherscan"`
-	Polygonscan   polygonscan   `mapstructure:"polygonscan"`
-	CoinMarketCap coinMarketCap `mapstructure:"coinmarketcap"`
-	Moonscan      coinMarketCap `mapstructure:"moonscan"`
+	Etherscan     oracleDetails `mapstructure:"etherscan"`
+	Polygonscan   oracleDetails `mapstructure:"polygonscan"`
+	CoinMarketCap oracleDetails `mapstructure:"coinmarketcap"`
+	Moonscan      oracleDetails `mapstructure:"moonscan"`
 }
 
 type store struct {
@@ -83,22 +82,11 @@ type httpServerConfig struct {
 	Port string `mapstructure:"port"`
 }
 
-type polygonscan struct {
-	Enable bool    `mapstructure:"enable"`
-	ApiKey string  `mapstructure:"api_key"`
-	Apis   apiUrls `mapstructure:"apis"`
-}
-
-type etherscan struct {
-	Enable bool    `mapstructure:"enable"`
-	ApiKey string  `mapstructure:"api_key"`
-	Apis   apiUrls `mapstructure:"apis"`
-}
-
-type coinMarketCap struct {
-	Enable bool    `mapstructure:"enable"`
-	ApiKey string  `mapstructure:"api_key"`
-	Apis   apiUrls `mapstructure:"apis"`
+type oracleDetails struct {
+	Enable            bool    `mapstructure:"enable"`
+	ApiKey            string  `mapstructure:"api_key"`
+	Apis              apiUrls `mapstructure:"apis"`
+	GasPriceDomainIds []int   `mapstructure:"gas_price_domainIDs"`
 }
 
 type apiUrls struct {

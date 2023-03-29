@@ -4,7 +4,6 @@
 package cronjob
 
 import (
-	"github.com/ChainSafe/sygma-fee-oracle/oracle"
 	"github.com/pkg/errors"
 )
 
@@ -17,12 +16,10 @@ func GasPriceJobOperation(c *Job) func() {
 			if !oracleOperator.IsOracleEnabled() {
 				continue
 			}
-			for _, domain := range c.cronBase.base.GetConfig().GasPriceDomains {
-				gasPriceData, err := oracleOperator.Run(domain)
+			for _, domainId := range oracleOperator.GetOracle().SupportedGasPriceDomainIds() {
+				gasPriceData, err := oracleOperator.Run(domainId)
 				if err != nil || gasPriceData == nil {
-					if err != oracle.ErrNotSupported {
-						c.log.Error(errors.Wrapf(err, "failed to fetch data from oracle: %s", oracleOperator.GetOracleName()))
-					}
+					c.log.Error(errors.Wrapf(err, "failed to fetch data from oracle: %s", oracleOperator.GetOracleName()))
 					continue
 				}
 

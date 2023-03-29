@@ -15,7 +15,7 @@ type GasPrices struct {
 	ProposeGasPrice string `json:"proposeGasPrice" mapstructure:"proposeGasPrice"`
 	FastGasPrice    string `json:"fastGasPrice" mapstructure:"fastGasPrice"`
 	OracleName      string `json:"oracleName" mapstructure:"oracleName"`
-	DomainName      string `json:"domainName" mapstructure:"domainName"`
+	DomainID        int    `json:"domainID" mapstructure:"domainID"`
 	Time            int64  `json:"time" mapstructure:"time"`
 }
 

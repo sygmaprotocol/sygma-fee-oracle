@@ -10,7 +10,8 @@ import (
 
 type GasPriceOracle interface {
 	Oracle
-	InquiryGasPrice(chainDomain string) (*types.GasPrices, error)
+	InquiryGasPrice(domainID int) (*types.GasPrices, error)
+	SupportedGasPriceDomainIds() []int
 }
 
 type GasPriceOracleOperator struct {
@@ -26,8 +27,8 @@ func NewGasPriceOracleOperator(log *logrus.Entry, oracle GasPriceOracle) *GasPri
 	}
 }
 
-func (g *GasPriceOracleOperator) Run(chainDomain string) (*types.GasPrices, error) {
-	return g.oracle.InquiryGasPrice(chainDomain)
+func (g *GasPriceOracleOperator) Run(domainID int) (*types.GasPrices, error) {
+	return g.oracle.InquiryGasPrice(domainID)
 }
 
 func (g *GasPriceOracleOperator) GetOracleName() string {
@@ -36,4 +37,8 @@ func (g *GasPriceOracleOperator) GetOracleName() string {
 
 func (g *GasPriceOracleOperator) IsOracleEnabled() bool {
 	return g.oracle.IsEnabled()
+}
+
+func (g *GasPriceOracleOperator) GetOracle() GasPriceOracle {
+	return g.oracle
 }

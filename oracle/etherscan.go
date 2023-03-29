@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"math/big"
 	"net/http"
-	"strings"
 	"time"
 
 	"github.com/ChainSafe/sygma-fee-oracle/config"
@@ -25,10 +24,11 @@ var _ GasPriceOracle = (*Etherscan)(nil)
 type Etherscan struct {
 	log *logrus.Entry
 
-	name   string
-	apiKey string
-	enable bool
-	apis   EtherscanApis
+	name              string
+	apiKey            string
+	enable            bool
+	apis              EtherscanApis
+	gasPriceDomainIDs []int
 }
 
 type EtherscanApis struct {
@@ -59,14 +59,11 @@ func NewEtherscan(conf *config.Config, log *logrus.Entry) *Etherscan {
 		apis: EtherscanApis{
 			GasPriceRequest: fmt.Sprintf("%s%s", conf.OracleConfig().Etherscan.Apis.GasPriceApiUrl, conf.OracleConfig().Etherscan.ApiKey),
 		},
+		gasPriceDomainIDs: conf.OracleConfig().Etherscan.GasPriceDomainIds,
 	}
 }
 
-func (e *Etherscan) InquiryGasPrice(domainName string) (*types.GasPrices, error) {
-	if strings.ToLower(domainName) != "ethereum" {
-		return nil, ErrNotSupported
-	}
-
+func (e *Etherscan) InquiryGasPrice(domainID int) (*types.GasPrices, error) {
 	statusCode, body, err := client.NewHttpRequestMessage(http.MethodGet, e.apis.GasPriceRequest,
 		nil, nil, e.log).Request()
 	if err != nil || statusCode != http.StatusOK {
@@ -109,7 +106,7 @@ func (e *Etherscan) InquiryGasPrice(domainName string) (*types.GasPrices, error)
 		ProposeGasPrice: new(big.Int).Mul(proposeGasPriceValue, big.NewInt(types.GWei)).String(),
 		FastGasPrice:    new(big.Int).Mul(fastGasPriceValue, big.NewInt(types.GWei)).String(),
 		OracleName:      e.name,
-		DomainName:      domainName,
+		DomainID:        domainID,
 		Time:            time.Now().Unix(),
 	}, nil
 }
@@ -120,6 +117,10 @@ func (e *Etherscan) Name() string {
 
 func (e *Etherscan) IsEnabled() bool {
 	return e.enable
+}
+
+func (e *Etherscan) SupportedGasPriceDomainIds() []int {
+	return e.gasPriceDomainIDs
 }
 
 func (er *EtherscanResp) parseEtherscanResp(body []byte) (EtherscanResp, error) {

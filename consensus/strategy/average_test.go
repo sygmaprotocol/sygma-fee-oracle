@@ -98,7 +98,7 @@ func (a *AverageStrategyTestSuite) TestGasPrice_DB_Error() {
 	var dataReceiver *types.GasPrices
 	a.db.EXPECT().GetByPrefix([]byte("gasprice:"), dataReceiver).Return(nil, errors.New("db error"))
 
-	re, err := a.strategy.GasPrice(a.gasPriceStore, "ethereum")
+	re, err := a.strategy.GasPrice(a.gasPriceStore, 1)
 	a.Nil(re)
 	a.EqualError(err, "db error")
 }
@@ -108,7 +108,7 @@ func (a *AverageStrategyTestSuite) TestGasPrice_Without_Data() {
 	var emptyResult []interface{}
 	a.db.EXPECT().GetByPrefix([]byte("gasprice:"), dataReceiver).Return(emptyResult, nil)
 
-	re, err := a.strategy.GasPrice(a.gasPriceStore, "ethereum")
+	re, err := a.strategy.GasPrice(a.gasPriceStore, 1)
 	a.Nil(re)
 	a.EqualError(err, "no gas price data found")
 }
@@ -121,7 +121,7 @@ func (a *AverageStrategyTestSuite) TestGasPrice_With_Data() {
 		ProposeGasPrice: "15",
 		FastGasPrice:    "20",
 		OracleName:      "",
-		DomainName:      "ethereum",
+		DomainID:        1,
 		Time:            0,
 	})
 	result = append(result, types.GasPrices{
@@ -129,7 +129,7 @@ func (a *AverageStrategyTestSuite) TestGasPrice_With_Data() {
 		ProposeGasPrice: "25",
 		FastGasPrice:    "30",
 		OracleName:      "",
-		DomainName:      "ethereum",
+		DomainID:        1,
 		Time:            0,
 	})
 	result = append(result, types.GasPrices{
@@ -137,12 +137,12 @@ func (a *AverageStrategyTestSuite) TestGasPrice_With_Data() {
 		ProposeGasPrice: "35",
 		FastGasPrice:    "40",
 		OracleName:      "",
-		DomainName:      "ethereum",
+		DomainID:        1,
 		Time:            0,
 	})
 	a.db.EXPECT().GetByPrefix([]byte("gasprice:"), dataReceiver).Return(result, nil)
 
-	re, err := a.strategy.GasPrice(a.gasPriceStore, "ethereum")
+	re, err := a.strategy.GasPrice(a.gasPriceStore, 1)
 
 	a.Nil(err)
 	a.EqualValues("20", re.SafeGasPrice)

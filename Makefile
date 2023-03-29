@@ -19,12 +19,11 @@ check:
 	gosec -exclude-dir=e2e ./...
 
 start: install
-	$(GOPATH)/bin/sygma-fee-oracle server -c $(makeFileDir)config.yaml -d $(makeFileDir)domain.json -r $(makeFileDir)resource.json -k $(makeFileDir)keyfile.priv -t secp256k1
+	$(GOPATH)/bin/sygma-fee-oracle server -c $(makeFileDir)config.yaml -d $(makeFileDir)domain.json -k $(makeFileDir)keyfile.priv -t secp256k1
 
 genmocks:
 	mockgen -destination=./store/mock/store.go -source=./store/store.go
 	mockgen -destination=./oracle/mock/oracle.go github.com/ChainSafe/sygma-fee-oracle/oracle GasPriceOracle,ConversionRateOracle
-	mockgen -destination=./config/mock/remoteParamOperator.go -source=./remoteParam/base.go
 
 test:
 	go clean -testcache

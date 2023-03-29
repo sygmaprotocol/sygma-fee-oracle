@@ -42,19 +42,19 @@ oracle:
     api_key:
     apis:
       gas_price:
+    gas_price_domainIDs: [ ]
   polygonscan:
     enable: true
     api_key:
     apis:
       gas_price:
+    gas_price_domainIDs: [ ]
   coinmarketcap:
     enable: true
     api_key:
     apis:
       query_rate:
-
-gas_price_domains:
-  [ ethereum ]
+    gas_price_domainIDs: [ ]
 
 # conversion_rate_pairs contains price pair for conversion rate
 # must be paired and follow the format of [ base, foreign, base, foreign, ... ]
