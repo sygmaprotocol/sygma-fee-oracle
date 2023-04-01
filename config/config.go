@@ -50,15 +50,22 @@ type Config struct {
 	Resources           map[string]*Resource
 }
 
+type OracleDetails struct {
+	Enable            bool    `mapstructure:"enable"`
+	ApiKey            string  `mapstructure:"api_key"`
+	Apis              apiUrls `mapstructure:"apis"`
+	GasPriceDomainIds []int   `mapstructure:"gas_price_domainIDs"`
+}
+
 type strategyConfig struct {
 	Local string `mapstructure:"local"`
 }
 
 type oracle struct {
-	Etherscan     oracleDetails `mapstructure:"etherscan"`
-	Polygonscan   oracleDetails `mapstructure:"polygonscan"`
-	CoinMarketCap oracleDetails `mapstructure:"coinmarketcap"`
-	Moonscan      oracleDetails `mapstructure:"moonscan"`
+	Etherscan     OracleDetails `mapstructure:"etherscan"`
+	Polygonscan   OracleDetails `mapstructure:"polygonscan"`
+	CoinMarketCap OracleDetails `mapstructure:"coinmarketcap"`
+	Moonscan      OracleDetails `mapstructure:"moonscan"`
 }
 
 type store struct {
@@ -80,13 +87,6 @@ type cronJob struct {
 type httpServerConfig struct {
 	Mode string `mapstructure:"mode"`
 	Port string `mapstructure:"port"`
-}
-
-type oracleDetails struct {
-	Enable            bool    `mapstructure:"enable"`
-	ApiKey            string  `mapstructure:"api_key"`
-	Apis              apiUrls `mapstructure:"apis"`
-	GasPriceDomainIds []int   `mapstructure:"gas_price_domainIDs"`
 }
 
 type apiUrls struct {

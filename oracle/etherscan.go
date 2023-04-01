@@ -6,14 +6,12 @@ package oracle
 import (
 	"encoding/json"
 	"fmt"
-	"math/big"
 	"net/http"
 	"time"
 
 	"github.com/ChainSafe/sygma-fee-oracle/config"
 	"github.com/ChainSafe/sygma-fee-oracle/oracle/client"
 	"github.com/ChainSafe/sygma-fee-oracle/types"
-	"github.com/ChainSafe/sygma-fee-oracle/util"
 	"github.com/mitchellh/mapstructure"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
@@ -50,16 +48,16 @@ type EtherscanGasPricesResp struct {
 	SuggestBaseFee  string `mapstructure:"suggestBaseFee"`
 }
 
-func NewEtherscan(conf *config.Config, log *logrus.Entry) *Etherscan {
+func NewEtherscan(oracleName string, oracle config.OracleDetails, log *logrus.Entry) *Etherscan {
 	return &Etherscan{
-		log:    log.WithField("services", "etherscan"),
-		name:   "etherscan",
-		apiKey: conf.OracleConfig().Etherscan.ApiKey,
-		enable: conf.OracleConfig().Etherscan.Enable,
+		log:    log.WithField("services", oracleName),
+		name:   oracleName,
+		apiKey: oracle.ApiKey,
+		enable: oracle.Enable,
 		apis: EtherscanApis{
-			GasPriceRequest: fmt.Sprintf("%s%s", conf.OracleConfig().Etherscan.Apis.GasPriceApiUrl, conf.OracleConfig().Etherscan.ApiKey),
+			GasPriceRequest: fmt.Sprintf("%s%s", oracle.Apis.GasPriceApiUrl, oracle.ApiKey),
 		},
-		gasPriceDomainIDs: conf.OracleConfig().Etherscan.GasPriceDomainIds,
+		gasPriceDomainIDs: oracle.GasPriceDomainIds,
 	}
 }
 
@@ -88,23 +86,10 @@ func (e *Etherscan) InquiryGasPrice(domainID int) (*types.GasPrices, error) {
 		return nil, errors.Wrap(err, "failed to decode gas price response")
 	}
 
-	safeGasPriceValue, err := util.Str2BigInt(egp.SafeGasPrice)
-	if err != nil {
-		return nil, errors.Wrap(err, "failed to convert gas price response value")
-	}
-	proposeGasPriceValue, err := util.Str2BigInt(egp.ProposeGasPrice)
-	if err != nil {
-		return nil, errors.Wrap(err, "failed to convert gas price response value")
-	}
-	fastGasPriceValue, err := util.Str2BigInt(egp.FastGasPrice)
-	if err != nil {
-		return nil, errors.Wrap(err, "failed to convert gas price response value")
-	}
-
 	return &types.GasPrices{
-		SafeGasPrice:    new(big.Int).Mul(safeGasPriceValue, big.NewInt(types.GWei)).String(),
-		ProposeGasPrice: new(big.Int).Mul(proposeGasPriceValue, big.NewInt(types.GWei)).String(),
-		FastGasPrice:    new(big.Int).Mul(fastGasPriceValue, big.NewInt(types.GWei)).String(),
+		SafeGasPrice:    egp.SafeGasPrice,
+		ProposeGasPrice: egp.ProposeGasPrice,
+		FastGasPrice:    egp.FastGasPrice,
 		OracleName:      e.name,
 		DomainID:        domainID,
 		Time:            time.Now().Unix(),

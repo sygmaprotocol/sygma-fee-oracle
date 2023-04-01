@@ -39,16 +39,16 @@ type MoonscanResp struct {
 	Result  string `json:"result"`
 }
 
-func NewMoonscan(conf *config.Config, log *logrus.Entry) *Moonscan {
+func NewMoonscan(oracleName string, oracle config.OracleDetails, log *logrus.Entry) *Moonscan {
 	return &Moonscan{
-		log:    log.WithField("services", "moonscan"),
-		name:   "moonscan",
-		apiKey: conf.OracleConfig().Moonscan.ApiKey,
-		enable: conf.OracleConfig().Moonscan.Enable,
+		log:    log.WithField("services", oracleName),
+		name:   oracleName,
+		apiKey: oracle.ApiKey,
+		enable: oracle.Enable,
 		apis: MoonscanApis{
-			GasPriceRequest: fmt.Sprintf("%s%s", conf.OracleConfig().Moonscan.Apis.GasPriceApiUrl, conf.OracleConfig().Moonscan.ApiKey),
+			GasPriceRequest: fmt.Sprintf("%s%s", oracle.Apis.GasPriceApiUrl, oracle.ApiKey),
 		},
-		GasPriceDomainIDs: conf.OracleConfig().Moonscan.GasPriceDomainIds,
+		GasPriceDomainIDs: oracle.GasPriceDomainIds,
 	}
 }
 

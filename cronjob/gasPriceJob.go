@@ -11,7 +11,7 @@ func GasPriceJobOperation(c *Job) func() {
 	return func() {
 		c.log.Debug("checking gas price")
 
-		// load gas price domains from config and run through each registered oracles
+		// run through each registered oracles and fetch gas price data for each supported domain
 		for _, oracleOperator := range c.cronBase.gasPriceOracles {
 			if !oracleOperator.IsOracleEnabled() {
 				continue

@@ -49,11 +49,12 @@ type FeeOracleApp struct {
 }
 
 func NewFeeOracleApp(appBase *base.FeeOracleAppBase) *FeeOracleApp {
-	// init concrete oracle services
-	coinMarketCap := oracle.NewCoinMarketCap(appBase.GetConfig(), appBase.GetLogger())
-	etherscan := oracle.NewEtherscan(appBase.GetConfig(), appBase.GetLogger())
-	polygonscan := oracle.NewPolygonscan(appBase.GetConfig(), appBase.GetLogger())
-	moonscan := oracle.NewMoonscan(appBase.GetConfig(), appBase.GetLogger())
+	// initialize concrete oracle services
+	// some oracles might be initialized with the same oracle implementation
+	coinMarketCap := oracle.NewCoinMarketCap("coinmarketcap", appBase.GetConfig().Oracle.CoinMarketCap, appBase.GetLogger())
+	etherscan := oracle.NewEtherscan("etherscan", appBase.GetConfig().Oracle.Etherscan, appBase.GetLogger())
+	polygonscan := oracle.NewEtherscan("polygonscan", appBase.GetConfig().Oracle.Polygonscan, appBase.GetLogger())
+	moonscan := oracle.NewMoonscan("moonscan", appBase.GetConfig().Oracle.Moonscan, appBase.GetLogger())
 
 	// register concrete oracle services in operator
 	coinMarketCapConversionRateOracle := oracle.NewConversionRateOracleOperator(appBase.GetLogger(), coinMarketCap)
