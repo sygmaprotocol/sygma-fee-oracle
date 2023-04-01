@@ -252,7 +252,7 @@ func DataPrepare(path string) error {
 		ProposeGasPrice: "0",
 		FastGasPrice:    "0",
 		OracleName:      "polygonscan",
-		DomainName:      "polygon",
+		DomainID:        1,
 		Time:            time.Now().Unix(),
 	}
 	data3, err := json.Marshal(dataValue3)

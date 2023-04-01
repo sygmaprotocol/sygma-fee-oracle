@@ -47,7 +47,7 @@ oracle:
     gas_price_domainIDs: [ 0 ]
   polygonscan:
     enable: true
-    api_key: BZM7P395BQS1YFKQMA2AK2ACQKWGEW4JB3
+    api_key: 1NVK2BB3XHJCPDFZV3QEHDBZ4R1EMC6U6T
     apis:
       gas_price: https://api.polygonscan.com/api?module=gastracker&action=gasoracle&apikey=
     gas_price_domainIDs: [ 1 ]
