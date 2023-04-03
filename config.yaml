@@ -17,7 +17,7 @@ http_server:
 
 # time in second before server shutdown
 # this will allow server to finish running jobs before shutdown
-finish_up_time: 3
+finish_up_time: 10
 
 # internal scheduled cronjob
 cron_job:
@@ -41,13 +41,13 @@ store:
 oracle:
   etherscan:
     enable: true
-    api_key: VUZFSMIGWQXFS54R7JF32AQNEY5A6IGPAJ
+    api_key: BZM7P395BQS1YFKQMA2AK2ACQKWGEW4JB3
     apis:
       gas_price: https://api.etherscan.io/api?module=gastracker&action=gasoracle&apikey=
     gas_price_domainIDs: [ 0 ]
   polygonscan:
     enable: true
-    api_key: 1NVK2BB3XHJCPDFZV3QEHDBZ4R1EMC6U6T
+    api_key: BZM7P395BQS1YFKQMA2AK2ACQKWGEW4JB3
     apis:
       gas_price: https://api.polygonscan.com/api?module=gastracker&action=gasoracle&apikey=
     gas_price_domainIDs: [ 1 ]
