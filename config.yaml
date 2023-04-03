@@ -59,7 +59,7 @@ oracle:
     gas_price_domainIDs: [ 2 ]
   coinmarketcap:
     enable: true
-    api_key: 1fca2426-b24b-4ed7-8cd0-1e9479803ed8
+    api_key: 1408daf0-0777-4916-9fe4-20da5ee77560
     apis:
       query_rate: https://pro-api.coinmarketcap.com/v2/cryptocurrency/quotes/latest?
 
