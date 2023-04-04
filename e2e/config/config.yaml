@@ -33,24 +33,33 @@ cron_job:
 store:
   path: ./e2e/testdb
 
-oracle:
-  etherscan:
+conversion_rate_oracles:
+  - implementation: coinmarketcap
+    source: coinmarketcap
     enable: true
-    api_key: 473P55YZMBNSRR63YF78D2PMMIUYUQJMGY
-    apis:
-      gas_price: https://api.etherscan.io/api?module=gastracker&action=gasoracle&apikey=
-    gas_price_domainIDs: [ 0 ]
-  polygonscan:
-    enable: true
-    api_key: BZM7P395BQS1YFKQMA2AK2ACQKWGEW4JB3
-    apis:
-      gas_price: https://api.polygonscan.com/api?module=gastracker&action=gasoracle&apikey=
-    gas_price_domainIDs: [ 1 ]
-  coinmarketcap:
-    enable: true
+    url: https://pro-api.coinmarketcap.com/v2/cryptocurrency/quotes/latest?
     api_key: 1408daf0-0777-4916-9fe4-20da5ee77560
-    apis:
-      query_rate: https://pro-api.coinmarketcap.com/v2/cryptocurrency/quotes/latest?
+
+# domainIDs with gas price oracle mapping
+gas_price_oracles_with_domain_ids:
+  0:
+    - implementation: etherscan
+      source: etherscan
+      enable: true
+      url: https://api.etherscan.io/api?module=gastracker&action=gasoracle&apikey=
+      api_key: BZM7P395BQS1YFKQMA2AK2ACQKWGEW4JB3
+  1:
+    - implementation: etherscan
+      source: polygonscan
+      enable: true
+      url: https://api.polygonscan.com/api?module=gastracker&action=gasoracle&apikey=
+      api_key: BZM7P395BQS1YFKQMA2AK2ACQKWGEW4JB3
+  2:
+    - implementation: moonscan
+      source: moonscan
+      enable: true
+      url: https://api-moonbeam.moonscan.io/api?module=proxy&action=eth_gasPrice&apikey=
+      api_key: BZM7P395BQS1YFKQMA2AK2ACQKWGEW4JB3
 
 # conversion_rate_pairs contains price pair for conversion rate
 # must be paired and follow the format of [ base, foreign, base, foreign, ... ]
