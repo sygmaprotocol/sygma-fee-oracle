@@ -30,8 +30,8 @@ func (c *ConversionRateOracleOperator) Run(baseCurrency, foreignCurrency string)
 	return c.oracle.InquiryConversionRate(baseCurrency, foreignCurrency)
 }
 
-func (c *ConversionRateOracleOperator) GetOracleName() string {
-	return c.oracle.Name()
+func (c *ConversionRateOracleOperator) GetOracleSource() string {
+	return c.oracle.Source()
 }
 
 func (c *ConversionRateOracleOperator) IsOracleEnabled() bool {

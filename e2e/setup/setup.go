@@ -212,11 +212,11 @@ func DataPrepare(path string) error {
 	dataKey1 := bytes.Buffer{}
 	dataKey1.WriteString(fmt.Sprintf("%s%s:%s:%s", "conversionrate:", "coinmarketcap", "matic", "eth"))
 	dataValue1 := &types.ConversionRate{
-		Base:       "matic",
-		Foreign:    "eth",
-		Rate:       0.000445,
-		OracleName: "coinmarketcap",
-		Time:       time.Now().Unix(),
+		Base:         "matic",
+		Foreign:      "eth",
+		Rate:         0.000445,
+		OracleSource: "coinmarketcap",
+		Time:         time.Now().Unix(),
 	}
 	data1, err := json.Marshal(dataValue1)
 	if err != nil {
@@ -230,11 +230,11 @@ func DataPrepare(path string) error {
 	dataKey2 := bytes.Buffer{}
 	dataKey2.WriteString(fmt.Sprintf("%s%s:%s:%s", "conversionrate:", "coinmarketcap", "matic", "usdt"))
 	dataValue2 := &types.ConversionRate{
-		Base:       "matic",
-		Foreign:    "usdt",
-		Rate:       8.948864,
-		OracleName: "coinmarketcap",
-		Time:       time.Now().Unix(),
+		Base:         "matic",
+		Foreign:      "usdt",
+		Rate:         8.948864,
+		OracleSource: "coinmarketcap",
+		Time:         time.Now().Unix(),
 	}
 	data2, err := json.Marshal(dataValue2)
 	if err != nil {
@@ -251,7 +251,7 @@ func DataPrepare(path string) error {
 		SafeGasPrice:    "9000000000",
 		ProposeGasPrice: "0",
 		FastGasPrice:    "0",
-		OracleName:      "polygonscan",
+		OracleSource:    "polygonscan",
 		DomainID:        1,
 		Time:            time.Now().Unix(),
 	}

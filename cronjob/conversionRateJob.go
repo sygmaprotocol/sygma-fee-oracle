@@ -22,7 +22,7 @@ func ConversionRateJobOperation(c *Job) func() {
 			for _, pricePair := range pricePairs {
 				rateData, err := oracleOperator.Run(pricePair[0], pricePair[1])
 				if err != nil || rateData == nil {
-					c.log.Error(errors.Wrapf(err, "failed to fetch data from oracle: %s", oracleOperator.GetOracleName()))
+					c.log.Error(errors.Wrapf(err, "failed to fetch data from oracle: %s", oracleOperator.GetOracleSource()))
 					continue
 				}
 
@@ -35,11 +35,11 @@ func ConversionRateJobOperation(c *Job) func() {
 				}
 
 				reverseRateData := &types.ConversionRate{
-					Base:       pricePair[1],
-					Foreign:    pricePair[0],
-					Rate:       1 / rateData.Rate,
-					OracleName: rateData.OracleName,
-					Time:       rateData.Time,
+					Base:         pricePair[1],
+					Foreign:      pricePair[0],
+					Rate:         1 / rateData.Rate,
+					OracleSource: rateData.OracleSource,
+					Time:         rateData.Time,
 				}
 
 				err = c.cronBase.conversionRateStore.StoreConversionRate(reverseRateData)

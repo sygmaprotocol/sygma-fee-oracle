@@ -13,6 +13,7 @@ var (
 )
 
 type Oracle interface {
-	Name() string
+	// Source of the oracle. Because one oracle implementation can be used for different oracle sources
+	Source() string
 	IsEnabled() bool
 }

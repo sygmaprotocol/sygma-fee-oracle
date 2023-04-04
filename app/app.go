@@ -49,26 +49,39 @@ type FeeOracleApp struct {
 }
 
 func NewFeeOracleApp(appBase *base.FeeOracleAppBase) *FeeOracleApp {
-	// initialize concrete oracle services
-	// some oracles might be initialized with the same oracle implementation
-	coinMarketCap := oracle.NewCoinMarketCap("coinmarketcap", appBase.GetConfig().Oracle.CoinMarketCap, appBase.GetLogger())
-	etherscan := oracle.NewEtherscan("etherscan", appBase.GetConfig().Oracle.Etherscan, appBase.GetLogger())
-	polygonscan := oracle.NewEtherscan("polygonscan", appBase.GetConfig().Oracle.Polygonscan, appBase.GetLogger())
-	moonscan := oracle.NewMoonscan("moonscan", appBase.GetConfig().Oracle.Moonscan, appBase.GetLogger())
-
-	// register concrete oracle services in operator
-	coinMarketCapConversionRateOracle := oracle.NewConversionRateOracleOperator(appBase.GetLogger(), coinMarketCap)
-	etherscanGasPriceOracle := oracle.NewGasPriceOracleOperator(appBase.GetLogger(), etherscan)
-	polygonscanGasPriceOracle := oracle.NewGasPriceOracleOperator(appBase.GetLogger(), polygonscan)
-	moonscanGasPriceOracle := oracle.NewGasPriceOracleOperator(appBase.GetLogger(), moonscan)
-
-	conversionRateOracles := make(map[string]*oracle.ConversionRateOracleOperator)
-	conversionRateOracles[coinMarketCap.Name()] = coinMarketCapConversionRateOracle
-
+	// initialize gas price oracles and register concrete oracle services in operator
 	gasPriceOracles := make(map[string]*oracle.GasPriceOracleOperator)
-	gasPriceOracles[etherscan.Name()] = etherscanGasPriceOracle
-	gasPriceOracles[polygonscan.Name()] = polygonscanGasPriceOracle
-	gasPriceOracles[moonscan.Name()] = moonscanGasPriceOracle
+	for domainID, oraclesPerDomainIDs := range appBase.GetConfig().GasPriceOraclesWithDomainIDs {
+		for _, priceOracle := range oraclesPerDomainIDs {
+			if priceOracle.Enable {
+				var oracleInstance oracle.GasPriceOracle
+				switch priceOracle.Implementation {
+				case "etherscan":
+					oracleInstance = oracle.NewEtherscan(priceOracle.Source, appBase.GetConfig().OracleAPIkeyReload(priceOracle), domainID, appBase.GetLogger())
+				case "moonscan":
+					oracleInstance = oracle.NewMoonscan(priceOracle.Source, appBase.GetConfig().OracleAPIkeyReload(priceOracle), domainID, appBase.GetLogger())
+				default:
+					panic("unknown gas price oracle implementation")
+				}
+				gasPriceOracles[priceOracle.Source] = oracle.NewGasPriceOracleOperator(appBase.GetLogger(), oracleInstance)
+			}
+		}
+	}
+
+	// initialize conversion rate oracles and register concrete oracle services in operator
+	conversionRateOracles := make(map[string]*oracle.ConversionRateOracleOperator)
+	for _, rateOracle := range appBase.GetConfig().ConversionRateOracles {
+		if rateOracle.Enable {
+			var oracleInstance oracle.ConversionRateOracle
+			switch rateOracle.Implementation {
+			case "coinmarketcap":
+				oracleInstance = oracle.NewCoinMarketCap(rateOracle.Source, appBase.GetConfig().OracleAPIkeyReload(rateOracle), appBase.GetLogger())
+			default:
+				panic("unknown conversion rate oracle implementation")
+			}
+			conversionRateOracles[rateOracle.Source] = oracle.NewConversionRateOracleOperator(appBase.GetLogger(), oracleInstance)
+		}
+	}
 
 	conversionRateStore := store.NewConversionRateStore(appBase.GetStore())
 	gasPriceStore := store.NewGasPriceStore(appBase.GetStore())

@@ -67,25 +67,25 @@ func (a *AverageStrategyTestSuite) TestConversionRate_With_Data() {
 	var dataReceiver *types.ConversionRate
 	result := make([]interface{}, 0)
 	result = append(result, types.ConversionRate{
-		Base:       "eth",
-		Foreign:    "matic",
-		Rate:       1000.0,
-		OracleName: "",
-		Time:       0,
+		Base:         "eth",
+		Foreign:      "matic",
+		Rate:         1000.0,
+		OracleSource: "",
+		Time:         0,
 	})
 	result = append(result, types.ConversionRate{
-		Base:       "eth",
-		Foreign:    "matic",
-		Rate:       2000.0,
-		OracleName: "",
-		Time:       0,
+		Base:         "eth",
+		Foreign:      "matic",
+		Rate:         2000.0,
+		OracleSource: "",
+		Time:         0,
 	})
 	result = append(result, types.ConversionRate{
-		Base:       "eth",
-		Foreign:    "matic",
-		Rate:       2100.0,
-		OracleName: "",
-		Time:       0,
+		Base:         "eth",
+		Foreign:      "matic",
+		Rate:         2100.0,
+		OracleSource: "",
+		Time:         0,
 	})
 	a.db.EXPECT().GetByPrefix([]byte("conversionrate:"), dataReceiver).Return(result, nil)
 
@@ -120,7 +120,7 @@ func (a *AverageStrategyTestSuite) TestGasPrice_With_Data() {
 		SafeGasPrice:    "10",
 		ProposeGasPrice: "15",
 		FastGasPrice:    "20",
-		OracleName:      "",
+		OracleSource:    "",
 		DomainID:        1,
 		Time:            0,
 	})
@@ -128,7 +128,7 @@ func (a *AverageStrategyTestSuite) TestGasPrice_With_Data() {
 		SafeGasPrice:    "20",
 		ProposeGasPrice: "25",
 		FastGasPrice:    "30",
-		OracleName:      "",
+		OracleSource:    "",
 		DomainID:        1,
 		Time:            0,
 	})
@@ -136,7 +136,7 @@ func (a *AverageStrategyTestSuite) TestGasPrice_With_Data() {
 		SafeGasPrice:    "30",
 		ProposeGasPrice: "35",
 		FastGasPrice:    "40",
-		OracleName:      "",
+		OracleSource:    "",
 		DomainID:        1,
 		Time:            0,
 	})

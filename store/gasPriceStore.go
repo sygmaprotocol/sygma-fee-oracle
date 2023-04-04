@@ -33,11 +33,11 @@ func (g *GasPriceStore) StoreGasPrice(gasPrice *types.GasPrices) error {
 		return err
 	}
 
-	return g.db.Set(g.storeKeyFormat(gasPrice.OracleName, gasPrice.DomainID), data)
+	return g.db.Set(g.storeKeyFormat(gasPrice.OracleSource, gasPrice.DomainID), data)
 }
 
-func (g *GasPriceStore) GetGasPrice(oracleName string, domainID int) (*types.GasPrices, error) {
-	gasPriceData, err := g.db.Get(g.storeKeyFormat(oracleName, domainID))
+func (g *GasPriceStore) GetGasPrice(OracleSource string, domainID int) (*types.GasPrices, error) {
+	gasPriceData, err := g.db.Get(g.storeKeyFormat(OracleSource, domainID))
 	if err != nil {
 		if errors.Is(err, leveldb.ErrNotFound) {
 			return nil, ErrNotFound
@@ -79,9 +79,9 @@ func (g *GasPriceStore) GetGasPricesByDomain(domainID int) ([]types.GasPrices, e
 	return re, nil
 }
 
-func (g *GasPriceStore) storeKeyFormat(oracleName string, domainID int) []byte {
+func (g *GasPriceStore) storeKeyFormat(oracleSource string, domainID int) []byte {
 	key := bytes.Buffer{}
-	key.WriteString(fmt.Sprintf("%s%s:%d", gasPriceStoreKeyPrefix, strings.ToLower(oracleName), domainID))
+	key.WriteString(fmt.Sprintf("%s%s:%d", gasPriceStoreKeyPrefix, strings.ToLower(oracleSource), domainID))
 
 	return key.Bytes()
 }

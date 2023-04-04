@@ -22,11 +22,11 @@ var _ GasPriceOracle = (*Etherscan)(nil)
 type Etherscan struct {
 	log *logrus.Entry
 
-	name              string
-	apiKey            string
-	enable            bool
-	apis              EtherscanApis
-	gasPriceDomainIDs []int
+	source   string
+	apiKey   string
+	enable   bool
+	apis     EtherscanApis
+	domainID int
 }
 
 type EtherscanApis struct {
@@ -48,20 +48,20 @@ type EtherscanGasPricesResp struct {
 	SuggestBaseFee  string `mapstructure:"suggestBaseFee"`
 }
 
-func NewEtherscan(oracleName string, oracle config.OracleDetails, log *logrus.Entry) *Etherscan {
+func NewEtherscan(oracleSource string, oracle config.Oracle, domainID int, log *logrus.Entry) *Etherscan {
 	return &Etherscan{
-		log:    log.WithField("services", oracleName),
-		name:   oracleName,
+		log:    log.WithField("services", oracleSource),
+		source: oracleSource,
 		apiKey: oracle.ApiKey,
 		enable: oracle.Enable,
 		apis: EtherscanApis{
-			GasPriceRequest: fmt.Sprintf("%s%s", oracle.Apis.GasPriceApiUrl, oracle.ApiKey),
+			GasPriceRequest: fmt.Sprintf("%s%s", oracle.URL, oracle.ApiKey),
 		},
-		gasPriceDomainIDs: oracle.GasPriceDomainIds,
+		domainID: domainID,
 	}
 }
 
-func (e *Etherscan) InquiryGasPrice(domainID int) (*types.GasPrices, error) {
+func (e *Etherscan) InquiryGasPrice() (*types.GasPrices, error) {
 	statusCode, body, err := client.NewHttpRequestMessage(http.MethodGet, e.apis.GasPriceRequest,
 		nil, nil, e.log).Request()
 	if err != nil || statusCode != http.StatusOK {
@@ -90,22 +90,18 @@ func (e *Etherscan) InquiryGasPrice(domainID int) (*types.GasPrices, error) {
 		SafeGasPrice:    egp.SafeGasPrice,
 		ProposeGasPrice: egp.ProposeGasPrice,
 		FastGasPrice:    egp.FastGasPrice,
-		OracleName:      e.name,
-		DomainID:        domainID,
+		OracleSource:    e.source,
+		DomainID:        e.domainID,
 		Time:            time.Now().Unix(),
 	}, nil
 }
 
-func (e *Etherscan) Name() string {
-	return e.name
+func (e *Etherscan) Source() string {
+	return e.source
 }
 
 func (e *Etherscan) IsEnabled() bool {
 	return e.enable
-}
-
-func (e *Etherscan) SupportedGasPriceDomainIds() []int {
-	return e.gasPriceDomainIDs
 }
 
 func (er *EtherscanResp) parseEtherscanResp(body []byte) (EtherscanResp, error) {

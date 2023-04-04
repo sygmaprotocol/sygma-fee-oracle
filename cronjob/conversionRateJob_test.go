@@ -64,11 +64,11 @@ func (s *ConversionRateJobTestSuite) SetupTest() {
 	s.db = mockStore.NewMockStore(gomockController)
 	s.conversionRateStore = store.NewConversionRateStore(s.db)
 	s.testdata = &types.ConversionRate{
-		Base:       "eth",
-		Foreign:    "usd",
-		Rate:       3000,
-		OracleName: "cooinmarketcap",
-		Time:       time.Time{}.UnixMilli(),
+		Base:         "eth",
+		Foreign:      "usd",
+		Rate:         3000,
+		OracleSource: "cooinmarketcap",
+		Time:         time.Time{}.UnixMilli(),
 	}
 
 	conversionRateOracle := oracle.NewConversionRateOracleOperator(s.appBase.GetLogger(), s.oracle)
@@ -93,7 +93,7 @@ func (s *ConversionRateJobTestSuite) TearDownTest() {
 func (s *ConversionRateJobTestSuite) TestJobOperation_Oracle_Disabled() {
 	s.oracle.EXPECT().IsEnabled().Return(false)
 	s.oracle.EXPECT().InquiryConversionRate(s.testdata.Base, s.testdata.Foreign).Return(nil, errors.New("error")).Times(0)
-	s.oracle.EXPECT().Name().Times(0)
+	s.oracle.EXPECT().Source().Times(0)
 
 	cronjob.ConversionRateJobOperation(s.job)()
 }
@@ -101,8 +101,8 @@ func (s *ConversionRateJobTestSuite) TestJobOperation_Oracle_Disabled() {
 func (s *ConversionRateJobTestSuite) TestJobOperation_Run_Failure() {
 	s.oracle.EXPECT().IsEnabled().Return(true)
 	s.oracle.EXPECT().InquiryConversionRate(s.testdata.Base, s.testdata.Foreign).Return(nil, errors.New("error")).Times(1)
-	s.oracle.EXPECT().Name().Return("test oracle").Times(1)
-	s.db.EXPECT().Set([]byte(fmt.Sprintf("conversionrate:%s:%s:%s", s.testdata.OracleName, s.testdata.Base, s.testdata.Foreign)), []byte("")).Return(nil).Times(0)
+	s.oracle.EXPECT().Source().Return("test oracle").Times(1)
+	s.db.EXPECT().Set([]byte(fmt.Sprintf("conversionrate:%s:%s:%s", s.testdata.OracleSource, s.testdata.Base, s.testdata.Foreign)), []byte("")).Return(nil).Times(0)
 
 	cronjob.ConversionRateJobOperation(s.job)()
 }
@@ -110,35 +110,35 @@ func (s *ConversionRateJobTestSuite) TestJobOperation_Run_Failure() {
 func (s *ConversionRateJobTestSuite) TestJobOperation_Run_Success_StoreConversionRate_Failure() {
 	s.oracle.EXPECT().IsEnabled().Return(true)
 	s.oracle.EXPECT().InquiryConversionRate(s.testdata.Base, s.testdata.Foreign).Return(s.testdata, nil).Times(1)
-	s.oracle.EXPECT().Name().Return("test oracle").Times(0)
+	s.oracle.EXPECT().Source().Return("test oracle").Times(0)
 
 	dataBytes, err := json.Marshal(s.testdata)
 	s.Nil(err)
 
-	s.db.EXPECT().Set([]byte(fmt.Sprintf("conversionrate:%s:%s:%s", s.testdata.OracleName, s.testdata.Base, s.testdata.Foreign)), dataBytes).Return(errors.New("error")).Times(1)
+	s.db.EXPECT().Set([]byte(fmt.Sprintf("conversionrate:%s:%s:%s", s.testdata.OracleSource, s.testdata.Base, s.testdata.Foreign)), dataBytes).Return(errors.New("error")).Times(1)
 	cronjob.ConversionRateJobOperation(s.job)()
 }
 
 func (s *ConversionRateJobTestSuite) TestJobOperation_Run_Success_StoreConversionRate_Success() {
 	s.oracle.EXPECT().IsEnabled().Return(true)
 	s.oracle.EXPECT().InquiryConversionRate(s.testdata.Base, s.testdata.Foreign).Return(s.testdata, nil).Times(1)
-	s.oracle.EXPECT().Name().Return("test oracle").Times(0)
+	s.oracle.EXPECT().Source().Return("test oracle").Times(0)
 
 	dataBytes, err := json.Marshal(s.testdata)
 	s.Nil(err)
 
-	s.db.EXPECT().Set([]byte(fmt.Sprintf("conversionrate:%s:%s:%s", s.testdata.OracleName, s.testdata.Base, s.testdata.Foreign)), dataBytes).Return(nil).Times(1)
+	s.db.EXPECT().Set([]byte(fmt.Sprintf("conversionrate:%s:%s:%s", s.testdata.OracleSource, s.testdata.Base, s.testdata.Foreign)), dataBytes).Return(nil).Times(1)
 
 	reverseData := &types.ConversionRate{
-		Base:       "usd",
-		Foreign:    "eth",
-		Rate:       0.0003333333333333333,
-		OracleName: s.testdata.OracleName,
-		Time:       s.testdata.Time,
+		Base:         "usd",
+		Foreign:      "eth",
+		Rate:         0.0003333333333333333,
+		OracleSource: s.testdata.OracleSource,
+		Time:         s.testdata.Time,
 	}
 	reverseDataBytes, err := json.Marshal(reverseData)
 	s.Nil(err)
 
-	s.db.EXPECT().Set([]byte(fmt.Sprintf("conversionrate:%s:%s:%s", s.testdata.OracleName, s.testdata.Foreign, s.testdata.Base)), reverseDataBytes).Return(nil).Times(1)
+	s.db.EXPECT().Set([]byte(fmt.Sprintf("conversionrate:%s:%s:%s", s.testdata.OracleSource, s.testdata.Foreign, s.testdata.Base)), reverseDataBytes).Return(nil).Times(1)
 	cronjob.ConversionRateJobOperation(s.job)()
 }

@@ -32,11 +32,11 @@ func (c *ConversionRateStore) StoreConversionRate(conversionRate *types.Conversi
 	if err != nil {
 		return err
 	}
-	return c.db.Set(c.storeKeyFormat(conversionRate.OracleName, conversionRate.Base, conversionRate.Foreign), data)
+	return c.db.Set(c.storeKeyFormat(conversionRate.OracleSource, conversionRate.Base, conversionRate.Foreign), data)
 }
 
-func (c *ConversionRateStore) GetConversionRate(oracleName, baseCurrency, foreignCurrency string) (*types.ConversionRate, error) {
-	data, err := c.db.Get(c.storeKeyFormat(oracleName, baseCurrency, foreignCurrency))
+func (c *ConversionRateStore) GetConversionRate(OracleSource, baseCurrency, foreignCurrency string) (*types.ConversionRate, error) {
+	data, err := c.db.Get(c.storeKeyFormat(OracleSource, baseCurrency, foreignCurrency))
 	if err != nil {
 		if errors.Is(err, leveldb.ErrNotFound) {
 			return nil, ErrNotFound
@@ -78,9 +78,9 @@ func (c *ConversionRateStore) GetConversionRatesByCurrencyPair(base, foreign str
 	return re, nil
 }
 
-func (c *ConversionRateStore) storeKeyFormat(oracleName, baseCurrency, foreignCurrency string) []byte {
+func (c *ConversionRateStore) storeKeyFormat(oracleSource, baseCurrency, foreignCurrency string) []byte {
 	key := bytes.Buffer{}
-	key.WriteString(fmt.Sprintf("%s%s:%s:%s", conversionRateStoreKeyPrefix, strings.ToLower(oracleName),
+	key.WriteString(fmt.Sprintf("%s%s:%s:%s", conversionRateStoreKeyPrefix, strings.ToLower(oracleSource),
 		strings.ToLower(baseCurrency), strings.ToLower(foreignCurrency)))
 
 	return key.Bytes()

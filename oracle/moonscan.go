@@ -22,11 +22,11 @@ var _ GasPriceOracle = (*Moonscan)(nil)
 type Moonscan struct {
 	log *logrus.Entry
 
-	name              string
-	apiKey            string
-	enable            bool
-	apis              MoonscanApis
-	GasPriceDomainIDs []int
+	source   string
+	apiKey   string
+	enable   bool
+	apis     MoonscanApis
+	domainID int
 }
 
 type MoonscanApis struct {
@@ -39,20 +39,20 @@ type MoonscanResp struct {
 	Result  string `json:"result"`
 }
 
-func NewMoonscan(oracleName string, oracle config.OracleDetails, log *logrus.Entry) *Moonscan {
+func NewMoonscan(oracleSource string, oracle config.Oracle, domainID int, log *logrus.Entry) *Moonscan {
 	return &Moonscan{
-		log:    log.WithField("services", oracleName),
-		name:   oracleName,
+		log:    log.WithField("services", oracleSource),
+		source: oracleSource,
 		apiKey: oracle.ApiKey,
 		enable: oracle.Enable,
 		apis: MoonscanApis{
-			GasPriceRequest: fmt.Sprintf("%s%s", oracle.Apis.GasPriceApiUrl, oracle.ApiKey),
+			GasPriceRequest: fmt.Sprintf("%s%s", oracle.URL, oracle.ApiKey),
 		},
-		GasPriceDomainIDs: oracle.GasPriceDomainIds,
+		domainID: domainID,
 	}
 }
 
-func (m *Moonscan) InquiryGasPrice(domainID int) (*types.GasPrices, error) {
+func (m *Moonscan) InquiryGasPrice() (*types.GasPrices, error) {
 	// Moonscan doesn't support GasTracker API like Etherscan and Polygonscan does,
 	// so we will use eth_gasPrice RPC call here
 	// the JSON2.0 response will be different: if Message is empty, it means a successful call
@@ -83,22 +83,18 @@ func (m *Moonscan) InquiryGasPrice(domainID int) (*types.GasPrices, error) {
 		SafeGasPrice:    gp.String(),
 		ProposeGasPrice: gp.String(),
 		FastGasPrice:    gp.String(),
-		OracleName:      m.name,
-		DomainID:        domainID,
+		OracleSource:    m.source,
+		DomainID:        m.domainID,
 		Time:            time.Now().Unix(),
 	}, nil
 }
 
-func (m *Moonscan) Name() string {
-	return m.name
+func (m *Moonscan) Source() string {
+	return m.source
 }
 
 func (m *Moonscan) IsEnabled() bool {
 	return m.enable
-}
-
-func (m *Moonscan) SupportedGasPriceDomainIds() []int {
-	return m.GasPriceDomainIDs
 }
 
 func (mr *MoonscanResp) parseMoonscanResp(body []byte) (MoonscanResp, error) {

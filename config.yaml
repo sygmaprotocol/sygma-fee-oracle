@@ -17,7 +17,7 @@ http_server:
 
 # time in second before server shutdown
 # this will allow server to finish running jobs before shutdown
-finish_up_time: 10
+finish_up_time: 3
 
 # internal scheduled cronjob
 cron_job:
@@ -36,32 +36,39 @@ cron_job:
 store:
   path: ./lvldbdata
 
-# supported oracles
-# api key is just a placeholder, replace with your valid key
-oracle:
-  etherscan:
+# conversion_rate_oracles contains the list of conversion rate oracle
+# implementation indicates the implementation of the oracle
+# name is the name of the oracle, reflect the source of the api url
+# url is the api url of gas price of the oracle
+# api_key is the api key of the oracle
+# enable is the flag to enable/disable the oracle, fee oracle will not instantiate the oracle if it is disabled
+conversion_rate_oracles:
+  - implementation: coinmarketcap
+    source: coinmarketcap
     enable: true
-    api_key: BZM7P395BQS1YFKQMA2AK2ACQKWGEW4JB3
-    apis:
-      gas_price: https://api.etherscan.io/api?module=gastracker&action=gasoracle&apikey=
-    gas_price_domainIDs: [ 0 ]
-  polygonscan:
-    enable: true
-    api_key: BZM7P395BQS1YFKQMA2AK2ACQKWGEW4JB3
-    apis:
-      gas_price: https://api.polygonscan.com/api?module=gastracker&action=gasoracle&apikey=
-    gas_price_domainIDs: [ 1 ]
-  moonscan:
-    enable: true
-    api_key: BZM7P395BQS1YFKQMA2AK2ACQKWGEW4JB3
-    apis:
-      gas_price: https://api-moonbeam.moonscan.io/api?module=proxy&action=eth_gasPrice&apikey=
-    gas_price_domainIDs: [ 2 ]
-  coinmarketcap:
-    enable: true
+    url: https://pro-api.coinmarketcap.com/v2/cryptocurrency/quotes/latest?
     api_key: 1408daf0-0777-4916-9fe4-20da5ee77560
-    apis:
-      query_rate: https://pro-api.coinmarketcap.com/v2/cryptocurrency/quotes/latest?
+
+# domainIDs with gas price oracle mapping
+gas_price_oracles_with_domain_ids:
+  0:
+    - implementation: etherscan
+      source: etherscan
+      enable: true
+      url: https://api.etherscan.io/api?module=gastracker&action=gasoracle&apikey=
+      api_key: BZM7P395BQS1YFKQMA2AK2ACQKWGEW4JB3
+  1:
+    - implementation: etherscan
+      source: polygonscan
+      enable: true
+      url: https://api.polygonscan.com/api?module=gastracker&action=gasoracle&apikey=
+      api_key: BZM7P395BQS1YFKQMA2AK2ACQKWGEW4JB3
+  2:
+    - implementation: moonscan
+      source: moonscan
+      enable: true
+      url: https://api-moonbeam.moonscan.io/api?module=proxy&action=eth_gasPrice&apikey=
+      api_key: BZM7P395BQS1YFKQMA2AK2ACQKWGEW4JB3
 
 # conversion_rate_pairs contains price pair for conversion rate
 # must be paired and follow the format of [ base, foreign, base, foreign, ... ]

@@ -13,8 +13,7 @@ import (
 
 type GasPriceOracle interface {
 	Oracle
-	InquiryGasPrice(domainID int) (*types.GasPrices, error)
-	SupportedGasPriceDomainIds() []int
+	InquiryGasPrice() (*types.GasPrices, error)
 }
 
 type GasPriceConverter func(gasPrices *types.GasPrices) (*types.GasPrices, error)
@@ -39,16 +38,16 @@ func NewGasPriceOracleOperator(log *logrus.Entry, oracle GasPriceOracle) *GasPri
 	}
 }
 
-func (g *GasPriceOracleOperator) Run(domainID int) (*types.GasPrices, error) {
-	gasPriceData, err := g.oracle.InquiryGasPrice(domainID)
+func (g *GasPriceOracleOperator) Run() (*types.GasPrices, error) {
+	gasPriceData, err := g.oracle.InquiryGasPrice()
 	if err != nil {
 		return nil, err
 	}
 	return g.GasPriceUnitConverter(gasPriceData)
 }
 
-func (g *GasPriceOracleOperator) GetOracleName() string {
-	return g.oracle.Name()
+func (g *GasPriceOracleOperator) GetOracleSource() string {
+	return g.oracle.Source()
 }
 
 func (g *GasPriceOracleOperator) IsOracleEnabled() bool {
@@ -60,7 +59,7 @@ func (g *GasPriceOracleOperator) GetOracle() GasPriceOracle {
 }
 
 func (g *GasPriceOracleOperator) GasPriceUnitConverter(gasPrices *types.GasPrices) (*types.GasPrices, error) {
-	return g.gasPriceConverterFns[g.oracle.Name()](gasPrices)
+	return g.gasPriceConverterFns[g.oracle.Source()](gasPrices)
 }
 
 func etherscanGasPriceConverter(gasPrices *types.GasPrices) (*types.GasPrices, error) {
@@ -81,7 +80,7 @@ func etherscanGasPriceConverter(gasPrices *types.GasPrices) (*types.GasPrices, e
 		SafeGasPrice:    new(big.Int).Mul(safeGasPriceValue, big.NewInt(types.GWei)).String(),
 		ProposeGasPrice: new(big.Int).Mul(proposeGasPriceValue, big.NewInt(types.GWei)).String(),
 		FastGasPrice:    new(big.Int).Mul(fastGasPriceValue, big.NewInt(types.GWei)).String(),
-		OracleName:      gasPrices.OracleName,
+		OracleSource:    gasPrices.OracleSource,
 		DomainID:        gasPrices.DomainID,
 		Time:            gasPrices.Time,
 	}, nil
@@ -105,7 +104,7 @@ func polygonscanGasPriceConverter(gasPrices *types.GasPrices) (*types.GasPrices,
 		SafeGasPrice:    safeGasPriceValue.String(),
 		ProposeGasPrice: proposeGasPriceValue.String(),
 		FastGasPrice:    fastGasPriceValue.String(),
-		OracleName:      gasPrices.OracleName,
+		OracleSource:    gasPrices.OracleSource,
 		DomainID:        gasPrices.DomainID,
 		Time:            gasPrices.Time,
 	}, nil

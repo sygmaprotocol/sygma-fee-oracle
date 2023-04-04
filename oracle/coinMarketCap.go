@@ -25,7 +25,7 @@ var _ ConversionRateOracle = (*CoinMarketCap)(nil)
 type CoinMarketCap struct {
 	log *logrus.Entry
 
-	name   string
+	source string
 	apiKey string
 	enable bool
 	apis   CoinMarketCapApis
@@ -51,14 +51,14 @@ type CoinMarketCapConversionRateQuote struct {
 	LastUpdated string  `mapstructure:"last_updated"`
 }
 
-func NewCoinMarketCap(oracleName string, oracle config.OracleDetails, log *logrus.Entry) *CoinMarketCap {
+func NewCoinMarketCap(oracleSource string, oracle config.Oracle, log *logrus.Entry) *CoinMarketCap {
 	return &CoinMarketCap{
-		log:    log.WithField("services", oracleName),
-		name:   oracleName,
+		log:    log.WithField("services", oracleSource),
+		source: oracleSource,
 		apiKey: oracle.ApiKey,
 		enable: oracle.Enable,
 		apis: CoinMarketCapApis{
-			ConversionRateRequest: oracle.Apis.QueryRate,
+			ConversionRateRequest: oracle.URL,
 		},
 	}
 }
@@ -107,16 +107,16 @@ func (c *CoinMarketCap) InquiryConversionRate(baseCurrency, foreignCurrency stri
 	}
 
 	return &types.ConversionRate{
-		Base:       baseCurrency,
-		Foreign:    foreignCurrency,
-		Rate:       cmccr.Price,
-		OracleName: c.name,
-		Time:       time.Now().Unix(),
+		Base:         baseCurrency,
+		Foreign:      foreignCurrency,
+		Rate:         cmccr.Price,
+		OracleSource: c.source,
+		Time:         time.Now().Unix(),
 	}, nil
 }
 
-func (c *CoinMarketCap) Name() string {
-	return c.name
+func (c *CoinMarketCap) Source() string {
+	return c.source
 }
 
 func (c *CoinMarketCap) IsEnabled() bool {
