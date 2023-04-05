@@ -36,33 +36,38 @@ cron_job:
 store:
   path: ./lvldbdata
 
-conversion_rate_oracles:
+conversion_rate_apis:
   - implementation: coinmarketcap
     source: coinmarketcap
     enable: true
     url:
     api_key:
 
-# domainIDs with gas price oracle mapping
-gas_price_oracles_with_domain_ids:
-  0:
-    - implementation: etherscan
-      source: etherscan
-      enable: true
-      url:
-      api_key:
-  1:
-    - implementation: etherscan
-      source: polygonscan
-      enable: true
-      url:
-      api_key:
-  2:
-    - implementation: moonscan
-      source: moonscan
-      enable: true
-      url:
-      api_key:
+domain_list:
+  - domain_id: 0
+    gas_price_apis:
+      - implementation: etherscan
+        source: etherscan
+        enable: true
+        url:
+        api_key:
+        decimals: 9
+  - domain_id: 1
+    gas_price_apis:
+      - implementation: etherscan
+        source: polygonscan
+        enable: true
+        url:
+        api_key:
+        decimals: 9
+  - domain_id: 2
+    gas_price_apis:
+      - implementation: moonscan
+        source: moonscan
+        enable: true
+        url:
+        api_key:
+        decimals:
 
 # conversion_rate_pairs contains price pair for conversion rate
 # must be paired and follow the format of [ base, foreign, base, foreign, ... ]

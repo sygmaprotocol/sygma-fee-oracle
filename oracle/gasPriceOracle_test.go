@@ -77,7 +77,7 @@ func (s *GasPriceOracleTestSuite) TestInquiryGasPrice_Failure() {
 
 func (s *GasPriceOracleTestSuite) TestInquiryGasPrice_Success() {
 	s.oracle.EXPECT().InquiryGasPrice().Return(s.testdata, nil)
-	s.oracle.EXPECT().Source().Return("etherscan").Times(1)
+	s.oracle.EXPECT().Source().Return("etherscan").Times(0)
 
 	_, err := s.gasPriceOperator.Run()
 

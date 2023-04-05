@@ -51,31 +51,31 @@ type FeeOracleApp struct {
 func NewFeeOracleApp(appBase *base.FeeOracleAppBase) *FeeOracleApp {
 	// initialize gas price oracles and register concrete oracle services in operator
 	gasPriceOracles := make(map[string]*oracle.GasPriceOracleOperator)
-	for domainID, oraclesPerDomainIDs := range appBase.GetConfig().GasPriceOraclesWithDomainIDs {
-		for _, priceOracle := range oraclesPerDomainIDs {
-			if priceOracle.Enable {
+	for _, domain := range appBase.GetConfig().DomainsList {
+		for _, apiService := range domain.GasPriceApis {
+			if apiService.Enable {
 				var oracleInstance oracle.GasPriceOracle
-				switch priceOracle.Implementation {
+				switch apiService.Implementation {
 				case "etherscan":
-					oracleInstance = oracle.NewEtherscan(priceOracle.Source, appBase.GetConfig().OracleAPIkeyReload(priceOracle), domainID, appBase.GetLogger())
+					oracleInstance = oracle.NewEtherscan(apiService.Source, appBase.GetConfig().GasPriceApikeyReload(domain.DomainID, apiService), domain.DomainID, appBase.GetLogger())
 				case "moonscan":
-					oracleInstance = oracle.NewMoonscan(priceOracle.Source, appBase.GetConfig().OracleAPIkeyReload(priceOracle), domainID, appBase.GetLogger())
+					oracleInstance = oracle.NewMoonscan(apiService.Source, appBase.GetConfig().GasPriceApikeyReload(domain.DomainID, apiService), domain.DomainID, appBase.GetLogger())
 				default:
 					panic("unknown gas price oracle implementation")
 				}
-				gasPriceOracles[priceOracle.Source] = oracle.NewGasPriceOracleOperator(appBase.GetLogger(), oracleInstance)
+				gasPriceOracles[apiService.Source] = oracle.NewGasPriceOracleOperator(appBase.GetLogger(), oracleInstance)
 			}
 		}
 	}
 
 	// initialize conversion rate oracles and register concrete oracle services in operator
 	conversionRateOracles := make(map[string]*oracle.ConversionRateOracleOperator)
-	for _, rateOracle := range appBase.GetConfig().ConversionRateOracles {
+	for _, rateOracle := range appBase.GetConfig().ConversionRateApis {
 		if rateOracle.Enable {
 			var oracleInstance oracle.ConversionRateOracle
 			switch rateOracle.Implementation {
 			case "coinmarketcap":
-				oracleInstance = oracle.NewCoinMarketCap(rateOracle.Source, appBase.GetConfig().OracleAPIkeyReload(rateOracle), appBase.GetLogger())
+				oracleInstance = oracle.NewCoinMarketCap(rateOracle.Source, appBase.GetConfig().ConversionRateApikeyReload(rateOracle), appBase.GetLogger())
 			default:
 				panic("unknown conversion rate oracle implementation")
 			}

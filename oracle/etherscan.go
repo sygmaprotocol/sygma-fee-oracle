@@ -6,6 +6,7 @@ package oracle
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/ChainSafe/sygma-fee-oracle/util"
 	"net/http"
 	"time"
 
@@ -22,11 +23,12 @@ var _ GasPriceOracle = (*Etherscan)(nil)
 type Etherscan struct {
 	log *logrus.Entry
 
-	source   string
-	apiKey   string
-	enable   bool
-	apis     EtherscanApis
-	domainID int
+	source           string
+	apiKey           string
+	enable           bool
+	apis             EtherscanApis
+	domainID         int
+	gasPriceDecimals int
 }
 
 type EtherscanApis struct {
@@ -48,16 +50,17 @@ type EtherscanGasPricesResp struct {
 	SuggestBaseFee  string `mapstructure:"suggestBaseFee"`
 }
 
-func NewEtherscan(oracleSource string, oracle config.Oracle, domainID int, log *logrus.Entry) *Etherscan {
+func NewEtherscan(source string, apiService config.ApiService, domainID int, log *logrus.Entry) *Etherscan {
 	return &Etherscan{
-		log:    log.WithField("services", oracleSource),
-		source: oracleSource,
-		apiKey: oracle.ApiKey,
-		enable: oracle.Enable,
+		log:    log.WithField("services", source),
+		source: source,
+		apiKey: apiService.ApiKey,
+		enable: apiService.Enable,
 		apis: EtherscanApis{
-			GasPriceRequest: fmt.Sprintf("%s%s", oracle.URL, oracle.ApiKey),
+			GasPriceRequest: fmt.Sprintf("%s%s", apiService.URL, apiService.ApiKey),
 		},
-		domainID: domainID,
+		domainID:         domainID,
+		gasPriceDecimals: apiService.Decimals,
 	}
 }
 
@@ -86,10 +89,24 @@ func (e *Etherscan) InquiryGasPrice() (*types.GasPrices, error) {
 		return nil, errors.Wrap(err, "failed to decode gas price response")
 	}
 
+	// convert gas price data to wei in bigInt
+	safeGasPriceValue, err := util.Large2SmallUnitConverter(egp.SafeGasPrice, uint(e.gasPriceDecimals))
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to convert safe gasprice")
+	}
+	proposeGasPriceValue, err := util.Large2SmallUnitConverter(egp.ProposeGasPrice, uint(e.gasPriceDecimals))
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to convert propose gasprice")
+	}
+	fastGasPriceValue, err := util.Large2SmallUnitConverter(egp.FastGasPrice, uint(e.gasPriceDecimals))
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to convert fast gasprice")
+	}
+
 	return &types.GasPrices{
-		SafeGasPrice:    egp.SafeGasPrice,
-		ProposeGasPrice: egp.ProposeGasPrice,
-		FastGasPrice:    egp.FastGasPrice,
+		SafeGasPrice:    safeGasPriceValue.String(),
+		ProposeGasPrice: proposeGasPriceValue.String(),
+		FastGasPrice:    fastGasPriceValue.String(),
 		OracleSource:    e.source,
 		DomainID:        e.domainID,
 		Time:            time.Now().Unix(),

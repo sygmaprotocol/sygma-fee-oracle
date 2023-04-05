@@ -36,44 +36,37 @@ var (
 type Config struct {
 	logLevel logrus.Level `mapstructure:"log_level"`
 
-	AppMode                      string                       `mapstructure:"app_mode"`
-	Env                          string                       `mapstructure:"env"`
-	HttpServer                   httpServerConfig             `mapstructure:"http_server"`
-	FinishUpTime                 int64                        `mapstructure:"finish_up_time"`
-	CronJob                      cronJobConfig                `mapstructure:"cron_job"`
-	Store                        store                        `mapstructure:"store"`
-	ConversionRateOracles        []Oracle                     `mapstructure:"conversion_rate_oracles"`
-	GasPriceOracles              gasPriceOraclesWithDomainIDs `mapstructure:"gas_price_oracles_with_domain_ids"`
-	ConversionRatePairs          []string                     `mapstructure:"conversion_rate_pairs"`
-	Strategy                     strategyConfig               `mapstructure:"strategy"`
-	DataValidInterval            int64                        `mapstructure:"data_valid_interval"`
-	Domains                      map[int]Domain
-	Resources                    map[string]*Resource
-	GasPriceOraclesWithDomainIDs map[int][]Oracle
-}
-
-type OracleDetails struct {
-	Enable bool    `mapstructure:"enable"`
-	ApiKey string  `mapstructure:"api_key"`
-	Apis   apiUrls `mapstructure:"apis"`
+	AppMode             string           `mapstructure:"app_mode"`
+	Env                 string           `mapstructure:"env"`
+	HttpServer          httpServerConfig `mapstructure:"http_server"`
+	FinishUpTime        int64            `mapstructure:"finish_up_time"`
+	CronJob             cronJobConfig    `mapstructure:"cron_job"`
+	Store               store            `mapstructure:"store"`
+	ConversionRateApis  []ApiService     `mapstructure:"conversion_rate_apis"`
+	DomainsList         []domainList     `mapstructure:"domain_list"`
+	ConversionRatePairs []string         `mapstructure:"conversion_rate_pairs"`
+	Strategy            strategyConfig   `mapstructure:"strategy"`
+	DataValidInterval   int64            `mapstructure:"data_valid_interval"`
+	Domains             map[int]Domain
+	Resources           map[string]*Resource
 }
 
 type strategyConfig struct {
 	Local string `mapstructure:"local"`
 }
 
-type gasPriceOraclesWithDomainIDs struct {
-	Domainid0 []Oracle `mapstructure:"0"`
-	Domainid1 []Oracle `mapstructure:"1"`
-	Domainid2 []Oracle `mapstructure:"2"`
+type domainList struct {
+	DomainID     int          `mapstructure:"domain_id"`
+	GasPriceApis []ApiService `mapstructure:"gas_price_apis"`
 }
 
-type Oracle struct {
+type ApiService struct {
 	Implementation string `mapstructure:"implementation"`
 	Source         string `mapstructure:"source"`
 	Enable         bool   `mapstructure:"enable"`
 	URL            string `mapstructure:"url"`
 	ApiKey         string `mapstructure:"api_key"`
+	Decimals       int    `mapstructure:"decimals"`
 }
 
 type store struct {
@@ -95,11 +88,6 @@ type cronJob struct {
 type httpServerConfig struct {
 	Mode string `mapstructure:"mode"`
 	Port string `mapstructure:"port"`
-}
-
-type apiUrls struct {
-	GasPriceApiUrl string `mapstructure:"gas_price"`
-	QueryRate      string `mapstructure:"query_rate"`
 }
 
 func (c *Config) LogLevel() (logrus.Level, error) {
@@ -171,26 +159,26 @@ func (c *Config) HttpServerConfig() httpServerConfig {
 	return httpConfig
 }
 
-func (c *Config) OracleAPIkeyReload(oracle Oracle) Oracle {
-	etherscanAPIKey := os.Getenv("ETHERSCAN_API_KEY")
-	polygonscanAPIKey := os.Getenv("POLYGONSCAN_API_KEY")
-	coinMarketCapAPIKey := os.Getenv("COINMARKETCAP_API_KEY")
-	moonscanAPIKey := os.Getenv("MOONSCAN_API_KEY")
-
-	if etherscanAPIKey != "" && oracle.Source == "etherscan" {
-		oracle.ApiKey = etherscanAPIKey
-	}
-	if polygonscanAPIKey != "" && oracle.Source == "polygonscan" {
-		oracle.ApiKey = polygonscanAPIKey
-	}
-	if coinMarketCapAPIKey != "" && oracle.Source == "coinmarketcap" {
-		oracle.ApiKey = coinMarketCapAPIKey
-	}
-	if moonscanAPIKey != "" && oracle.Source == "moonscan" {
-		oracle.ApiKey = moonscanAPIKey
+// GasPriceApikeyReload dynamically builds the env var key string and replaces the api key if the env var is set
+// dynamic env var key string format: <SOURCE>_API_KEY_<DOMAIN_ID>
+func (c *Config) GasPriceApikeyReload(domainID int, apiService ApiService) ApiService {
+	loadedApiKey := os.Getenv(fmt.Sprintf("%s_API_KEY_%d", strings.ToUpper(apiService.Source), domainID))
+	if loadedApiKey != "" {
+		apiService.ApiKey = loadedApiKey
 	}
 
-	return oracle
+	return apiService
+}
+
+// ConversionRateApikeyReload dynamically builds the env var key string and replaces the api key if the env var is set
+// dynamic env var key string format: <SOURCE>_API_KEY
+func (c *Config) ConversionRateApikeyReload(apiService ApiService) ApiService {
+	loadedApiKey := os.Getenv(fmt.Sprintf("%s_API_KEY", strings.ToUpper(apiService.Source)))
+	if loadedApiKey != "" {
+		apiService.ApiKey = loadedApiKey
+	}
+
+	return apiService
 }
 
 func (c *Config) CronJobConfig() cronJobConfig {
@@ -273,16 +261,6 @@ func (c *Config) dataValidIntervalConfigLoad() int64 {
 	return c.DataValidInterval
 }
 
-func (c *Config) remappingGasPriceOracleWithDomainIDs() map[int][]Oracle {
-	gasPriceOracleWithDomains := make(map[int][]Oracle)
-
-	gasPriceOracleWithDomains[0] = c.GasPriceOracles.Domainid0
-	gasPriceOracleWithDomains[1] = c.GasPriceOracles.Domainid1
-	gasPriceOracleWithDomains[2] = c.GasPriceOracles.Domainid2
-
-	return gasPriceOracleWithDomains
-}
-
 func (c *Config) ConversionRatePairsConfig() [][]string {
 	pricePairs := make([][]string, 0)
 
@@ -332,7 +310,6 @@ func LoadConfig(configPath, domainConfigPath string) *Config {
 
 	conf.DataValidInterval = conf.dataValidIntervalConfigLoad()
 	conf.ConversionRatePairs = conf.conversionRatePairsConfigLoad()
-	conf.GasPriceOraclesWithDomainIDs = conf.remappingGasPriceOracleWithDomainIDs()
 
 	return conf
 }

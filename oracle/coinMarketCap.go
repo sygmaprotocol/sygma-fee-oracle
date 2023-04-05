@@ -51,14 +51,14 @@ type CoinMarketCapConversionRateQuote struct {
 	LastUpdated string  `mapstructure:"last_updated"`
 }
 
-func NewCoinMarketCap(oracleSource string, oracle config.Oracle, log *logrus.Entry) *CoinMarketCap {
+func NewCoinMarketCap(source string, apiService config.ApiService, log *logrus.Entry) *CoinMarketCap {
 	return &CoinMarketCap{
-		log:    log.WithField("services", oracleSource),
-		source: oracleSource,
-		apiKey: oracle.ApiKey,
-		enable: oracle.Enable,
+		log:    log.WithField("services", source),
+		source: source,
+		apiKey: apiService.ApiKey,
+		enable: apiService.Enable,
 		apis: CoinMarketCapApis{
-			ConversionRateRequest: oracle.URL,
+			ConversionRateRequest: apiService.URL,
 		},
 	}
 }

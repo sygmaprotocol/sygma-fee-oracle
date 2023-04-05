@@ -113,12 +113,9 @@ func (s *GasPriceJobTestSuite) TestJobOperation_Run_Failure() {
 func (s *GasPriceJobTestSuite) TestJobOperation_Run_Success_StoreGasPrice_Failure() {
 	s.oracle.EXPECT().IsEnabled().Return(true)
 	s.oracle.EXPECT().InquiryGasPrice().Return(s.testdata, nil).Times(1)
-	s.oracle.EXPECT().Source().Return("etherscan").Times(2)
+	s.oracle.EXPECT().Source().Return("etherscan").Times(0)
 
-	convertedTestData, err := s.gasPriceOperator.GasPriceUnitConverter(s.testdata)
-	s.Nil(err)
-
-	dataBytes, err := json.Marshal(convertedTestData)
+	dataBytes, err := json.Marshal(s.testdata)
 	s.Nil(err)
 
 	s.db.EXPECT().Set([]byte(fmt.Sprintf("gasprice:%s:%d", s.testdata.OracleSource, s.testdata.DomainID)), dataBytes).Return(errors.New("error")).Times(1)
@@ -128,12 +125,9 @@ func (s *GasPriceJobTestSuite) TestJobOperation_Run_Success_StoreGasPrice_Failur
 func (s *GasPriceJobTestSuite) TestJobOperation_Run_Success_StoreGasPrice_Success() {
 	s.oracle.EXPECT().IsEnabled().Return(true)
 	s.oracle.EXPECT().InquiryGasPrice().Return(s.testdata, nil).Times(1)
-	s.oracle.EXPECT().Source().Return("etherscan").Times(2)
+	s.oracle.EXPECT().Source().Return("etherscan").Times(0)
 
-	convertedTestData, err := s.gasPriceOperator.GasPriceUnitConverter(s.testdata)
-	s.Nil(err)
-
-	dataBytes, err := json.Marshal(convertedTestData)
+	dataBytes, err := json.Marshal(s.testdata)
 	s.Nil(err)
 
 	s.db.EXPECT().Set([]byte(fmt.Sprintf("gasprice:%s:%d", s.testdata.OracleSource, s.testdata.DomainID)), dataBytes).Return(nil).Times(1)
