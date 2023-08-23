@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"math/big"
 	"net/http"
-	"strings"
 	"time"
 
 	"github.com/ChainSafe/sygma-fee-oracle/config"
@@ -23,10 +22,11 @@ var _ GasPriceOracle = (*Moonscan)(nil)
 type Moonscan struct {
 	log *logrus.Entry
 
-	name   string
-	apiKey string
-	enable bool
-	apis   MoonscanApis
+	source   string
+	apiKey   string
+	enable   bool
+	apis     MoonscanApis
+	domainID int
 }
 
 type MoonscanApis struct {
@@ -39,23 +39,20 @@ type MoonscanResp struct {
 	Result  string `json:"result"`
 }
 
-func NewMoonscan(conf *config.Config, log *logrus.Entry) *Moonscan {
+func NewMoonscan(source string, apiService config.ApiService, domainID int, log *logrus.Entry) *Moonscan {
 	return &Moonscan{
-		log:    log.WithField("services", "moonscan"),
-		name:   "moonscan",
-		apiKey: conf.OracleConfig().Moonscan.ApiKey,
-		enable: conf.OracleConfig().Moonscan.Enable,
+		log:    log.WithField("services", source),
+		source: source,
+		apiKey: apiService.ApiKey,
+		enable: apiService.Enable,
 		apis: MoonscanApis{
-			GasPriceRequest: fmt.Sprintf("%s%s", conf.OracleConfig().Moonscan.Apis.GasPriceApiUrl, conf.OracleConfig().Moonscan.ApiKey),
+			GasPriceRequest: fmt.Sprintf("%s%s", apiService.URL, apiService.ApiKey),
 		},
+		domainID: domainID,
 	}
 }
 
-func (m *Moonscan) InquiryGasPrice(domainName string) (*types.GasPrices, error) {
-	if strings.ToLower(domainName) != "moonbeam" {
-		return nil, ErrNotSupported
-	}
-
+func (m *Moonscan) InquiryGasPrice() (*types.GasPrices, error) {
 	// Moonscan doesn't support GasTracker API like Etherscan and Polygonscan does,
 	// so we will use eth_gasPrice RPC call here
 	// the JSON2.0 response will be different: if Message is empty, it means a successful call
@@ -86,14 +83,14 @@ func (m *Moonscan) InquiryGasPrice(domainName string) (*types.GasPrices, error) 
 		SafeGasPrice:    gp.String(),
 		ProposeGasPrice: gp.String(),
 		FastGasPrice:    gp.String(),
-		OracleName:      m.name,
-		DomainName:      domainName,
+		OracleSource:    m.source,
+		DomainID:        m.domainID,
 		Time:            time.Now().Unix(),
 	}, nil
 }
 
-func (m *Moonscan) Name() string {
-	return m.name
+func (m *Moonscan) Source() string {
+	return m.source
 }
 
 func (m *Moonscan) IsEnabled() bool {

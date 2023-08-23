@@ -35,18 +35,18 @@ func (m *MockGasPriceOracle) EXPECT() *MockGasPriceOracleMockRecorder {
 }
 
 // InquiryGasPrice mocks base method.
-func (m *MockGasPriceOracle) InquiryGasPrice(arg0 string) (*types.GasPrices, error) {
+func (m *MockGasPriceOracle) InquiryGasPrice() (*types.GasPrices, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "InquiryGasPrice", arg0)
+	ret := m.ctrl.Call(m, "InquiryGasPrice")
 	ret0, _ := ret[0].(*types.GasPrices)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // InquiryGasPrice indicates an expected call of InquiryGasPrice.
-func (mr *MockGasPriceOracleMockRecorder) InquiryGasPrice(arg0 interface{}) *gomock.Call {
+func (mr *MockGasPriceOracleMockRecorder) InquiryGasPrice() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InquiryGasPrice", reflect.TypeOf((*MockGasPriceOracle)(nil).InquiryGasPrice), arg0)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InquiryGasPrice", reflect.TypeOf((*MockGasPriceOracle)(nil).InquiryGasPrice))
 }
 
 // IsEnabled mocks base method.
@@ -63,18 +63,18 @@ func (mr *MockGasPriceOracleMockRecorder) IsEnabled() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "IsEnabled", reflect.TypeOf((*MockGasPriceOracle)(nil).IsEnabled))
 }
 
-// Name mocks base method.
-func (m *MockGasPriceOracle) Name() string {
+// Source mocks base method.
+func (m *MockGasPriceOracle) Source() string {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Name")
+	ret := m.ctrl.Call(m, "Source")
 	ret0, _ := ret[0].(string)
 	return ret0
 }
 
-// Name indicates an expected call of Name.
-func (mr *MockGasPriceOracleMockRecorder) Name() *gomock.Call {
+// Source indicates an expected call of Source.
+func (mr *MockGasPriceOracleMockRecorder) Source() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Name", reflect.TypeOf((*MockGasPriceOracle)(nil).Name))
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Source", reflect.TypeOf((*MockGasPriceOracle)(nil).Source))
 }
 
 // MockConversionRateOracle is a mock of ConversionRateOracle interface.
@@ -129,16 +129,16 @@ func (mr *MockConversionRateOracleMockRecorder) IsEnabled() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "IsEnabled", reflect.TypeOf((*MockConversionRateOracle)(nil).IsEnabled))
 }
 
-// Name mocks base method.
-func (m *MockConversionRateOracle) Name() string {
+// Source mocks base method.
+func (m *MockConversionRateOracle) Source() string {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Name")
+	ret := m.ctrl.Call(m, "Source")
 	ret0, _ := ret[0].(string)
 	return ret0
 }
 
-// Name indicates an expected call of Name.
-func (mr *MockConversionRateOracleMockRecorder) Name() *gomock.Call {
+// Source indicates an expected call of Source.
+func (mr *MockConversionRateOracleMockRecorder) Source() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Name", reflect.TypeOf((*MockConversionRateOracle)(nil).Name))
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Source", reflect.TypeOf((*MockConversionRateOracle)(nil).Source))
 }

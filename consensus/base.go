@@ -30,8 +30,8 @@ func (c *Consensus) GetStrategy() string {
 	return c.strategy.Name()
 }
 
-func (c *Consensus) FilterLocalGasPriceData(store *store.GasPriceStore, domainName string) (*types.GasPrices, error) {
-	return c.strategy.GasPrice(store, domainName)
+func (c *Consensus) FilterLocalGasPriceData(store *store.GasPriceStore, domainID int) (*types.GasPrices, error) {
+	return c.strategy.GasPrice(store, domainID)
 }
 
 func (c *Consensus) FilterLocalConversionRateData(store *store.ConversionRateStore, base, foreign string) (*types.ConversionRate, error) {

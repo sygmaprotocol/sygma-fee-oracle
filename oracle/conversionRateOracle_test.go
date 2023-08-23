@@ -53,11 +53,11 @@ func (s *ConversionRateOracleTestSuite) SetupTest() {
 	s.appBase = base.NewFeeOracleAppBase("../config/config.template.yaml", "../domain.json", "./keyfile.priv", "secp256k1")
 	s.conversionRateOperator = oracle.NewConversionRateOracleOperator(s.appBase.GetLogger(), s.oracle)
 	s.testdata = &types.ConversionRate{
-		Base:       "eth",
-		Foreign:    "usdt",
-		Rate:       3000,
-		OracleName: "cooinmarketcap",
-		Time:       time.Time{}.UnixMilli(),
+		Base:         "eth",
+		Foreign:      "usdt",
+		Rate:         3000,
+		OracleSource: "cooinmarketcap",
+		Time:         time.Time{}.UnixMilli(),
 	}
 }
 

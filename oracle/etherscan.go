@@ -6,15 +6,13 @@ package oracle
 import (
 	"encoding/json"
 	"fmt"
-	"math/big"
+	"github.com/ChainSafe/sygma-fee-oracle/util"
 	"net/http"
-	"strings"
 	"time"
 
 	"github.com/ChainSafe/sygma-fee-oracle/config"
 	"github.com/ChainSafe/sygma-fee-oracle/oracle/client"
 	"github.com/ChainSafe/sygma-fee-oracle/types"
-	"github.com/ChainSafe/sygma-fee-oracle/util"
 	"github.com/mitchellh/mapstructure"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
@@ -25,10 +23,12 @@ var _ GasPriceOracle = (*Etherscan)(nil)
 type Etherscan struct {
 	log *logrus.Entry
 
-	name   string
-	apiKey string
-	enable bool
-	apis   EtherscanApis
+	source           string
+	apiKey           string
+	enable           bool
+	apis             EtherscanApis
+	domainID         int
+	gasPriceDecimals int
 }
 
 type EtherscanApis struct {
@@ -50,23 +50,21 @@ type EtherscanGasPricesResp struct {
 	SuggestBaseFee  string `mapstructure:"suggestBaseFee"`
 }
 
-func NewEtherscan(conf *config.Config, log *logrus.Entry) *Etherscan {
+func NewEtherscan(source string, apiService config.ApiService, domainID int, log *logrus.Entry) *Etherscan {
 	return &Etherscan{
-		log:    log.WithField("services", "etherscan"),
-		name:   "etherscan",
-		apiKey: conf.OracleConfig().Etherscan.ApiKey,
-		enable: conf.OracleConfig().Etherscan.Enable,
+		log:    log.WithField("services", source),
+		source: source,
+		apiKey: apiService.ApiKey,
+		enable: apiService.Enable,
 		apis: EtherscanApis{
-			GasPriceRequest: fmt.Sprintf("%s%s", conf.OracleConfig().Etherscan.Apis.GasPriceApiUrl, conf.OracleConfig().Etherscan.ApiKey),
+			GasPriceRequest: fmt.Sprintf("%s%s", apiService.URL, apiService.ApiKey),
 		},
+		domainID:         domainID,
+		gasPriceDecimals: apiService.Decimals,
 	}
 }
 
-func (e *Etherscan) InquiryGasPrice(domainName string) (*types.GasPrices, error) {
-	if strings.ToLower(domainName) != "ethereum" {
-		return nil, ErrNotSupported
-	}
-
+func (e *Etherscan) InquiryGasPrice() (*types.GasPrices, error) {
 	statusCode, body, err := client.NewHttpRequestMessage(http.MethodGet, e.apis.GasPriceRequest,
 		nil, nil, e.log).Request()
 	if err != nil || statusCode != http.StatusOK {
@@ -91,31 +89,32 @@ func (e *Etherscan) InquiryGasPrice(domainName string) (*types.GasPrices, error)
 		return nil, errors.Wrap(err, "failed to decode gas price response")
 	}
 
-	safeGasPriceValue, err := util.Str2BigInt(egp.SafeGasPrice)
+	// convert gas price data to wei in bigInt
+	safeGasPriceValue, err := util.Large2SmallUnitConverter(egp.SafeGasPrice, uint(e.gasPriceDecimals))
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to convert gas price response value")
+		return nil, errors.Wrap(err, "failed to convert safe gasprice")
 	}
-	proposeGasPriceValue, err := util.Str2BigInt(egp.ProposeGasPrice)
+	proposeGasPriceValue, err := util.Large2SmallUnitConverter(egp.ProposeGasPrice, uint(e.gasPriceDecimals))
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to convert gas price response value")
+		return nil, errors.Wrap(err, "failed to convert propose gasprice")
 	}
-	fastGasPriceValue, err := util.Str2BigInt(egp.FastGasPrice)
+	fastGasPriceValue, err := util.Large2SmallUnitConverter(egp.FastGasPrice, uint(e.gasPriceDecimals))
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to convert gas price response value")
+		return nil, errors.Wrap(err, "failed to convert fast gasprice")
 	}
 
 	return &types.GasPrices{
-		SafeGasPrice:    new(big.Int).Mul(safeGasPriceValue, big.NewInt(types.GWei)).String(),
-		ProposeGasPrice: new(big.Int).Mul(proposeGasPriceValue, big.NewInt(types.GWei)).String(),
-		FastGasPrice:    new(big.Int).Mul(fastGasPriceValue, big.NewInt(types.GWei)).String(),
-		OracleName:      e.name,
-		DomainName:      domainName,
+		SafeGasPrice:    safeGasPriceValue.String(),
+		ProposeGasPrice: proposeGasPriceValue.String(),
+		FastGasPrice:    fastGasPriceValue.String(),
+		OracleSource:    e.source,
+		DomainID:        e.domainID,
 		Time:            time.Now().Unix(),
 	}, nil
 }
 
-func (e *Etherscan) Name() string {
-	return e.name
+func (e *Etherscan) Source() string {
+	return e.source
 }
 
 func (e *Etherscan) IsEnabled() bool {

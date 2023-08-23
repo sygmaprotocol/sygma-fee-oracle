@@ -42,8 +42,8 @@ type Config struct {
 	FinishUpTime        int64            `mapstructure:"finish_up_time"`
 	CronJob             cronJobConfig    `mapstructure:"cron_job"`
 	Store               store            `mapstructure:"store"`
-	Oracle              oracle           `mapstructure:"oracle"`
-	GasPriceDomains     []string         `mapstructure:"gas_price_domains"`
+	ConversionRateApis  []ApiService     `mapstructure:"conversion_rate_apis"`
+	DomainsList         []domainList     `mapstructure:"domain_list"`
 	ConversionRatePairs []string         `mapstructure:"conversion_rate_pairs"`
 	Strategy            strategyConfig   `mapstructure:"strategy"`
 	DataValidInterval   int64            `mapstructure:"data_valid_interval"`
@@ -55,11 +55,18 @@ type strategyConfig struct {
 	Local string `mapstructure:"local"`
 }
 
-type oracle struct {
-	Etherscan     etherscan     `mapstructure:"etherscan"`
-	Polygonscan   polygonscan   `mapstructure:"polygonscan"`
-	CoinMarketCap coinMarketCap `mapstructure:"coinmarketcap"`
-	Moonscan      coinMarketCap `mapstructure:"moonscan"`
+type domainList struct {
+	DomainID     int          `mapstructure:"domain_id"`
+	GasPriceApis []ApiService `mapstructure:"gas_price_apis"`
+}
+
+type ApiService struct {
+	Implementation string `mapstructure:"implementation"`
+	Source         string `mapstructure:"source"`
+	Enable         bool   `mapstructure:"enable"`
+	URL            string `mapstructure:"url"`
+	ApiKey         string `mapstructure:"api_key"`
+	Decimals       int    `mapstructure:"decimals"`
 }
 
 type store struct {
@@ -81,29 +88,6 @@ type cronJob struct {
 type httpServerConfig struct {
 	Mode string `mapstructure:"mode"`
 	Port string `mapstructure:"port"`
-}
-
-type polygonscan struct {
-	Enable bool    `mapstructure:"enable"`
-	ApiKey string  `mapstructure:"api_key"`
-	Apis   apiUrls `mapstructure:"apis"`
-}
-
-type etherscan struct {
-	Enable bool    `mapstructure:"enable"`
-	ApiKey string  `mapstructure:"api_key"`
-	Apis   apiUrls `mapstructure:"apis"`
-}
-
-type coinMarketCap struct {
-	Enable bool    `mapstructure:"enable"`
-	ApiKey string  `mapstructure:"api_key"`
-	Apis   apiUrls `mapstructure:"apis"`
-}
-
-type apiUrls struct {
-	GasPriceApiUrl string `mapstructure:"gas_price"`
-	QueryRate      string `mapstructure:"query_rate"`
 }
 
 func (c *Config) LogLevel() (logrus.Level, error) {
@@ -175,28 +159,26 @@ func (c *Config) HttpServerConfig() httpServerConfig {
 	return httpConfig
 }
 
-func (c *Config) OracleConfig() oracle {
-	oracleConfig := c.Oracle
-
-	etherscanAPIKey := os.Getenv("ETHERSCAN_API_KEY")
-	polygonscanAPIKey := os.Getenv("POLYGONSCAN_API_KEY")
-	coinMarketCapAPIKey := os.Getenv("COINMARKETCAP_API_KEY")
-	moonscanAPIKey := os.Getenv("MOONSCAN_API_KEY")
-
-	if etherscanAPIKey != "" {
-		oracleConfig.Etherscan.ApiKey = etherscanAPIKey
-	}
-	if polygonscanAPIKey != "" {
-		oracleConfig.Polygonscan.ApiKey = polygonscanAPIKey
-	}
-	if coinMarketCapAPIKey != "" {
-		oracleConfig.CoinMarketCap.ApiKey = coinMarketCapAPIKey
-	}
-	if moonscanAPIKey != "" {
-		oracleConfig.Moonscan.ApiKey = moonscanAPIKey
+// GasPriceApikeyReload dynamically builds the env var key string and replaces the api key if the env var is set
+// dynamic env var key string format: <SOURCE>_API_KEY_<DOMAIN_ID>
+func (c *Config) GasPriceApikeyReload(domainID int, apiService ApiService) ApiService {
+	loadedApiKey := os.Getenv(fmt.Sprintf("%s_API_KEY_%d", strings.ToUpper(apiService.Source), domainID))
+	if loadedApiKey != "" {
+		apiService.ApiKey = loadedApiKey
 	}
 
-	return oracleConfig
+	return apiService
+}
+
+// ConversionRateApikeyReload dynamically builds the env var key string and replaces the api key if the env var is set
+// dynamic env var key string format: <SOURCE>_API_KEY
+func (c *Config) ConversionRateApikeyReload(apiService ApiService) ApiService {
+	loadedApiKey := os.Getenv(fmt.Sprintf("%s_API_KEY", strings.ToUpper(apiService.Source)))
+	if loadedApiKey != "" {
+		apiService.ApiKey = loadedApiKey
+	}
+
+	return apiService
 }
 
 func (c *Config) CronJobConfig() cronJobConfig {

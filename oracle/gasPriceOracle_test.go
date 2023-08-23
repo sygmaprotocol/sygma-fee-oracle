@@ -57,8 +57,8 @@ func (s *GasPriceOracleTestSuite) SetupTest() {
 		SafeGasPrice:    "1",
 		ProposeGasPrice: "2",
 		FastGasPrice:    "3",
-		OracleName:      "etherscan",
-		DomainName:      "ethereum",
+		OracleSource:    "etherscan",
+		DomainID:        1,
 		Time:            time.Now().UnixMilli(),
 	}
 }
@@ -68,17 +68,18 @@ func (s *GasPriceOracleTestSuite) TearDownTest() {
 }
 
 func (s *GasPriceOracleTestSuite) TestInquiryGasPrice_Failure() {
-	s.oracle.EXPECT().InquiryGasPrice(s.testdata.DomainName).Return(nil, errors.New("error"))
+	s.oracle.EXPECT().InquiryGasPrice().Return(nil, errors.New("error"))
 
-	_, err := s.gasPriceOperator.Run(s.testdata.DomainName)
+	_, err := s.gasPriceOperator.Run()
 
 	s.NotNil(err)
 }
 
 func (s *GasPriceOracleTestSuite) TestInquiryGasPrice_Success() {
-	s.oracle.EXPECT().InquiryGasPrice(s.testdata.DomainName).Return(s.testdata, nil)
+	s.oracle.EXPECT().InquiryGasPrice().Return(s.testdata, nil)
+	s.oracle.EXPECT().Source().Return("etherscan").Times(0)
 
-	_, err := s.gasPriceOperator.Run(s.testdata.DomainName)
+	_, err := s.gasPriceOperator.Run()
 
 	s.Nil(err)
 }

@@ -22,8 +22,8 @@ func (a *Average) Name() string {
 	return "average"
 }
 
-func (a *Average) GasPrice(store *store.GasPriceStore, domainName string) (*types.GasPrices, error) {
-	re, err := store.GetGasPricesByDomain(domainName)
+func (a *Average) GasPrice(store *store.GasPriceStore, domainID int) (*types.GasPrices, error) {
+	re, err := store.GetGasPricesByDomain(domainID)
 	if err != nil {
 		return nil, err
 	}
@@ -55,7 +55,7 @@ func (a *Average) GasPrice(store *store.GasPriceStore, domainName string) (*type
 		SafeGasPrice:    fmt.Sprintf("%d", int(math.Round(safe/dataSize))),
 		ProposeGasPrice: fmt.Sprintf("%d", int(propose/dataSize)),
 		FastGasPrice:    fmt.Sprintf("%d", int(fast/dataSize)),
-		DomainName:      domainName,
+		DomainID:        domainID,
 		Time:            re[0].Time, // use the first data time for now
 	}, nil
 

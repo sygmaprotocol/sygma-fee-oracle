@@ -69,7 +69,7 @@ func (h *Handler) getRate(c *gin.Context) {
 		return
 	}
 
-	gp, err := h.consensus.FilterLocalGasPriceData(h.gasPriceStore, toDomain.Name)
+	gp, err := h.consensus.FilterLocalGasPriceData(h.gasPriceStore, toDomain.ID)
 	if err != nil {
 		h.log.Errorf("get gasprice process failed: %v", err)
 		ginErrorReturn(c, http.StatusInternalServerError, newReturnErrorResp(&oracleErrors.InternalServerError, err))

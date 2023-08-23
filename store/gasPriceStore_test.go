@@ -40,8 +40,8 @@ func (s *GasPriceStoreTestSuite) SetupTest() {
 		SafeGasPrice:    "1",
 		ProposeGasPrice: "2",
 		FastGasPrice:    "3",
-		OracleName:      "etherscan",
-		DomainName:      "ethereum",
+		OracleSource:    "etherscan",
+		DomainID:        1,
 		Time:            time.Now().UnixMilli(),
 	}
 }
@@ -52,7 +52,7 @@ func (s *GasPriceStoreTestSuite) TestStoreGasPrice_Failure() {
 	dataBytes, err := json.Marshal(s.testdata)
 	s.Nil(err)
 
-	s.db.EXPECT().Set([]byte(fmt.Sprintf("gasprice:%s:%s", s.testdata.OracleName, s.testdata.DomainName)), dataBytes).Return(errors.New("error"))
+	s.db.EXPECT().Set([]byte(fmt.Sprintf("gasprice:%s:%d", s.testdata.OracleSource, s.testdata.DomainID)), dataBytes).Return(errors.New("error"))
 
 	err = s.gasPriceStore.StoreGasPrice(s.testdata)
 
@@ -63,7 +63,7 @@ func (s *GasPriceStoreTestSuite) TestStoreGasPrice_Success() {
 	dataBytes, err := json.Marshal(s.testdata)
 	s.Nil(err)
 
-	s.db.EXPECT().Set([]byte(fmt.Sprintf("gasprice:%s:%s", s.testdata.OracleName, s.testdata.DomainName)), dataBytes).Return(nil)
+	s.db.EXPECT().Set([]byte(fmt.Sprintf("gasprice:%s:%d", s.testdata.OracleSource, s.testdata.DomainID)), dataBytes).Return(nil)
 
 	err = s.gasPriceStore.StoreGasPrice(s.testdata)
 
@@ -71,9 +71,9 @@ func (s *GasPriceStoreTestSuite) TestStoreGasPrice_Success() {
 }
 
 func (s *GasPriceStoreTestSuite) TestGetGasPrice_Failure() {
-	s.db.EXPECT().Get([]byte(fmt.Sprintf("gasprice:%s:%s", s.testdata.OracleName, s.testdata.DomainName))).Return(nil, errors.New("error"))
+	s.db.EXPECT().Get([]byte(fmt.Sprintf("gasprice:%s:%d", s.testdata.OracleSource, s.testdata.DomainID))).Return(nil, errors.New("error"))
 
-	_, err := s.gasPriceStore.GetGasPrice(s.testdata.OracleName, s.testdata.DomainName)
+	_, err := s.gasPriceStore.GetGasPrice(s.testdata.OracleSource, s.testdata.DomainID)
 
 	s.NotNil(err)
 }
@@ -82,17 +82,17 @@ func (s *GasPriceStoreTestSuite) TestGetGasPrice_Success() {
 	dataBytes, err := json.Marshal(s.testdata)
 	s.Nil(err)
 
-	s.db.EXPECT().Get([]byte(fmt.Sprintf("gasprice:%s:%s", s.testdata.OracleName, s.testdata.DomainName))).Return(dataBytes, nil)
+	s.db.EXPECT().Get([]byte(fmt.Sprintf("gasprice:%s:%d", s.testdata.OracleSource, s.testdata.DomainID))).Return(dataBytes, nil)
 
-	_, err = s.gasPriceStore.GetGasPrice(s.testdata.OracleName, s.testdata.DomainName)
+	_, err = s.gasPriceStore.GetGasPrice(s.testdata.OracleSource, s.testdata.DomainID)
 
 	s.Nil(err)
 }
 
 func (s *GasPriceStoreTestSuite) TestGetGasPrice_NotFound() {
-	s.db.EXPECT().Get([]byte(fmt.Sprintf("gasprice:%s:%s", s.testdata.OracleName, s.testdata.DomainName))).Return(nil, store.ErrNotFound)
+	s.db.EXPECT().Get([]byte(fmt.Sprintf("gasprice:%s:%d", s.testdata.OracleSource, s.testdata.DomainID))).Return(nil, store.ErrNotFound)
 
-	_, err := s.gasPriceStore.GetGasPrice(s.testdata.OracleName, s.testdata.DomainName)
+	_, err := s.gasPriceStore.GetGasPrice(s.testdata.OracleSource, s.testdata.DomainID)
 
 	s.EqualError(err, store.ErrNotFound.Error())
 }
@@ -101,7 +101,7 @@ func (s *GasPriceStoreTestSuite) TestGetGasPriceByDomain_NotFound() {
 	var dataReceiver *types.GasPrices
 	s.db.EXPECT().GetByPrefix([]byte("gasprice:"), dataReceiver).Return(nil, store.ErrNotFound)
 
-	_, err := s.gasPriceStore.GetGasPricesByDomain(s.testdata.DomainName)
+	_, err := s.gasPriceStore.GetGasPricesByDomain(s.testdata.DomainID)
 
 	s.EqualError(err, store.ErrNotFound.Error())
 }
@@ -114,8 +114,8 @@ func (s *GasPriceStoreTestSuite) TestGetGasPriceByDomain_Success() {
 		SafeGasPrice:    "1",
 		ProposeGasPrice: "2",
 		FastGasPrice:    "3",
-		OracleName:      "",
-		DomainName:      "ethereum",
+		OracleSource:    "",
+		DomainID:        1,
 		Time:            time.Time{}.UnixMilli(),
 	}
 	jd1, err := json.Marshal(d1)
@@ -128,8 +128,8 @@ func (s *GasPriceStoreTestSuite) TestGetGasPriceByDomain_Success() {
 		SafeGasPrice:    "2",
 		ProposeGasPrice: "3",
 		FastGasPrice:    "4",
-		OracleName:      "",
-		DomainName:      "ethereum",
+		OracleSource:    "",
+		DomainID:        1,
 		Time:            time.Time{}.UnixMilli(),
 	}
 
@@ -142,7 +142,7 @@ func (s *GasPriceStoreTestSuite) TestGetGasPriceByDomain_Success() {
 	var dataReceiver *types.GasPrices
 	s.db.EXPECT().GetByPrefix([]byte("gasprice:"), dataReceiver).Return(re, nil)
 
-	fetchedData, err := s.gasPriceStore.GetGasPricesByDomain(s.testdata.DomainName)
+	fetchedData, err := s.gasPriceStore.GetGasPricesByDomain(s.testdata.DomainID)
 	s.Nil(err)
 
 	s.Equal(2, len(fetchedData))
