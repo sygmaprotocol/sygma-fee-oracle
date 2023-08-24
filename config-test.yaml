@@ -1,0 +1,84 @@
+# Copyright 2021 ChainSafe Systems
+# SPDX-License-Identifier: LGPL-3.0-only
+
+# app mode: debug, release
+app_mode: release
+
+# env
+env: dev # dev, production
+
+# Log level
+log_level: 5  # 5 is debug level, use 4(info) in prod
+
+# Gin http server config
+http_server:
+  mode: debug # or release, debug
+  port: :8091
+
+# time in second before server shutdown
+# this will allow server to finish running jobs before shutdown
+finish_up_time: 3
+
+# internal scheduled cronjob
+cron_job:
+  update_conversion_rate_job:
+    name: conversion rate
+    enable: true
+    check_frequency: "* * * * *"
+    process_number: 1
+  update_gas_price_job:
+    name: gas price
+    enable: true
+    check_frequency: "* * * * *"
+    process_number: 1
+
+# store path
+store:
+  path: ./lvldbdata
+
+# conversion_rate_apis contains the list of conversion rate api services
+# implementation indicates the implementation of the oracle
+# source is the source of the data, reflected the source of the api url
+# url is the api url of gas price of the oracle
+# api_key is the api key of the oracle
+# enable is the flag to enable/disable the current api service, fee oracle will not instantiate this service if it is disabled
+conversion_rate_apis:
+  - implementation: coinmarketcap
+    source: coinmarketcap
+    enable: true
+    url: https://pro-api.coinmarketcap.com/v2/cryptocurrency/quotes/latest?
+
+domain_list:
+  - domain_id: 1
+    gas_price_apis:
+      - implementation: etherscan
+        source: etherscan
+        enable: true
+        url: https://api.etherscan.io/api?module=gastracker&action=gasoracle&apikey=
+        decimals: 9
+  - domain_id: 2
+    gas_price_apis:
+      - implementation: etherscan
+        source: etherscan
+        enable: true
+        url: https://api.etherscan.io/api?module=gastracker&action=gasoracle&apikey=
+        decimals: 9
+  - domain_id: 3
+    gas_price_apis:
+      - implementation: moonscan
+        source: moonscan
+        enable: false
+        url: https://api-moonbeam.moonscan.io/api?module=proxy&action=eth_gasPrice&apikey=
+        decimals:
+
+# conversion_rate_pairs contains price pair for conversion rate
+# must be paired and follow the format of [ base, foreign, base, foreign, ... ]
+conversion_rate_pairs:
+  [ eth, usdt ]
+
+# strategy defines the strategy on verify and aggregate data from store when fetched
+strategy:
+  local: average
+
+# data_valid_interval defines how long the endpoint response data remains valid before sending it to fee handler contract
+data_valid_interval: 3600 # second
