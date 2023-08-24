@@ -74,7 +74,7 @@ domain_list:
 # conversion_rate_pairs contains price pair for conversion rate
 # must be paired and follow the format of [ base, foreign, base, foreign, ... ]
 conversion_rate_pairs:
-  [ eth, usdt, eth, matic, matic, usdt, eth, glmr, glmr, usdt ]
+  [ eth, usdt ]
 
 # strategy defines the strategy on verify and aggregate data from store when fetched
 strategy:
