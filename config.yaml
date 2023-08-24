@@ -47,32 +47,28 @@ conversion_rate_apis:
     source: coinmarketcap
     enable: true
     url: https://pro-api.coinmarketcap.com/v2/cryptocurrency/quotes/latest?
-    api_key: 1408daf0-0777-4916-9fe4-20da5ee77560
 
 domain_list:
-  - domain_id: 0
+  - domain_id: 1
     gas_price_apis:
       - implementation: etherscan
         source: etherscan
         enable: true
         url: https://api.etherscan.io/api?module=gastracker&action=gasoracle&apikey=
-        api_key: BZM7P395BQS1YFKQMA2AK2ACQKWGEW4JB3
-        decimals: 9
-  - domain_id: 1
-    gas_price_apis:
-      - implementation: etherscan
-        source: polygonscan
-        enable: true
-        url: https://api.polygonscan.com/api?module=gastracker&action=gasoracle&apikey=
-        api_key: BZM7P395BQS1YFKQMA2AK2ACQKWGEW4JB3
         decimals: 9
   - domain_id: 2
     gas_price_apis:
+      - implementation: etherscan
+        source: etherscan
+        enable: true
+        url: https://api.etherscan.io/api?module=gastracker&action=gasoracle&apikey=
+        decimals: 9
+  - domain_id: 3
+    gas_price_apis:
       - implementation: moonscan
         source: moonscan
-        enable: true
+        enable: false
         url: https://api-moonbeam.moonscan.io/api?module=proxy&action=eth_gasPrice&apikey=
-        api_key: BZM7P395BQS1YFKQMA2AK2ACQKWGEW4JB3
         decimals:
 
 # conversion_rate_pairs contains price pair for conversion rate
