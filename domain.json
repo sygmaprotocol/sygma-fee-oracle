@@ -5,30 +5,30 @@
       "chainId": 5,
       "name": "goerli",
       "type": "evm",
-      "bridge": "0xc26335a9f16398b5fDA4bC05b62C1429D8a4d755",
+      "bridge": "0xf9a3618bC7Dd11d715cC45D6038F821F13290d8E",
       "handlers": [
         {
           "type": "erc20",
-          "address": "0x7Ed4B14a82B2F2C4DfB13DC4Eac00205EDEff6C2"
+          "address": "0x41c105C70ABF590d67dc8fD7708F9E52BB44CeF2"
         },
         {
           "type": "permissionlessGeneric",
-          "address": "0x56826b015911E2E14AE64fc5d7996cbDDea906cd"
+          "address": "0x318EFd751B60730786D29376A6785bb02C923733"
         }
       ],
       "nativeTokenSymbol": "eth",
       "nativeTokenFullName": "ether",
       "nativeTokenDecimals": 18,
       "blockConfirmations": 5,
-      "startBlock": 9022004,
-      "feeRouter": "0xBcE136Ec4510BA4D748994d057637A5B4FaDb614",
+      "startBlock": 9681836,
+      "feeRouter": "0xB6F9764Ee1d6B6b3211785C3EAFBAd3F8358D205",
       "feeHandlers": [
         {
-          "address": "0xe6CE0ea4eC6ECbdC23eEF9f4fB165aCc979C56b5",
+          "address": "0x4e4Ef31C98f1C2Cf581098Abc0b2d0e456426aE7",
           "type": "basic"
         },
         {
-          "address": "0x307ac28Be1c7225A09D4d93937828Fd7C550CB51",
+          "address": "0x66eB349d5750957f68Fe43c01f82019fCe278293",
           "type": "oracle"
         }
       ],
