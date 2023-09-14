@@ -52,14 +52,14 @@ domain_list:
   - domain_id: 1
     gas_price_apis:
       - implementation: etherscan
-        source: etherscan
+        source: etherscan_goerli
         enable: true
         url: https://api.etherscan.io/api?module=gastracker&action=gasoracle&apikey=
         decimals: 9
   - domain_id: 2
     gas_price_apis:
       - implementation: etherscan
-        source: etherscan
+        source: etherscan_sepolia
         enable: true
         url: https://api.etherscan.io/api?module=gastracker&action=gasoracle&apikey=
         decimals: 9
