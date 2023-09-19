@@ -8,12 +8,13 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
-	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"io/ioutil"
 	"math/big"
 	"net/http"
 	"strconv"
 	"testing"
+
+	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 
 	"github.com/ChainSafe/sygma-fee-oracle/identity/secp256k1"
 	"github.com/ChainSafe/sygma-fee-oracle/types"
@@ -55,7 +56,7 @@ func (s *SignatureVerificationTestSuite) TestSignatureVerification_CalculateFee(
 	emptySetResourceData := []byte{}
 
 	// fee oracle endpoints request
-	resp, err := http.Get("http://127.0.0.1:8091/v1/rate/from/0/to/1/resourceid/0x0000000000000000000000000000000000000000000000000000000000000001")
+	resp, err := http.Get("http://127.0.0.1:8091/v1/rate/from/1/to/2/resourceid/0x0000000000000000000000000000000000000000000000000000000000000300")
 	s.Nil(err)
 
 	body, err := ioutil.ReadAll(resp.Body)
