@@ -8,12 +8,13 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
-	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"io/ioutil"
 	"math/big"
 	"net/http"
 	"strconv"
 	"testing"
+
+	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 
 	"github.com/ChainSafe/sygma-fee-oracle/identity/secp256k1"
 	"github.com/ChainSafe/sygma-fee-oracle/types"
