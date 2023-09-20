@@ -56,7 +56,7 @@ func (s *SignatureVerificationTestSuite) TestSignatureVerification_CalculateFee(
 	emptySetResourceData := []byte{}
 
 	// fee oracle endpoints request
-	resp, err := http.Get("http://127.0.0.1:8091/v1/rate/from/1/to/2/resourceid/0x0000000000000000000000000000000000000000000000000000000000000300")
+	resp, err := http.Get("http://127.0.0.1:8091/v1/rate/from/0/to/1/resourceid/0x0000000000000000000000000000000000000000000000000000000000000001")
 	s.Nil(err)
 
 	body, err := ioutil.ReadAll(resp.Body)
