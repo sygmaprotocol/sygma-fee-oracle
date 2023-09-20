@@ -1,5 +1,19 @@
 # Changelog
 
+## [1.1.3](https://github.com/sygmaprotocol/sygma-fee-oracle/compare/v1.1.2...v1.1.3) (2023-09-20)
+
+
+### Bug Fixes
+
+* Switch from domainName to domainID ([#47](https://github.com/sygmaprotocol/sygma-fee-oracle/issues/47)) ([e88d862](https://github.com/sygmaprotocol/sygma-fee-oracle/commit/e88d8627aed50fe66330a5d036097b920553902e))
+
+
+### Miscellaneous
+
+* add fees documentation ([#36](https://github.com/sygmaprotocol/sygma-fee-oracle/issues/36)) ([33da6cb](https://github.com/sygmaprotocol/sygma-fee-oracle/commit/33da6cbad082b08c439f80df8c1709f6941a302d))
+* update config ([#52](https://github.com/sygmaprotocol/sygma-fee-oracle/issues/52)) ([24cb304](https://github.com/sygmaprotocol/sygma-fee-oracle/commit/24cb304af6fd413ebec21b7148a0d6ef73bee5b4))
+* update config.yaml ([#50](https://github.com/sygmaprotocol/sygma-fee-oracle/issues/50)) ([769858e](https://github.com/sygmaprotocol/sygma-fee-oracle/commit/769858e12c1c5d14466f6d2293ca9b69a69113ba))
+
 ## [1.1.2](https://github.com/sygmaprotocol/sygma-fee-oracle/compare/v1.1.1...v1.1.2) (2023-03-15)
 
 
