@@ -6,9 +6,10 @@ package oracle
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/ChainSafe/sygma-fee-oracle/util"
 	"net/http"
 	"time"
+
+	"github.com/ChainSafe/sygma-fee-oracle/util"
 
 	"github.com/ChainSafe/sygma-fee-oracle/config"
 	"github.com/ChainSafe/sygma-fee-oracle/oracle/client"
@@ -78,7 +79,7 @@ func (e *Etherscan) InquiryGasPrice() (*types.GasPrices, error) {
 		e.log.Errorf("unmarshal response body err: %s ", err.Error())
 		return nil, errors.Wrap(err, "failed to unmarshal resp body of querying gas price")
 	}
-
+	fmt.Println("response from etherscan: ", erResult)
 	if erResult.Message != "OK" {
 		return nil, errors.Errorf("failed to fetch gas price: %s", erResult.Result)
 	}
