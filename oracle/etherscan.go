@@ -66,6 +66,8 @@ func NewEtherscan(source string, apiService config.ApiService, domainID int, log
 }
 
 func (e *Etherscan) InquiryGasPrice() (*types.GasPrices, error) {
+	fmt.Println("sending request to etherscan: ")
+	fmt.Println(e.apis.GasPriceRequest)
 	statusCode, body, err := client.NewHttpRequestMessage(http.MethodGet, e.apis.GasPriceRequest,
 		nil, nil, e.log).Request()
 	if err != nil || statusCode != http.StatusOK {
